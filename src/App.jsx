@@ -611,11 +611,17 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearLeaderboard, o
     setNotificationTime(e.target.value);
     scheduleNotification(e.target.value);
   };
+
+  const handleResetToNewYear = () => {
+    localStorage.removeItem(`happinessStreakStart${CURRENT_YEAR}`);
+    window.location.reload();
+  };
   
   if (!isOpen) return null;
 
   const actions = [
     { id: 'streak', label: 'Reset Current Streak', desc: 'Start fresh without saving', onConfirm: onResetStreak, danger: false },
+    { id: 'newyear', label: 'Reset Streak to New Year', desc: 'Fix if timer looks wrong', onConfirm: handleResetToNewYear, danger: false },
     { id: 'checkins', label: 'Clear Check-ins & Journal', desc: `${stats.checkins} entries`, onConfirm: onClearCheckins },
     { id: 'leaderboard', label: 'Clear Leaderboard', desc: `${stats.entries} entries`, onConfirm: onClearLeaderboard },
     { id: 'all', label: 'Clear All Data', desc: 'Complete reset', onConfirm: onClearAll },
