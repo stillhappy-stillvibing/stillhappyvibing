@@ -630,7 +630,7 @@ export default function App() {
   // Streak timer (since last reset/end)
   const [streakStartTime, setStreakStartTime] = useState(() => {
     const saved = localStorage.getItem('happinessStreakStart2026');
-    return saved ? parseInt(saved) : Date.now();
+    return saved ? parseInt(saved) : NEW_YEAR_2026; // Default to start of 2026
   });
   const [streakTime, setStreakTime] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [streakMs, setStreakMs] = useState(0);
