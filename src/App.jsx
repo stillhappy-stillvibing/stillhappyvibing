@@ -560,6 +560,57 @@ function JournalModal({ isOpen, onClose, checkins, onDeleteEntry, onClearAll }) 
 // Settings Modal
 function SettingsModal({ isOpen, onClose, onClearCheckins, onClearLeaderboard, onClearAll, onResetStreak, stats }) {
   const [confirmAction, setConfirmAction] = useState(null);
+  const [notificationEnabled, setNotificationEnabled] = useState(() => {
+    return localStorage.getItem(`happinessNotification${CURRENT_YEAR}`) === 'true';
+  });
+  const [notificationTime, setNotificationTime] = useState(() => {
+    return localStorage.getItem(`happinessNotificationTime${CURRENT_YEAR}`) || '09:00';
+  });
+  const [notificationPermission, setNotificationPermission] = useState(
+    typeof Notification !== 'undefined' ? Notification.permission : 'denied'
+  );
+
+  const requestNotificationPermission = async () => {
+    if (typeof Notification === 'undefined') {
+      alert('Notifications are not supported in this browser');
+      return;
+    }
+    
+    const permission = await Notification.requestPermission();
+    setNotificationPermission(permission);
+    
+    if (permission === 'granted') {
+      setNotificationEnabled(true);
+      localStorage.setItem(`happinessNotification${CURRENT_YEAR}`, 'true');
+      scheduleNotification(notificationTime);
+      
+      // Show test notification
+      new Notification('Happiness Tracker 🌟', {
+        body: 'Notifications enabled! We\'ll remind you to check in.',
+        icon: '/pwa-512x512.svg'
+      });
+    }
+  };
+
+  const scheduleNotification = (time) => {
+    localStorage.setItem(`happinessNotificationTime${CURRENT_YEAR}`, time);
+    // Note: For persistent notifications, we'd need a service worker
+    // This sets up the time for the service worker to use
+  };
+
+  const toggleNotification = () => {
+    if (!notificationEnabled) {
+      requestNotificationPermission();
+    } else {
+      setNotificationEnabled(false);
+      localStorage.setItem(`happinessNotification${CURRENT_YEAR}`, 'false');
+    }
+  };
+
+  const handleTimeChange = (e) => {
+    setNotificationTime(e.target.value);
+    scheduleNotification(e.target.value);
+  };
   
   if (!isOpen) return null;
 
@@ -571,11 +622,50 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearLeaderboard, o
   ];
 
   return (
-    <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50" onClick={onClose}>
-      <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-lg w-full p-6 border border-white/20" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50 overflow-y-auto" onClick={onClose}>
+      <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-lg w-full p-6 border border-white/20 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-xl font-bold flex items-center gap-2">⚙️ Settings</h2>
           <button onClick={onClose} className="text-slate-400 hover:text-white text-xl">✕</button>
+        </div>
+
+        {/* Notifications Section */}
+        <div className="bg-blue-400/10 border border-blue-400/30 rounded-xl p-4 mb-6">
+          <h3 className="font-semibold text-blue-400 mb-3 flex items-center gap-2">🔔 Daily Reminder</h3>
+          
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm text-slate-300">Enable notifications</span>
+            <button
+              onClick={toggleNotification}
+              className={`w-12 h-6 rounded-full transition-colors ${notificationEnabled ? 'bg-green-500' : 'bg-white/20'}`}
+            >
+              <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${notificationEnabled ? 'translate-x-6' : 'translate-x-0.5'}`} />
+            </button>
+          </div>
+          
+          {notificationEnabled && (
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-slate-300">Reminder time</span>
+              <input
+                type="time"
+                value={notificationTime}
+                onChange={handleTimeChange}
+                className="bg-white/10 border border-white/20 rounded-lg px-3 py-1 text-sm text-white"
+              />
+            </div>
+          )}
+          
+          {notificationPermission === 'denied' && (
+            <p className="text-xs text-red-400 mt-2">
+              ⚠️ Notifications blocked. Enable in browser settings.
+            </p>
+          )}
+          
+          {typeof Notification === 'undefined' && (
+            <p className="text-xs text-slate-400 mt-2">
+              📱 Install the app for notifications
+            </p>
+          )}
         </div>
 
         <div className="bg-green-400/10 border border-green-400/30 rounded-xl p-4 mb-6">
@@ -650,6 +740,47 @@ export default function App() {
   const [showJournalModal, setShowJournalModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [activeTab, setActiveTab] = useState('timer');
+  const [showReminder, setShowReminder] = useState(false);
+
+  // Check for notification reminder
+  useEffect(() => {
+    const checkReminder = () => {
+      const enabled = localStorage.getItem(`happinessNotification${CURRENT_YEAR}`) === 'true';
+      const reminderTime = localStorage.getItem(`happinessNotificationTime${CURRENT_YEAR}`) || '09:00';
+      const lastReminder = localStorage.getItem(`happinessLastReminder${CURRENT_YEAR}`);
+      
+      if (!enabled) return;
+      
+      const now = new Date();
+      const today = now.toISOString().split('T')[0];
+      const [hours, minutes] = reminderTime.split(':').map(Number);
+      
+      // Check if it's past reminder time and we haven't shown reminder today
+      if (now.getHours() >= hours && now.getMinutes() >= minutes && lastReminder !== today) {
+        // Check if user already checked in today
+        const todayCheckins = checkins.filter(c => 
+          new Date(c.timestamp).toISOString().split('T')[0] === today
+        ).length;
+        
+        if (todayCheckins === 0) {
+          // Show browser notification if permitted
+          if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+            new Notification('Happiness Check-in 🌟', {
+              body: 'Take a moment to reflect on what\'s bringing you joy today!',
+              icon: '/pwa-512x512.svg',
+              tag: 'happiness-reminder'
+            });
+          }
+          setShowReminder(true);
+        }
+        localStorage.setItem(`happinessLastReminder${CURRENT_YEAR}`, today);
+      }
+    };
+    
+    checkReminder();
+    const interval = setInterval(checkReminder, 60000); // Check every minute
+    return () => clearInterval(interval);
+  }, [checkins]);
 
   // Update timers every second
   useEffect(() => {
@@ -804,6 +935,33 @@ export default function App() {
         {/* Timer Tab */}
         {activeTab === 'timer' && (
           <>
+            {/* Reminder Banner */}
+            {showReminder && (
+              <div className="bg-gradient-to-r from-yellow-400/20 to-amber-400/20 border border-yellow-400/30 rounded-2xl p-4 mb-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">🔔</span>
+                  <div>
+                    <p className="font-medium text-yellow-400">Time for a check-in!</p>
+                    <p className="text-xs text-slate-300">What's bringing you happiness today?</p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => { setShowReminder(false); setShowCheckinModal(true); }}
+                    className="bg-yellow-400 text-slate-900 px-3 py-1 rounded-lg text-sm font-medium"
+                  >
+                    Check in
+                  </button>
+                  <button 
+                    onClick={() => setShowReminder(false)}
+                    className="text-slate-400 hover:text-white px-2"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            )}
+            
             <div className="bg-white/5 backdrop-blur rounded-2xl p-5 mb-4 border border-white/10">
               {/* Year Timer */}
               <div className="mb-4">
