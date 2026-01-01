@@ -69,7 +69,9 @@ const checkinBadges = [
   { id: 'entries-50', name: '50 Entries', threshold: 50, icon: '🎯', type: 'total' },
 ];
 
-const NEW_YEAR_2026 = new Date('2026-01-01T00:00:00').getTime();
+// Dynamic - always uses current year
+const CURRENT_YEAR = new Date().getFullYear();
+const NEW_YEAR_START = new Date(`${CURRENT_YEAR}-01-01T00:00:00`).getTime();
 
 const formatDuration = (ms, style = 'short') => {
   if (ms < 0) ms = 0;
@@ -351,9 +353,9 @@ function EndModal({ isOpen, onClose, streakMs, onSave }) {
   };
 
   const handleShare = async () => {
-    const text = `My happiness streak lasted ${formatDuration(streakMs, 'long')} in 2026! ✨\n\nHow long can YOU keep the joy alive?`;
+    const text = `My happiness streak lasted ${formatDuration(streakMs, 'long')} in ${CURRENT_YEAR}! ✨\n\nHow long can YOU keep the joy alive?`;
     if (navigator.share) {
-      try { await navigator.share({ title: '2026 Happiness Tracker', text }); } catch {}
+      try { await navigator.share({ title: `${CURRENT_YEAR} Happiness Tracker`, text }); } catch {}
     } else {
       await navigator.clipboard.writeText(text);
       alert('Copied to clipboard! 📋');
@@ -623,23 +625,23 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearLeaderboard, o
 
 // Main App
 export default function App() {
-  // Year timer (since Jan 1, 2026)
+  // Year timer (since Jan 1 of current year)
   const [yearTime, setYearTime] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [yearMs, setYearMs] = useState(0);
   
   // Streak timer (since last reset/end)
   const [streakStartTime, setStreakStartTime] = useState(() => {
-    const saved = localStorage.getItem('happinessStreakStart2026');
-    return saved ? parseInt(saved) : NEW_YEAR_2026; // Default to start of 2026
+    const saved = localStorage.getItem(`happinessStreakStart${CURRENT_YEAR}`);
+    return saved ? parseInt(saved) : NEW_YEAR_START; // Default to start of current year
   });
   const [streakTime, setStreakTime] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [streakMs, setStreakMs] = useState(0);
 
   const [entries, setEntries] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('happinessLeaderboard2026') || '[]'); } catch { return []; }
+    try { return JSON.parse(localStorage.getItem(`happinessLeaderboard${CURRENT_YEAR}`) || '[]'); } catch { return []; }
   });
   const [checkins, setCheckins] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('happinessCheckins2026') || '[]'); } catch { return []; }
+    try { return JSON.parse(localStorage.getItem(`happinessCheckins${CURRENT_YEAR}`) || '[]'); } catch { return []; }
   });
   
   const [showEndModal, setShowEndModal] = useState(false);
@@ -655,7 +657,7 @@ export default function App() {
       const now = Date.now();
       
       // Year timer
-      const yearDiff = Math.max(0, now - NEW_YEAR_2026);
+      const yearDiff = Math.max(0, now - NEW_YEAR_START);
       setYearMs(yearDiff);
       setYearTime(msToTimeUnits(yearDiff));
       
@@ -671,15 +673,15 @@ export default function App() {
 
   // Save streak start time
   useEffect(() => {
-    localStorage.setItem('happinessStreakStart2026', streakStartTime.toString());
+    localStorage.setItem(`happinessStreakStart${CURRENT_YEAR}`, streakStartTime.toString());
   }, [streakStartTime]);
 
   useEffect(() => {
-    localStorage.setItem('happinessLeaderboard2026', JSON.stringify(entries));
+    localStorage.setItem(`happinessLeaderboard${CURRENT_YEAR}`, JSON.stringify(entries));
   }, [entries]);
 
   useEffect(() => {
-    localStorage.setItem('happinessCheckins2026', JSON.stringify(checkins));
+    localStorage.setItem(`happinessCheckins${CURRENT_YEAR}`, JSON.stringify(checkins));
   }, [checkins]);
 
   const resetStreakToNow = () => {
@@ -687,7 +689,7 @@ export default function App() {
   };
 
   const resetStreakToNewYear = () => {
-    setStreakStartTime(NEW_YEAR_2026);
+    setStreakStartTime(NEW_YEAR_START);
   };
 
   const handleEndSave = ({ reason, journal }) => {
@@ -722,13 +724,13 @@ export default function App() {
 
   const handleClearCheckins = () => {
     setCheckins([]);
-    localStorage.removeItem('happinessCheckins2026');
+    localStorage.removeItem(`happinessCheckins${CURRENT_YEAR}`);
     resetStreakToNewYear(); // Revert to start of year
   };
 
   const handleClearLeaderboard = () => {
     setEntries([]);
-    localStorage.removeItem('happinessLeaderboard2026');
+    localStorage.removeItem(`happinessLeaderboard${CURRENT_YEAR}`);
     resetStreakToNewYear(); // Revert to start of year
   };
 
@@ -736,9 +738,9 @@ export default function App() {
     setCheckins([]);
     setEntries([]);
     resetStreakToNewYear();
-    localStorage.removeItem('happinessCheckins2026');
-    localStorage.removeItem('happinessLeaderboard2026');
-    localStorage.removeItem('happinessStreakStart2026');
+    localStorage.removeItem(`happinessCheckins${CURRENT_YEAR}`);
+    localStorage.removeItem(`happinessLeaderboard${CURRENT_YEAR}`);
+    localStorage.removeItem(`happinessStreakStart${CURRENT_YEAR}`);
   };
 
   // Calculate check-in streak (days in a row)
@@ -779,7 +781,7 @@ export default function App() {
             <h1 className="text-xl font-bold bg-gradient-to-r from-yellow-400 via-pink-400 to-yellow-400 bg-clip-text text-transparent">✨ Happiness Tracker ✨</h1>
             <button onClick={() => setShowSettingsModal(true)} className="text-slate-400 hover:text-white text-xl">⚙️</button>
           </div>
-          <span className="inline-block px-4 py-1 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-900 font-bold rounded-full text-sm">🎉 2026 🎉</span>
+          <span className="inline-block px-4 py-1 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-900 font-bold rounded-full text-sm">🎉 {CURRENT_YEAR} 🎉</span>
         </header>
 
         {/* Tab Navigation */}
@@ -805,7 +807,7 @@ export default function App() {
             <div className="bg-white/5 backdrop-blur rounded-2xl p-5 mb-4 border border-white/10">
               {/* Year Timer */}
               <div className="mb-4">
-                <TimerDisplay time={yearTime} label="Time in 2026" color="yellow" />
+                <TimerDisplay time={yearTime} label={`Time in ${CURRENT_YEAR}`} color="yellow" />
               </div>
               
               {/* Current Streak Timer */}
@@ -1010,7 +1012,7 @@ export default function App() {
           </div>
         )}
 
-        <footer className="text-center mt-6 text-slate-500 text-xs">Made with 💛 for a happier 2026</footer>
+        <footer className="text-center mt-6 text-slate-500 text-xs">Made with 💛 for a happier {CURRENT_YEAR}</footer>
       </div>
 
       {/* Modals */}
