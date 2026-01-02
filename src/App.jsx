@@ -69,7 +69,9 @@ const checkinBadges = [
   { id: 'entries-50', name: '50 Entries', threshold: 50, icon: '🎯', type: 'total' },
 ];
 
-const NEW_YEAR_2026 = new Date('2026-01-01T00:00:00').getTime();
+// Dynamic - always uses current year
+const CURRENT_YEAR = new Date().getFullYear();
+const NEW_YEAR_START = new Date(`${CURRENT_YEAR}-01-01T00:00:00`).getTime();
 
 const formatDuration = (ms, style = 'short') => {
   if (ms < 0) ms = 0;
@@ -105,6 +107,46 @@ const msToTimeUnits = (ms) => {
 };
 
 const getRandomItem = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+const APP_URL = typeof window !== 'undefined' ? window.location.origin : 'https://stillhappyvibing.vercel.app';
+
+const shareContent = async (text, fallbackMessage = 'Copied to clipboard! 📋') => {
+  if (navigator.share) {
+    try { 
+      await navigator.share({ text }); 
+      return true;
+    } catch { return false; }
+  } else {
+    try {
+      await navigator.clipboard.writeText(text);
+      alert(fallbackMessage);
+      return true;
+    } catch { return false; }
+  }
+};
+
+const shareGratitude = (gratitudeText) => {
+  const text = `💛 A thank you for you:\n\n"${gratitudeText}"\n\n— Sent with gratitude ✨\n${APP_URL}`;
+  return shareContent(text);
+};
+
+const shareQuote = (quote) => {
+  const text = `📖 A moment of wisdom:\n\n"${quote.text}"\n— ${quote.author}\n\n${APP_URL}`;
+  return shareContent(text);
+};
+
+const shareExercise = (exercise) => {
+  let text = `🧘 Try this when you need calm:\n\n${exercise.title}\n${exercise.subtitle}\n\n`;
+  if (exercise.pattern) {
+    text += `Inhale ${exercise.pattern.inhale}s`;
+    if (exercise.pattern.hold1) text += ` → Hold ${exercise.pattern.hold1}s`;
+    text += ` → Exhale ${exercise.pattern.exhale}s`;
+    if (exercise.pattern.hold2) text += ` → Hold ${exercise.pattern.hold2}s`;
+    text += '\n\n';
+  }
+  text += APP_URL;
+  return shareContent(text);
+};
 
 const formatDate = (date) => {
   return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
@@ -283,6 +325,14 @@ function CheckinModal({ isOpen, onClose, onSave, streakMs }) {
                 placeholder="Share your gratitude... (optional)"
                 className="w-full h-28 p-4 rounded-xl bg-white/5 border border-white/20 text-white placeholder-slate-500 resize-none focus:outline-none focus:border-green-400/50"
               />
+              {gratitude.trim() && (
+                <button
+                  onClick={() => shareGratitude(gratitude)}
+                  className="mt-2 w-full py-2 rounded-lg bg-pink-500/20 border border-pink-500/30 text-pink-400 text-sm flex items-center justify-center gap-2 hover:bg-pink-500/30 transition"
+                >
+                  💌 Send as Thank You Card
+                </button>
+              )}
             </div>
             <div className="flex gap-3">
               <button onClick={() => setStep('source')} className="flex-1 bg-white/10 py-3 rounded-xl">← Back</button>
@@ -293,11 +343,17 @@ function CheckinModal({ isOpen, onClose, onSave, streakMs }) {
 
         {step === 'wisdom' && (
           <>
-            <div className="border-l-4 border-green-400 bg-white/5 p-4 rounded-r-xl mb-5">
+            <div className="border-l-4 border-green-400 bg-white/5 p-4 rounded-r-xl mb-3">
               <p className="text-lg italic mb-2">"{quote.text}"</p>
               <p className="text-green-400 font-medium">— {quote.author}</p>
               <p className="text-slate-400 text-sm">{quote.tradition}</p>
             </div>
+            <button
+              onClick={() => shareQuote(quote)}
+              className="w-full py-2 rounded-lg bg-purple-500/20 border border-purple-500/30 text-purple-400 text-sm flex items-center justify-center gap-2 hover:bg-purple-500/30 transition mb-5"
+            >
+              📤 Share this wisdom
+            </button>
             <div className="flex gap-3">
               <button onClick={() => setStep('gratitude')} className="flex-1 bg-white/10 py-3 rounded-xl">← Back</button>
               <button onClick={() => setStep('exercise')} className="flex-1 bg-gradient-to-r from-green-400 to-emerald-500 text-slate-900 font-bold py-3 rounded-xl">Continue →</button>
@@ -307,7 +363,7 @@ function CheckinModal({ isOpen, onClose, onSave, streakMs }) {
 
         {step === 'exercise' && (
           <>
-            <div className="bg-green-400/10 border border-green-400/30 rounded-xl p-4 mb-5">
+            <div className="bg-green-400/10 border border-green-400/30 rounded-xl p-4 mb-3">
               <h3 className="text-green-400 font-semibold mb-1">🧘 {exercise.title}</h3>
               <p className="text-slate-400 text-sm mb-3">{exercise.subtitle}</p>
               {exercise.pattern && <BreathingGuide pattern={exercise.pattern} />}
@@ -315,6 +371,12 @@ function CheckinModal({ isOpen, onClose, onSave, streakMs }) {
                 {exercise.steps.map((s, i) => <li key={i} className="flex gap-2"><span className="text-green-400">•</span>{s}</li>)}
               </ul>
             </div>
+            <button
+              onClick={() => shareExercise(exercise)}
+              className="w-full py-2 rounded-lg bg-blue-500/20 border border-blue-500/30 text-blue-400 text-sm flex items-center justify-center gap-2 hover:bg-blue-500/30 transition mb-5"
+            >
+              🧘 Share this with someone who needs calm
+            </button>
             <div className="flex gap-3">
               <button onClick={handleSkip} className="flex-1 bg-white/10 py-3 rounded-xl">Skip & Save</button>
               <button onClick={handleSave} className="flex-1 bg-gradient-to-r from-green-400 to-emerald-500 text-slate-900 font-bold py-3 rounded-xl">✓ Complete</button>
@@ -351,9 +413,9 @@ function EndModal({ isOpen, onClose, streakMs, onSave }) {
   };
 
   const handleShare = async () => {
-    const text = `My happiness streak lasted ${formatDuration(streakMs, 'long')} in 2026! ✨\n\nHow long can YOU keep the joy alive?`;
+    const text = `My happiness streak lasted ${formatDuration(streakMs, 'long')} in ${CURRENT_YEAR}! ✨\n\nHow long can YOU keep the joy alive?`;
     if (navigator.share) {
-      try { await navigator.share({ title: '2026 Happiness Tracker', text }); } catch {}
+      try { await navigator.share({ title: `${CURRENT_YEAR} Happiness Tracker`, text }); } catch {}
     } else {
       await navigator.clipboard.writeText(text);
       alert('Copied to clipboard! 📋');
@@ -383,11 +445,17 @@ function EndModal({ isOpen, onClose, streakMs, onSave }) {
 
         {step === 'wisdom' && (
           <>
-            <div className="border-l-4 border-yellow-400 bg-white/5 p-4 rounded-r-xl mb-5">
+            <div className="border-l-4 border-yellow-400 bg-white/5 p-4 rounded-r-xl mb-3">
               <p className="text-lg italic mb-2">"{quote.text}"</p>
               <p className="text-yellow-400 font-medium">— {quote.author}</p>
               <p className="text-slate-400 text-sm">{quote.tradition}</p>
             </div>
+            <button
+              onClick={() => shareQuote(quote)}
+              className="w-full py-2 rounded-lg bg-purple-500/20 border border-purple-500/30 text-purple-400 text-sm flex items-center justify-center gap-2 hover:bg-purple-500/30 transition mb-5"
+            >
+              📤 Share this wisdom
+            </button>
             <button onClick={() => setStep('reason')} className="w-full bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-900 font-bold py-3 rounded-xl">Continue →</button>
           </>
         )}
@@ -424,7 +492,7 @@ function EndModal({ isOpen, onClose, streakMs, onSave }) {
 
         {step === 'exercise' && (
           <>
-            <div className="bg-green-400/10 border border-green-400/30 rounded-xl p-4 mb-5">
+            <div className="bg-green-400/10 border border-green-400/30 rounded-xl p-4 mb-3">
               <h3 className="text-green-400 font-semibold mb-1">🧘 {exercise.title}</h3>
               <p className="text-slate-400 text-sm mb-3">{exercise.subtitle}</p>
               {exercise.pattern && <BreathingGuide pattern={exercise.pattern} />}
@@ -432,6 +500,12 @@ function EndModal({ isOpen, onClose, streakMs, onSave }) {
                 {exercise.steps.map((s, i) => <li key={i} className="flex gap-2"><span className="text-green-400">•</span>{s}</li>)}
               </ul>
             </div>
+            <button
+              onClick={() => shareExercise(exercise)}
+              className="w-full py-2 rounded-lg bg-blue-500/20 border border-blue-500/30 text-blue-400 text-sm flex items-center justify-center gap-2 hover:bg-blue-500/30 transition mb-4"
+            >
+              🧘 Share this with someone who needs calm
+            </button>
             <div className="flex gap-3 mb-3">
               <button onClick={handleSave} className="flex-1 bg-gradient-to-r from-green-400 to-emerald-500 text-slate-900 font-bold py-3 rounded-xl">🌟 Begin Again</button>
               <button onClick={handleShare} className="flex-1 bg-white/10 border border-white/20 py-3 rounded-xl">📤 Share</button>
@@ -558,22 +632,118 @@ function JournalModal({ isOpen, onClose, checkins, onDeleteEntry, onClearAll }) 
 // Settings Modal
 function SettingsModal({ isOpen, onClose, onClearCheckins, onClearLeaderboard, onClearAll, onResetStreak, stats }) {
   const [confirmAction, setConfirmAction] = useState(null);
+  const [notificationEnabled, setNotificationEnabled] = useState(() => {
+    return localStorage.getItem(`happinessNotification${CURRENT_YEAR}`) === 'true';
+  });
+  const [notificationTime, setNotificationTime] = useState(() => {
+    return localStorage.getItem(`happinessNotificationTime${CURRENT_YEAR}`) || '09:00';
+  });
+  const [notificationPermission, setNotificationPermission] = useState(
+    typeof Notification !== 'undefined' ? Notification.permission : 'denied'
+  );
+
+  const requestNotificationPermission = async () => {
+    if (typeof Notification === 'undefined') {
+      alert('Notifications are not supported in this browser');
+      return;
+    }
+    
+    const permission = await Notification.requestPermission();
+    setNotificationPermission(permission);
+    
+    if (permission === 'granted') {
+      setNotificationEnabled(true);
+      localStorage.setItem(`happinessNotification${CURRENT_YEAR}`, 'true');
+      scheduleNotification(notificationTime);
+      
+      // Show test notification
+      new Notification('Happiness Tracker 🌟', {
+        body: 'Notifications enabled! We\'ll remind you to check in.',
+        icon: '/pwa-512x512.svg'
+      });
+    }
+  };
+
+  const scheduleNotification = (time) => {
+    localStorage.setItem(`happinessNotificationTime${CURRENT_YEAR}`, time);
+    // Note: For persistent notifications, we'd need a service worker
+    // This sets up the time for the service worker to use
+  };
+
+  const toggleNotification = () => {
+    if (!notificationEnabled) {
+      requestNotificationPermission();
+    } else {
+      setNotificationEnabled(false);
+      localStorage.setItem(`happinessNotification${CURRENT_YEAR}`, 'false');
+    }
+  };
+
+  const handleTimeChange = (e) => {
+    setNotificationTime(e.target.value);
+    scheduleNotification(e.target.value);
+  };
+
+  const handleResetToNewYear = () => {
+    localStorage.removeItem(`happinessStreakStart${CURRENT_YEAR}`);
+    window.location.reload();
+  };
   
   if (!isOpen) return null;
 
   const actions = [
     { id: 'streak', label: 'Reset Current Streak', desc: 'Start fresh without saving', onConfirm: onResetStreak, danger: false },
+    { id: 'newyear', label: 'Reset Streak to New Year', desc: 'Fix if timer looks wrong', onConfirm: handleResetToNewYear, danger: false },
     { id: 'checkins', label: 'Clear Check-ins & Journal', desc: `${stats.checkins} entries`, onConfirm: onClearCheckins },
     { id: 'leaderboard', label: 'Clear Leaderboard', desc: `${stats.entries} entries`, onConfirm: onClearLeaderboard },
     { id: 'all', label: 'Clear All Data', desc: 'Complete reset', onConfirm: onClearAll },
   ];
 
   return (
-    <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50" onClick={onClose}>
-      <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-lg w-full p-6 border border-white/20" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50 overflow-y-auto" onClick={onClose}>
+      <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-lg w-full p-6 border border-white/20 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-xl font-bold flex items-center gap-2">⚙️ Settings</h2>
           <button onClick={onClose} className="text-slate-400 hover:text-white text-xl">✕</button>
+        </div>
+
+        {/* Notifications Section */}
+        <div className="bg-blue-400/10 border border-blue-400/30 rounded-xl p-4 mb-6">
+          <h3 className="font-semibold text-blue-400 mb-3 flex items-center gap-2">🔔 Daily Reminder</h3>
+          
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm text-slate-300">Enable notifications</span>
+            <button
+              onClick={toggleNotification}
+              className={`w-12 h-6 rounded-full transition-colors ${notificationEnabled ? 'bg-green-500' : 'bg-white/20'}`}
+            >
+              <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${notificationEnabled ? 'translate-x-6' : 'translate-x-0.5'}`} />
+            </button>
+          </div>
+          
+          {notificationEnabled && (
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-slate-300">Reminder time</span>
+              <input
+                type="time"
+                value={notificationTime}
+                onChange={handleTimeChange}
+                className="bg-white/10 border border-white/20 rounded-lg px-3 py-1 text-sm text-white"
+              />
+            </div>
+          )}
+          
+          {notificationPermission === 'denied' && (
+            <p className="text-xs text-red-400 mt-2">
+              ⚠️ Notifications blocked. Enable in browser settings.
+            </p>
+          )}
+          
+          {typeof Notification === 'undefined' && (
+            <p className="text-xs text-slate-400 mt-2">
+              📱 Install the app for notifications
+            </p>
+          )}
         </div>
 
         <div className="bg-green-400/10 border border-green-400/30 rounded-xl p-4 mb-6">
@@ -623,23 +793,23 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearLeaderboard, o
 
 // Main App
 export default function App() {
-  // Year timer (since Jan 1, 2026)
+  // Year timer (since Jan 1 of current year)
   const [yearTime, setYearTime] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [yearMs, setYearMs] = useState(0);
   
   // Streak timer (since last reset/end)
   const [streakStartTime, setStreakStartTime] = useState(() => {
-    const saved = localStorage.getItem('happinessStreakStart2026');
-    return saved ? parseInt(saved) : Date.now();
+    const saved = localStorage.getItem(`happinessStreakStart${CURRENT_YEAR}`);
+    return saved ? parseInt(saved) : NEW_YEAR_START; // Default to start of current year
   });
   const [streakTime, setStreakTime] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [streakMs, setStreakMs] = useState(0);
 
   const [entries, setEntries] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('happinessLeaderboard2026') || '[]'); } catch { return []; }
+    try { return JSON.parse(localStorage.getItem(`happinessLeaderboard${CURRENT_YEAR}`) || '[]'); } catch { return []; }
   });
   const [checkins, setCheckins] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('happinessCheckins2026') || '[]'); } catch { return []; }
+    try { return JSON.parse(localStorage.getItem(`happinessCheckins${CURRENT_YEAR}`) || '[]'); } catch { return []; }
   });
   
   const [showEndModal, setShowEndModal] = useState(false);
@@ -648,6 +818,47 @@ export default function App() {
   const [showJournalModal, setShowJournalModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [activeTab, setActiveTab] = useState('timer');
+  const [showReminder, setShowReminder] = useState(false);
+
+  // Check for notification reminder
+  useEffect(() => {
+    const checkReminder = () => {
+      const enabled = localStorage.getItem(`happinessNotification${CURRENT_YEAR}`) === 'true';
+      const reminderTime = localStorage.getItem(`happinessNotificationTime${CURRENT_YEAR}`) || '09:00';
+      const lastReminder = localStorage.getItem(`happinessLastReminder${CURRENT_YEAR}`);
+      
+      if (!enabled) return;
+      
+      const now = new Date();
+      const today = now.toISOString().split('T')[0];
+      const [hours, minutes] = reminderTime.split(':').map(Number);
+      
+      // Check if it's past reminder time and we haven't shown reminder today
+      if (now.getHours() >= hours && now.getMinutes() >= minutes && lastReminder !== today) {
+        // Check if user already checked in today
+        const todayCheckins = checkins.filter(c => 
+          new Date(c.timestamp).toISOString().split('T')[0] === today
+        ).length;
+        
+        if (todayCheckins === 0) {
+          // Show browser notification if permitted
+          if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+            new Notification('Happiness Check-in 🌟', {
+              body: 'Take a moment to reflect on what\'s bringing you joy today!',
+              icon: '/pwa-512x512.svg',
+              tag: 'happiness-reminder'
+            });
+          }
+          setShowReminder(true);
+        }
+        localStorage.setItem(`happinessLastReminder${CURRENT_YEAR}`, today);
+      }
+    };
+    
+    checkReminder();
+    const interval = setInterval(checkReminder, 60000); // Check every minute
+    return () => clearInterval(interval);
+  }, [checkins]);
 
   // Update timers every second
   useEffect(() => {
@@ -655,7 +866,7 @@ export default function App() {
       const now = Date.now();
       
       // Year timer
-      const yearDiff = Math.max(0, now - NEW_YEAR_2026);
+      const yearDiff = Math.max(0, now - NEW_YEAR_START);
       setYearMs(yearDiff);
       setYearTime(msToTimeUnits(yearDiff));
       
@@ -671,15 +882,15 @@ export default function App() {
 
   // Save streak start time
   useEffect(() => {
-    localStorage.setItem('happinessStreakStart2026', streakStartTime.toString());
+    localStorage.setItem(`happinessStreakStart${CURRENT_YEAR}`, streakStartTime.toString());
   }, [streakStartTime]);
 
   useEffect(() => {
-    localStorage.setItem('happinessLeaderboard2026', JSON.stringify(entries));
+    localStorage.setItem(`happinessLeaderboard${CURRENT_YEAR}`, JSON.stringify(entries));
   }, [entries]);
 
   useEffect(() => {
-    localStorage.setItem('happinessCheckins2026', JSON.stringify(checkins));
+    localStorage.setItem(`happinessCheckins${CURRENT_YEAR}`, JSON.stringify(checkins));
   }, [checkins]);
 
   const resetStreakToNow = () => {
@@ -687,7 +898,7 @@ export default function App() {
   };
 
   const resetStreakToNewYear = () => {
-    setStreakStartTime(NEW_YEAR_2026);
+    setStreakStartTime(NEW_YEAR_START);
   };
 
   const handleEndSave = ({ reason, journal }) => {
@@ -722,13 +933,13 @@ export default function App() {
 
   const handleClearCheckins = () => {
     setCheckins([]);
-    localStorage.removeItem('happinessCheckins2026');
+    localStorage.removeItem(`happinessCheckins${CURRENT_YEAR}`);
     resetStreakToNewYear(); // Revert to start of year
   };
 
   const handleClearLeaderboard = () => {
     setEntries([]);
-    localStorage.removeItem('happinessLeaderboard2026');
+    localStorage.removeItem(`happinessLeaderboard${CURRENT_YEAR}`);
     resetStreakToNewYear(); // Revert to start of year
   };
 
@@ -736,9 +947,9 @@ export default function App() {
     setCheckins([]);
     setEntries([]);
     resetStreakToNewYear();
-    localStorage.removeItem('happinessCheckins2026');
-    localStorage.removeItem('happinessLeaderboard2026');
-    localStorage.removeItem('happinessStreakStart2026');
+    localStorage.removeItem(`happinessCheckins${CURRENT_YEAR}`);
+    localStorage.removeItem(`happinessLeaderboard${CURRENT_YEAR}`);
+    localStorage.removeItem(`happinessStreakStart${CURRENT_YEAR}`);
   };
 
   // Calculate check-in streak (days in a row)
@@ -779,7 +990,7 @@ export default function App() {
             <h1 className="text-xl font-bold bg-gradient-to-r from-yellow-400 via-pink-400 to-yellow-400 bg-clip-text text-transparent">✨ Happiness Tracker ✨</h1>
             <button onClick={() => setShowSettingsModal(true)} className="text-slate-400 hover:text-white text-xl">⚙️</button>
           </div>
-          <span className="inline-block px-4 py-1 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-900 font-bold rounded-full text-sm">🎉 2026 🎉</span>
+          <span className="inline-block px-4 py-1 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-900 font-bold rounded-full text-sm">🎉 {CURRENT_YEAR} 🎉</span>
         </header>
 
         {/* Tab Navigation */}
@@ -802,10 +1013,37 @@ export default function App() {
         {/* Timer Tab */}
         {activeTab === 'timer' && (
           <>
+            {/* Reminder Banner */}
+            {showReminder && (
+              <div className="bg-gradient-to-r from-yellow-400/20 to-amber-400/20 border border-yellow-400/30 rounded-2xl p-4 mb-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">🔔</span>
+                  <div>
+                    <p className="font-medium text-yellow-400">Time for a check-in!</p>
+                    <p className="text-xs text-slate-300">What's bringing you happiness today?</p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => { setShowReminder(false); setShowCheckinModal(true); }}
+                    className="bg-yellow-400 text-slate-900 px-3 py-1 rounded-lg text-sm font-medium"
+                  >
+                    Check in
+                  </button>
+                  <button 
+                    onClick={() => setShowReminder(false)}
+                    className="text-slate-400 hover:text-white px-2"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            )}
+            
             <div className="bg-white/5 backdrop-blur rounded-2xl p-5 mb-4 border border-white/10">
               {/* Year Timer */}
               <div className="mb-4">
-                <TimerDisplay time={yearTime} label="Time in 2026" color="yellow" />
+                <TimerDisplay time={yearTime} label={`Time in ${CURRENT_YEAR}`} color="yellow" />
               </div>
               
               {/* Current Streak Timer */}
@@ -1010,7 +1248,7 @@ export default function App() {
           </div>
         )}
 
-        <footer className="text-center mt-6 text-slate-500 text-xs">Made with 💛 for a happier 2026</footer>
+        <footer className="text-center mt-6 text-slate-500 text-xs">Made with 💛 for a happier {CURRENT_YEAR}</footer>
       </div>
 
       {/* Modals */}
