@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react';
 
+// App Version
+const APP_VERSION = '1.1.0';
+const BUILD_DATE = '2026-01-02 8:45 PM';
+
 // Wisdom quotes from various traditions
 const wisdomQuotes = [
   { text: "Pain is inevitable, but suffering is optional. The present moment is filled with joy and happiness.", author: "Thich Nhat Hanh", tradition: "Buddhist Monk" },
@@ -773,6 +777,12 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearLeaderboard, o
               </span>
             </button>
           ))}
+        </div>
+
+        {/* Version Info */}
+        <div className="mt-6 pt-4 border-t border-white/10 text-center">
+          <p className="text-xs text-slate-500">Happiness Tracker v{APP_VERSION}</p>
+          <p className="text-xs text-slate-600">Build {BUILD_DATE}</p>
         </div>
       </div>
 
