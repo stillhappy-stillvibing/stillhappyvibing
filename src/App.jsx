@@ -3,8 +3,8 @@ import { initializeApp } from 'firebase/app';
 import { getDatabase, ref, onValue, runTransaction, increment, set, get } from 'firebase/database';
 
 // App Version
-const APP_VERSION = '1.4.0';
-const BUILD_DATE = '2026-01-02 11:00 PM';
+const APP_VERSION = '1.5.0';
+const BUILD_DATE = '2026-01-03 12:00 AM';
 
 // Firebase Configuration
 const firebaseConfig = {
@@ -298,6 +298,59 @@ const timeRituals = {
   }
 };
 
+// Regular check-in (used for afternoon + after ritual is done)
+const regularCheckin = {
+  emoji: '🌟',
+  greeting: 'Happiness Check-in',
+  title: 'Check-in',
+  sourcePrompt: "What's bringing you happiness right now?",
+  gratitudePrompt: "What are you grateful for?",
+  intentionPrompt: null, // No intention for regular check-ins
+  color: 'green',
+  sources: [
+    { id: 'work', label: '💼 Work going well', prompt: 'work' },
+    { id: 'relationship', label: '💕 Loved ones', prompt: 'your loved ones' },
+    { id: 'health', label: '🏃 Health/Exercise', prompt: 'your health' },
+    { id: 'peace', label: '😌 Inner peace', prompt: 'inner peace' },
+    { id: 'nature', label: '🌿 Nature/Outdoors', prompt: 'nature' },
+    { id: 'achievement', label: '🎯 Achievement', prompt: 'this achievement' },
+    { id: 'fun', label: '🎉 Fun/Play', prompt: 'this moment of fun' },
+    { id: 'rest', label: '😴 Good rest', prompt: 'rest' },
+  ]
+};
+
+// Helper to check if ritual was done today
+const getTodayKey = () => new Date().toISOString().split('T')[0];
+
+const isRitualDoneToday = (ritualType) => {
+  const key = `ritualDone_${ritualType}_${getTodayKey()}`;
+  return localStorage.getItem(key) === 'true';
+};
+
+const markRitualDone = (ritualType) => {
+  const key = `ritualDone_${ritualType}_${getTodayKey()}`;
+  localStorage.setItem(key, 'true');
+};
+
+// Determine which check-in experience to show
+const getCheckinConfig = () => {
+  const timeOfDay = getTimeOfDay();
+  
+  // Afternoon is always regular (unlimited)
+  if (timeOfDay === 'afternoon') {
+    return { ritual: regularCheckin, isRitual: false, timeOfDay };
+  }
+  
+  // Morning/Evening/Night - check if ritual done today
+  if (isRitualDoneToday(timeOfDay)) {
+    // Ritual already done, show regular check-in
+    return { ritual: regularCheckin, isRitual: false, timeOfDay };
+  }
+  
+  // Ritual not done yet, show the special ritual
+  return { ritual: timeRituals[timeOfDay], isRitual: true, timeOfDay };
+};
+
 const journalPrompts = [
   "What made you smile today?",
   "What are you grateful for right now?",
@@ -553,15 +606,25 @@ function CheckinModal({ isOpen, onClose, onSave, streakMs }) {
   const [gratitude, setGratitude] = useState('');
   const [intention, setIntention] = useState('');
   const [quote] = useState(() => getRandomItem(wisdomQuotes));
-  const [timeOfDay] = useState(() => getTimeOfDay());
-  const [exercise] = useState(() => timeOfDay === 'night' ? nightExercise : getRandomItem(exercises));
   
-  const ritual = timeRituals[timeOfDay];
+  // Get config based on time and whether ritual was done
+  const [checkinConfig] = useState(() => getCheckinConfig());
+  const { ritual, isRitual, timeOfDay } = checkinConfig;
+  
+  // Night ritual gets Dream Insight, others get random exercise
+  const [exercise] = useState(() => 
+    isRitual && timeOfDay === 'night' ? nightExercise : getRandomItem(exercises)
+  );
 
   const selectedSource = ritual.sources.find(s => s.id === source);
 
   const handleSave = () => {
-    onSave({ source, gratitude, intention, quote: quote.author, timeOfDay });
+    // Mark ritual as done if this was a ritual check-in
+    if (isRitual && timeOfDay !== 'afternoon') {
+      markRitualDone(timeOfDay);
+    }
+    
+    onSave({ source, gratitude, intention, quote: quote.author, timeOfDay, isRitual });
     setSource('');
     setGratitude('');
     setIntention('');
@@ -569,7 +632,12 @@ function CheckinModal({ isOpen, onClose, onSave, streakMs }) {
   };
 
   const handleSkip = () => {
-    onSave({ source: source || '', gratitude: '', intention: '', quote: quote.author, timeOfDay });
+    // Mark ritual as done even if skipped
+    if (isRitual && timeOfDay !== 'afternoon') {
+      markRitualDone(timeOfDay);
+    }
+    
+    onSave({ source: source || '', gratitude: '', intention: '', quote: quote.author, timeOfDay, isRitual });
     setSource('');
     setGratitude('');
     setIntention('');
@@ -578,6 +646,11 @@ function CheckinModal({ isOpen, onClose, onSave, streakMs }) {
 
   if (!isOpen) return null;
 
+  // Determine which steps to show (rituals have intention, regular doesn't)
+  const steps = isRitual && ritual.intentionPrompt 
+    ? ['source', 'gratitude', 'wisdom', 'exercise']
+    : ['source', 'gratitude', 'wisdom', 'exercise'];
+
   return (
     <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50 overflow-y-auto" onClick={onClose}>
       <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-lg w-full p-6 border border-green-400/20 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
@@ -585,11 +658,13 @@ function CheckinModal({ isOpen, onClose, onSave, streakMs }) {
         <div className="text-center mb-5">
           <div className="text-4xl mb-2">{ritual.emoji}</div>
           <h2 className="text-xl font-bold">{ritual.greeting}</h2>
-          <p className="text-slate-400 text-sm">{ritual.title} • Streak: {formatDuration(streakMs)}</p>
+          <p className="text-slate-400 text-sm">
+            {isRitual ? ritual.title : 'Check-in'} • Streak: {formatDuration(streakMs)}
+          </p>
         </div>
 
         <div className="flex justify-center gap-2 mb-5">
-          {['source', 'gratitude', 'wisdom', 'exercise'].map(s => (
+          {steps.map(s => (
             <button key={s} onClick={() => setStep(s)} className={`w-2.5 h-2.5 rounded-full transition ${step === s ? 'bg-green-400' : 'bg-white/20'}`} />
           ))}
         </div>
@@ -627,20 +702,24 @@ function CheckinModal({ isOpen, onClose, onSave, streakMs }) {
                 value={gratitude}
                 onChange={e => setGratitude(e.target.value)}
                 placeholder={selectedSource ? `Grateful for ${selectedSource.prompt}...` : "Share your gratitude... (optional)"}
-                className="w-full h-20 p-4 rounded-xl bg-white/5 border border-white/20 text-white placeholder-slate-500 resize-none focus:outline-none focus:border-green-400/50 mb-3"
+                className={`w-full ${isRitual && ritual.intentionPrompt ? 'h-20' : 'h-28'} p-4 rounded-xl bg-white/5 border border-white/20 text-white placeholder-slate-500 resize-none focus:outline-none focus:border-green-400/50 mb-3`}
               />
-              <p className="text-amber-400 text-sm mb-2 text-center">
-                ✨ {ritual.intentionPrompt}
-              </p>
-              <textarea
-                value={intention}
-                onChange={e => setIntention(e.target.value)}
-                placeholder="Set your intention... (optional)"
-                className="w-full h-16 p-4 rounded-xl bg-white/5 border border-white/20 text-white placeholder-slate-500 resize-none focus:outline-none focus:border-amber-400/50"
-              />
+              {isRitual && ritual.intentionPrompt && (
+                <>
+                  <p className="text-amber-400 text-sm mb-2 text-center">
+                    ✨ {ritual.intentionPrompt}
+                  </p>
+                  <textarea
+                    value={intention}
+                    onChange={e => setIntention(e.target.value)}
+                    placeholder="Set your intention... (optional)"
+                    className="w-full h-16 p-4 rounded-xl bg-white/5 border border-white/20 text-white placeholder-slate-500 resize-none focus:outline-none focus:border-amber-400/50 mb-3"
+                  />
+                </>
+              )}
               <button
                 onClick={() => shareGratitude(gratitude || (selectedSource ? `Feeling grateful for ${selectedSource.prompt}` : 'this moment of happiness'))}
-                className="mt-3 w-full py-2 rounded-lg bg-pink-500/20 border border-pink-500/30 text-pink-400 text-sm flex items-center justify-center gap-2 hover:bg-pink-500/30 transition"
+                className="w-full py-2 rounded-lg bg-pink-500/20 border border-pink-500/30 text-pink-400 text-sm flex items-center justify-center gap-2 hover:bg-pink-500/30 transition"
               >
                 💌 Send as Thank You Card
               </button>
