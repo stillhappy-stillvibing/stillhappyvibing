@@ -3,8 +3,8 @@ import { initializeApp } from 'firebase/app';
 import { getDatabase, ref, onValue, runTransaction, increment, set, get } from 'firebase/database';
 
 // App Version
-const APP_VERSION = '1.6.0';
-const BUILD_DATE = '2026-01-03 1:00 AM';
+const APP_VERSION = '1.7.0';
+const BUILD_DATE = '2026-01-03 2:00 AM';
 
 // Firebase Configuration
 const firebaseConfig = {
@@ -40,6 +40,16 @@ const incrementCheckins = () => {
   runTransaction(totalRef, (current) => (current || 0) + 1);
   runTransaction(todayRef, (current) => (current || 0) + 1);
 };
+
+// Increment global happiness source counter
+const incrementHappinessSource = (source) => {
+  if (!source) return;
+  const sourceRef = ref(database, `globalHappinessSources/${source}`);
+  runTransaction(sourceRef, (current) => (current || 0) + 1);
+};
+
+// Reference for global happiness sources
+const globalHappinessSourcesRef = ref(database, 'globalHappinessSources');
 
 // Wisdom quotes from various traditions
 const wisdomQuotes = [
@@ -500,6 +510,140 @@ function GlobalCounter() {
         <span>💫 {formatNumber(stats.totalCheckins)} all-time</span>
       </div>
     </div>
+  );
+}
+
+// Source labels for display
+const sourceLabels = {
+  work: '💼 Work', relationship: '💕 Loved ones', health: '🏃 Health',
+  peace: '😌 Peace', nature: '🌿 Nature', achievement: '🎯 Achievement',
+  fun: '🎉 Fun', rest: '😴 Rest', anticipation: '✨ Looking forward',
+  gratitude: '🙏 Gratitude', coffee: '☕ Morning ritual', food: '🍽️ Food',
+  progress: '📈 Progress', accomplishment: '✅ Accomplishment',
+  growth: '📚 Growth', comfort: '🛏️ Comfort', reflection: '💭 Reflection',
+  tomorrow: '✨ Tomorrow', 'letting-go': '🍃 Letting go'
+};
+
+// Smiles Shared Tab Component
+function SmilesSharedTab({ checkins, checkinStreak }) {
+  const [globalSources, setGlobalSources] = useState({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onValue(globalHappinessSourcesRef, (snapshot) => {
+      const data = snapshot.val() || {};
+      setGlobalSources(data);
+      setLoading(false);
+    }, (error) => {
+      console.log('Firebase read error:', error);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const formatNumber = (num) => num.toLocaleString();
+
+  // Calculate local happiness sources
+  const localCounts = checkins.reduce((acc, c) => {
+    if (c.source) acc[c.source] = (acc[c.source] || 0) + 1;
+    return acc;
+  }, {});
+
+  // Sort global sources by count
+  const sortedGlobal = Object.entries(globalSources)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8);
+  
+  const maxGlobal = sortedGlobal.length > 0 ? sortedGlobal[0][1] : 1;
+
+  // Sort local sources by count
+  const sortedLocal = Object.entries(localCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5);
+  
+  const maxLocal = sortedLocal.length > 0 ? sortedLocal[0][1] : 1;
+
+  return (
+    <>
+      {/* Day Streak & Badges */}
+      <div className="bg-white/5 backdrop-blur rounded-2xl p-4 mb-4 border border-white/10">
+        <div className="text-center mb-4">
+          <div className="text-5xl font-bold text-orange-400 mb-1">{checkinStreak}</div>
+          <div className="text-slate-400">Day Streak 🔥</div>
+        </div>
+        
+        <h3 className="font-semibold mb-3 flex items-center justify-center gap-2">
+          🏅 Badges 
+          <span className="text-sm font-normal text-slate-400">
+            ({streakBadges.filter(b => checkinStreak >= b.threshold).length}/{streakBadges.length})
+          </span>
+        </h3>
+        <div className="flex flex-wrap gap-2 justify-center">
+          {streakBadges.map(b => {
+            const earned = checkinStreak >= b.threshold;
+            return (
+              <div key={b.id} className={`flex flex-col items-center p-2 rounded-lg transition ${earned ? 'bg-orange-400/20' : 'bg-white/5 opacity-40'}`}>
+                <span className="text-2xl">{b.icon}</span>
+                <span className="text-[9px] mt-1">{b.name}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Global Happiness Sources */}
+      <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur rounded-2xl p-4 mb-4 border border-purple-500/20">
+        <h3 className="font-semibold mb-3 flex items-center gap-2">🌍 What's Making the World Happy</h3>
+        {loading ? (
+          <div className="space-y-2 animate-pulse">
+            {[1,2,3,4].map(i => (
+              <div key={i} className="h-6 bg-white/10 rounded"></div>
+            ))}
+          </div>
+        ) : sortedGlobal.length === 0 ? (
+          <p className="text-center text-slate-400 py-4 text-sm">Be the first to share what makes you happy!</p>
+        ) : (
+          <div className="space-y-2">
+            {sortedGlobal.map(([source, count]) => (
+              <div key={source} className="flex items-center gap-2">
+                <span className="text-sm w-28 truncate">{sourceLabels[source] || source}</span>
+                <div className="flex-1 h-5 bg-white/10 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-gradient-to-r from-purple-400 to-pink-500 rounded-full transition-all"
+                    style={{ width: `${(count / maxGlobal) * 100}%` }}
+                  />
+                </div>
+                <span className="text-xs text-purple-300 w-12 text-right">{formatNumber(count)}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Your Happiness Sources */}
+      <div className="bg-white/5 backdrop-blur rounded-2xl p-4 border border-white/10">
+        <h3 className="font-semibold mb-3 flex items-center gap-2">😊 What Makes YOU Happy</h3>
+        {sortedLocal.length === 0 ? (
+          <p className="text-center text-slate-400 py-4 text-sm">Check in to see your happiness sources</p>
+        ) : (
+          <div className="space-y-2">
+            {sortedLocal.map(([source, count]) => (
+              <div key={source} className="flex items-center gap-2">
+                <span className="text-sm w-28 truncate">{sourceLabels[source] || source}</span>
+                <div className="flex-1 h-5 bg-white/5 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full"
+                    style={{ width: `${(count / maxLocal) * 100}%` }}
+                  />
+                </div>
+                <span className="text-xs text-slate-400 w-6 text-right">{count}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </>
   );
 }
 
@@ -1172,6 +1316,21 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearLeaderboard, o
           </ul>
         </div>
 
+        {/* Share the App */}
+        <div className="bg-gradient-to-r from-pink-500/10 to-purple-500/10 border border-pink-500/20 rounded-xl p-4 mb-6">
+          <h3 className="font-semibold text-pink-400 mb-2 flex items-center gap-2">💝 Share the Happiness</h3>
+          <p className="text-sm text-slate-300 mb-3">Help someone you love have a happier {CURRENT_YEAR}</p>
+          <button
+            onClick={() => {
+              const shareText = `✨ I'm tracking my happiness in ${CURRENT_YEAR} with Still Happy!\n\nJoin me and thousands of others building a happier year.\n\n🌍 See what's making the world happy\n🔥 Build your daily streak\n🙏 Practice gratitude daily\n\nTry it free: ${APP_URL}`;
+              shareContent(shareText, 'Check out Still Happy - shared to clipboard!');
+            }}
+            className="w-full py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold hover:scale-105 transition"
+          >
+            💌 Share Still Happy
+          </button>
+        </div>
+
         <h3 className="font-semibold mb-3 text-slate-400 text-sm uppercase tracking-wider">Data Management</h3>
         <div className="space-y-2">
           {actions.map(action => (
@@ -1367,8 +1526,9 @@ export default function App() {
     setCheckins(prev => [...prev, checkin]);
     setShowCheckinModal(false);
     
-    // Increment global check-in counter
+    // Increment global counters
     incrementCheckins();
+    incrementHappinessSource(source);
   };
 
   const handleDeleteCheckin = (id) => {
@@ -1430,7 +1590,7 @@ export default function App() {
         <div className="flex bg-white/5 rounded-xl p-1 mb-4">
           {[
             { id: 'timer', label: '⏱️ Timer' },
-            { id: 'journal', label: '📔 Journal' },
+            { id: 'smiles', label: '😊 Smiles Shared' },
           ].map(tab => (
             <button
               key={tab.id}
@@ -1515,15 +1675,15 @@ export default function App() {
             <div className="grid grid-cols-3 gap-3 mb-4">
               <div className="bg-white/5 rounded-xl p-3 text-center border border-white/10">
                 <div className="text-2xl font-bold text-orange-400">{checkinStreak}</div>
-                <div className="text-[10px] text-slate-400 uppercase">Day Streak</div>
+                <div className="text-[10px] text-slate-400 uppercase">Day Streak 🔥</div>
               </div>
               <div className="bg-white/5 rounded-xl p-3 text-center border border-white/10">
                 <div className="text-2xl font-bold text-blue-400">{todayCheckins}</div>
-                <div className="text-[10px] text-slate-400 uppercase">Today</div>
+                <div className="text-[10px] text-slate-400 uppercase">Check-ins Today</div>
               </div>
               <div className="bg-white/5 rounded-xl p-3 text-center border border-white/10">
                 <div className="text-2xl font-bold text-purple-400">{checkins.length}</div>
-                <div className="text-[10px] text-slate-400 uppercase">Total</div>
+                <div className="text-[10px] text-slate-400 uppercase">Total Check-ins</div>
               </div>
             </div>
 
@@ -1549,117 +1709,9 @@ export default function App() {
           </>
         )}
 
-        {/* Journal Tab */}
-        {activeTab === 'journal' && (
-          <>
-            {/* Day Streak & Badges */}
-            <div className="bg-white/5 backdrop-blur rounded-2xl p-4 mb-4 border border-white/10">
-              <div className="text-center mb-4">
-                <div className="text-5xl font-bold text-orange-400 mb-1">{checkinStreak}</div>
-                <div className="text-slate-400">Day Streak 🔥</div>
-              </div>
-              
-              <h3 className="font-semibold mb-3 flex items-center justify-center gap-2">
-                🏅 Badges 
-                <span className="text-sm font-normal text-slate-400">
-                  ({streakBadges.filter(b => checkinStreak >= b.threshold).length}/{streakBadges.length})
-                </span>
-              </h3>
-              <div className="flex flex-wrap gap-2 justify-center">
-                {streakBadges.map(b => {
-                  const earned = checkinStreak >= b.threshold;
-                  return (
-                    <div key={b.id} className={`flex flex-col items-center p-2 rounded-lg transition ${earned ? 'bg-orange-400/20' : 'bg-white/5 opacity-40'}`}>
-                      <span className="text-2xl">{b.icon}</span>
-                      <span className="text-[9px] mt-1">{b.name}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Happiness Sources */}
-            <div className="bg-white/5 backdrop-blur rounded-2xl p-4 mb-4 border border-white/10">
-              <h3 className="font-semibold mb-3 flex items-center gap-2">💚 What Brings You Happiness</h3>
-              {checkins.length === 0 ? (
-                <p className="text-center text-slate-400 py-4 text-sm">Check in to see your happiness sources</p>
-              ) : (
-                <div className="space-y-2">
-                  {(() => {
-                    const sourceLabels = {
-                      work: '💼 Work', relationship: '💕 Loved ones', health: '🏃 Health',
-                      peace: '😌 Peace', nature: '🌿 Nature', achievement: '🎯 Achievement',
-                      fun: '🎉 Fun', rest: '😴 Rest', anticipation: '✨ Looking forward',
-                      gratitude: '🙏 Gratitude', coffee: '☕ Morning ritual', food: '🍽️ Food',
-                      progress: '📈 Progress', accomplishment: '✅ Accomplishment',
-                      growth: '📚 Growth', comfort: '🛏️ Comfort', reflection: '💭 Reflection',
-                      tomorrow: '✨ Tomorrow', 'letting-go': '🍃 Letting go'
-                    };
-                    const counts = checkins.reduce((acc, c) => {
-                      if (c.source) acc[c.source] = (acc[c.source] || 0) + 1;
-                      return acc;
-                    }, {});
-                    const maxCount = Math.max(...Object.values(counts), 1);
-                    const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 5);
-                    
-                    if (sorted.length === 0) {
-                      return <p className="text-center text-slate-400 py-2 text-sm">Select a source during check-in</p>;
-                    }
-                    
-                    return sorted.map(([source, count]) => (
-                      <div key={source} className="flex items-center gap-2">
-                        <span className="text-sm w-28 truncate">{sourceLabels[source] || source}</span>
-                        <div className="flex-1 h-5 bg-white/5 rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full"
-                            style={{ width: `${(count / maxCount) * 100}%` }}
-                          />
-                        </div>
-                        <span className="text-xs text-slate-400 w-6 text-right">{count}</span>
-                      </div>
-                    ));
-                  })()}
-                </div>
-              )}
-            </div>
-
-            {/* Gratitude Entries */}
-            <div className="bg-white/5 backdrop-blur rounded-2xl p-4 border border-white/10">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold flex items-center gap-2">🙏 Gratitude Journal</h3>
-                <span className="text-xs text-slate-400">{checkins.length} entries</span>
-              </div>
-              
-              {checkins.length === 0 ? (
-                <div className="text-center py-6 text-slate-400">
-                  <p className="text-2xl mb-2">📔</p>
-                  <p className="text-sm">Your gratitude entries will appear here</p>
-                </div>
-              ) : (
-                <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {[...checkins].reverse().slice(0, 10).map(c => (
-                    <div key={c.id} className="bg-white/5 rounded-lg p-3">
-                      {c.gratitude && (
-                        <p className="text-sm mb-1">"{c.gratitude}"</p>
-                      )}
-                      {c.intention && (
-                        <p className="text-xs text-amber-400 mb-1">✨ {c.intention}</p>
-                      )}
-                      <p className="text-[10px] text-slate-500">{formatDate(c.timestamp)}</p>
-                    </div>
-                  ))}
-                  {checkins.length > 10 && (
-                    <button 
-                      onClick={() => setShowJournalModal(true)}
-                      className="w-full text-center text-sm text-slate-400 py-2 hover:text-white"
-                    >
-                      View all {checkins.length} entries →
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-          </>
+        {/* Smiles Shared Tab */}
+        {activeTab === 'smiles' && (
+          <SmilesSharedTab checkins={checkins} checkinStreak={checkinStreak} />
         )}
 
         <footer className="text-center mt-6 text-slate-500 text-xs">Made with 💛 for a happier {CURRENT_YEAR}</footer>
