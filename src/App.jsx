@@ -1,8 +1,45 @@
 import { useState, useEffect } from 'react';
+import { initializeApp } from 'firebase/app';
+import { getDatabase, ref, onValue, runTransaction, increment, set, get } from 'firebase/database';
 
 // App Version
-const APP_VERSION = '1.2.0';
-const BUILD_DATE = '2026-01-02 9:30 PM';
+const APP_VERSION = '1.4.0';
+const BUILD_DATE = '2026-01-02 11:00 PM';
+
+// Firebase Configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyAMKvmSrwTsJAIz0U0D9n9eBQ0Meav3I1g",
+  authDomain: "stillhappy-92482.firebaseapp.com",
+  databaseURL: "https://stillhappy-92482-default-rtdb.firebaseio.com",
+  projectId: "stillhappy-92482",
+  storageBucket: "stillhappy-92482.firebasestorage.app",
+  messagingSenderId: "611348244768",
+  appId: "1:611348244768:web:02df514e089311dd7acf45"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
+
+// Global counter functions
+const globalCounterRef = ref(database, 'globalStats');
+
+const incrementActiveStreaks = () => {
+  const activeRef = ref(database, 'globalStats/activeStreaks');
+  runTransaction(activeRef, (current) => (current || 0) + 1);
+};
+
+const decrementActiveStreaks = () => {
+  const activeRef = ref(database, 'globalStats/activeStreaks');
+  runTransaction(activeRef, (current) => Math.max((current || 0) - 1, 0));
+};
+
+const incrementCheckins = () => {
+  const totalRef = ref(database, 'globalStats/totalCheckins');
+  const todayRef = ref(database, `globalStats/todayCheckins/${new Date().toISOString().split('T')[0]}`);
+  runTransaction(totalRef, (current) => (current || 0) + 1);
+  runTransaction(todayRef, (current) => (current || 0) + 1);
+};
 
 // Wisdom quotes from various traditions
 const wisdomQuotes = [
@@ -44,6 +81,25 @@ const exercises = [
   { title: "Smile Meditation", subtitle: "The happiness feedback loop", steps: ["Sit comfortably and close your eyes", "Gently smile — even if you don't feel it", "Notice how your face muscles feel", "Let the smile soften your eyes", "Feel warmth spreading through you", "Your body tells your mind: be happy"], pattern: null },
   { title: "GLAD Technique", subtitle: "Find four daily wins", steps: ["G — One GOOD thing today", "L — One thing you LEARNED", "A — One small ACCOMPLISHMENT", "D — One thing that DELIGHTED you", "Reflect on each one with gratitude"], pattern: null },
 ];
+
+// Night-only exercise for hypnagogia/dream problem-solving
+const nightExercise = {
+  title: "Dream Insight",
+  subtitle: "Let your sleeping mind solve problems",
+  description: "Edison, Dalí, and Einstein used the hypnagogic state — the twilight between waking and sleep — to unlock creative breakthroughs. Your dreaming mind sees connections your waking mind misses.",
+  steps: [
+    "Think of a question or problem you want insight on",
+    "Write it down or say it clearly in your mind",
+    "Read/repeat it slowly three times",
+    "Close your eyes and visualize the question as an image",
+    "Take slow breaths and release any need for an answer",
+    "As you drift off, stay curious but not grasping",
+    "Keep a notepad nearby for morning insights",
+    "Upon waking, immediately capture any thoughts"
+  ],
+  pattern: null,
+  isNightOnly: true
+};
 
 // CBT Tools matched to end-streak reasons
 const cbtTools = {
@@ -152,6 +208,94 @@ const defaultCbtTool = {
     "Say: 'May I be kind to myself'",
     "Take a deep breath and begin again"
   ]
+};
+
+// Time-of-day ritual configuration
+const getTimeOfDay = () => {
+  const hour = new Date().getHours();
+  if (hour >= 5 && hour < 12) return 'morning';
+  if (hour >= 12 && hour < 17) return 'afternoon';
+  if (hour >= 17 && hour < 22) return 'evening';
+  return 'night';
+};
+
+const timeRituals = {
+  morning: {
+    emoji: '🌅',
+    greeting: 'Good morning!',
+    title: 'Morning Ritual',
+    sourcePrompt: "What's energizing you this morning?",
+    gratitudePrompt: "What are you grateful for as you start your day?",
+    intentionPrompt: "What's one intention for today?",
+    color: 'amber',
+    sources: [
+      { id: 'rest', label: '😴 Good sleep', prompt: 'restful sleep' },
+      { id: 'peace', label: '☀️ Fresh start', prompt: 'this new day' },
+      { id: 'relationship', label: '💕 Loved ones', prompt: 'your loved ones' },
+      { id: 'health', label: '🏃 Morning energy', prompt: 'your energy' },
+      { id: 'nature', label: '🌿 Nature/Weather', prompt: 'nature' },
+      { id: 'anticipation', label: '✨ Looking forward', prompt: 'what lies ahead' },
+      { id: 'gratitude', label: '🙏 Simply grateful', prompt: 'being alive' },
+      { id: 'coffee', label: '☕ Morning ritual', prompt: 'your morning ritual' },
+    ]
+  },
+  afternoon: {
+    emoji: '☀️',
+    greeting: 'Good afternoon!',
+    title: 'Midday Check-in',
+    sourcePrompt: "What's going well today?",
+    gratitudePrompt: "What's been a bright spot so far?",
+    intentionPrompt: "What will make the rest of today great?",
+    color: 'yellow',
+    sources: [
+      { id: 'work', label: '💼 Work going well', prompt: 'work' },
+      { id: 'achievement', label: '🎯 Got something done', prompt: 'this achievement' },
+      { id: 'relationship', label: '💕 Good conversation', prompt: 'connection' },
+      { id: 'health', label: '🏃 Staying active', prompt: 'movement' },
+      { id: 'food', label: '🍽️ Good meal', prompt: 'nourishment' },
+      { id: 'peace', label: '😌 Moment of calm', prompt: 'inner peace' },
+      { id: 'fun', label: '🎉 Fun break', prompt: 'this moment of fun' },
+      { id: 'progress', label: '📈 Making progress', prompt: 'progress' },
+    ]
+  },
+  evening: {
+    emoji: '🌆',
+    greeting: 'Good evening!',
+    title: 'Evening Reflection',
+    sourcePrompt: "What made today good?",
+    gratitudePrompt: "What are you thankful for from today?",
+    intentionPrompt: "What's one thing you're letting go of tonight?",
+    color: 'orange',
+    sources: [
+      { id: 'accomplishment', label: '✅ What I accomplished', prompt: 'your accomplishments' },
+      { id: 'relationship', label: '💕 Time with loved ones', prompt: 'your loved ones' },
+      { id: 'rest', label: '🛋️ Relaxing now', prompt: 'rest' },
+      { id: 'health', label: '🏃 Moved my body', prompt: 'taking care of yourself' },
+      { id: 'food', label: '🍽️ Good dinner', prompt: 'nourishment' },
+      { id: 'fun', label: '🎉 Had some fun', prompt: 'fun moments' },
+      { id: 'growth', label: '📚 Learned something', prompt: 'growth' },
+      { id: 'peace', label: '😌 Peaceful evening', prompt: 'peace' },
+    ]
+  },
+  night: {
+    emoji: '🌙',
+    greeting: 'Good night!',
+    title: 'Night Wind-down',
+    sourcePrompt: "What's bringing you peace tonight?",
+    gratitudePrompt: "What from today are you carrying into tomorrow?",
+    intentionPrompt: "What thought do you want to sleep on?",
+    color: 'indigo',
+    sources: [
+      { id: 'rest', label: '😴 Ready for sleep', prompt: 'rest' },
+      { id: 'peace', label: '😌 Inner calm', prompt: 'peace' },
+      { id: 'relationship', label: '💕 Loved ones safe', prompt: 'your loved ones' },
+      { id: 'gratitude', label: '🙏 Today was enough', prompt: 'today' },
+      { id: 'comfort', label: '🛏️ Cozy & comfortable', prompt: 'comfort' },
+      { id: 'reflection', label: '💭 Good thoughts', prompt: 'reflection' },
+      { id: 'tomorrow', label: '✨ Tomorrow awaits', prompt: 'tomorrow' },
+      { id: 'letting-go', label: '🍃 Letting go', prompt: 'release' },
+    ]
+  }
 };
 
 const journalPrompts = [
@@ -265,6 +409,55 @@ const shareExercise = (exercise) => {
   return shareContent(text);
 };
 
+// Global Counter Component
+function GlobalCounter() {
+  const [stats, setStats] = useState({ activeStreaks: 0, totalCheckins: 0, todayCheckins: 0 });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onValue(globalCounterRef, (snapshot) => {
+      const data = snapshot.val() || {};
+      const today = new Date().toISOString().split('T')[0];
+      setStats({
+        activeStreaks: data.activeStreaks || 0,
+        totalCheckins: data.totalCheckins || 0,
+        todayCheckins: data.todayCheckins?.[today] || 0
+      });
+      setLoading(false);
+    }, (error) => {
+      console.log('Firebase read error:', error);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="bg-white/5 border border-white/10 rounded-xl p-3 text-center animate-pulse">
+        <div className="h-4 bg-white/10 rounded w-3/4 mx-auto"></div>
+      </div>
+    );
+  }
+
+  const formatNumber = (num) => num.toLocaleString();
+
+  return (
+    <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-xl p-4 text-center">
+      <div className="flex items-center justify-center gap-2 mb-2">
+        <span className="text-lg">🌍</span>
+        <span className="text-purple-300 font-medium">
+          <span className="text-white font-bold">{formatNumber(stats.activeStreaks)}</span> people on a happiness streak
+        </span>
+      </div>
+      <div className="flex justify-center gap-4 text-sm text-slate-400">
+        <span>✨ {formatNumber(stats.todayCheckins)} check-ins today</span>
+        <span>💫 {formatNumber(stats.totalCheckins)} all-time</span>
+      </div>
+    </div>
+  );
+}
+
 const formatDate = (date) => {
   return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 };
@@ -358,33 +551,28 @@ function CheckinModal({ isOpen, onClose, onSave, streakMs }) {
   const [step, setStep] = useState('source');
   const [source, setSource] = useState('');
   const [gratitude, setGratitude] = useState('');
+  const [intention, setIntention] = useState('');
   const [quote] = useState(() => getRandomItem(wisdomQuotes));
-  const [exercise] = useState(() => getRandomItem(exercises));
+  const [timeOfDay] = useState(() => getTimeOfDay());
+  const [exercise] = useState(() => timeOfDay === 'night' ? nightExercise : getRandomItem(exercises));
+  
+  const ritual = timeRituals[timeOfDay];
 
-  const happinessSources = [
-    { id: 'work', label: '💼 Work going well', prompt: 'work' },
-    { id: 'relationship', label: '💕 Loved ones', prompt: 'your loved ones' },
-    { id: 'health', label: '🏃 Health/Exercise', prompt: 'your health' },
-    { id: 'peace', label: '😌 Inner peace', prompt: 'inner peace' },
-    { id: 'nature', label: '🌿 Nature/Outdoors', prompt: 'nature' },
-    { id: 'achievement', label: '🎯 Achievement', prompt: 'this achievement' },
-    { id: 'fun', label: '🎉 Fun/Play', prompt: 'this moment of fun' },
-    { id: 'rest', label: '😴 Good rest', prompt: 'rest' },
-  ];
-
-  const selectedSource = happinessSources.find(s => s.id === source);
+  const selectedSource = ritual.sources.find(s => s.id === source);
 
   const handleSave = () => {
-    onSave({ source, gratitude, quote: quote.author });
+    onSave({ source, gratitude, intention, quote: quote.author, timeOfDay });
     setSource('');
     setGratitude('');
+    setIntention('');
     setStep('source');
   };
 
   const handleSkip = () => {
-    onSave({ source: source || '', gratitude: '', quote: quote.author });
+    onSave({ source: source || '', gratitude: '', intention: '', quote: quote.author, timeOfDay });
     setSource('');
     setGratitude('');
+    setIntention('');
     setStep('source');
   };
 
@@ -395,9 +583,9 @@ function CheckinModal({ isOpen, onClose, onSave, streakMs }) {
       <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-lg w-full p-6 border border-green-400/20 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         
         <div className="text-center mb-5">
-          <div className="text-4xl mb-2">🌟</div>
-          <h2 className="text-xl font-bold">Happiness Check-in</h2>
-          <p className="text-slate-400 text-sm">Current streak: {formatDuration(streakMs)}</p>
+          <div className="text-4xl mb-2">{ritual.emoji}</div>
+          <h2 className="text-xl font-bold">{ritual.greeting}</h2>
+          <p className="text-slate-400 text-sm">{ritual.title} • Streak: {formatDuration(streakMs)}</p>
         </div>
 
         <div className="flex justify-center gap-2 mb-5">
@@ -408,9 +596,9 @@ function CheckinModal({ isOpen, onClose, onSave, streakMs }) {
 
         {step === 'source' && (
           <>
-            <p className="text-center text-slate-300 mb-4">What's bringing you happiness right now?</p>
+            <p className="text-center text-slate-300 mb-4">{ritual.sourcePrompt}</p>
             <div className="grid grid-cols-2 gap-2 mb-5">
-              {happinessSources.map(s => (
+              {ritual.sources.map(s => (
                 <button
                   key={s.id}
                   onClick={() => setSource(source === s.id ? '' : s.id)}
@@ -433,18 +621,26 @@ function CheckinModal({ isOpen, onClose, onSave, streakMs }) {
           <>
             <div className="mb-5">
               <p className="text-green-400 text-sm mb-3 text-center">
-                🙏 Who or what are you grateful for that brought you happiness
-                {selectedSource ? ` with ${selectedSource.prompt}` : ''}?
+                🙏 {ritual.gratitudePrompt}
               </p>
               <textarea
                 value={gratitude}
                 onChange={e => setGratitude(e.target.value)}
-                placeholder="Share your gratitude... (optional)"
-                className="w-full h-28 p-4 rounded-xl bg-white/5 border border-white/20 text-white placeholder-slate-500 resize-none focus:outline-none focus:border-green-400/50"
+                placeholder={selectedSource ? `Grateful for ${selectedSource.prompt}...` : "Share your gratitude... (optional)"}
+                className="w-full h-20 p-4 rounded-xl bg-white/5 border border-white/20 text-white placeholder-slate-500 resize-none focus:outline-none focus:border-green-400/50 mb-3"
+              />
+              <p className="text-amber-400 text-sm mb-2 text-center">
+                ✨ {ritual.intentionPrompt}
+              </p>
+              <textarea
+                value={intention}
+                onChange={e => setIntention(e.target.value)}
+                placeholder="Set your intention... (optional)"
+                className="w-full h-16 p-4 rounded-xl bg-white/5 border border-white/20 text-white placeholder-slate-500 resize-none focus:outline-none focus:border-amber-400/50"
               />
               <button
                 onClick={() => shareGratitude(gratitude || (selectedSource ? `Feeling grateful for ${selectedSource.prompt}` : 'this moment of happiness'))}
-                className="mt-2 w-full py-2 rounded-lg bg-pink-500/20 border border-pink-500/30 text-pink-400 text-sm flex items-center justify-center gap-2 hover:bg-pink-500/30 transition"
+                className="mt-3 w-full py-2 rounded-lg bg-pink-500/20 border border-pink-500/30 text-pink-400 text-sm flex items-center justify-center gap-2 hover:bg-pink-500/30 transition"
               >
                 💌 Send as Thank You Card
               </button>
@@ -478,12 +674,22 @@ function CheckinModal({ isOpen, onClose, onSave, streakMs }) {
 
         {step === 'exercise' && (
           <>
-            <div className="bg-green-400/10 border border-green-400/30 rounded-xl p-4 mb-3">
-              <h3 className="text-green-400 font-semibold mb-1">🧘 {exercise.title}</h3>
-              <p className="text-slate-400 text-sm mb-3">{exercise.subtitle}</p>
+            <div className={`${exercise.isNightOnly ? 'bg-indigo-400/10 border-indigo-400/30' : 'bg-green-400/10 border-green-400/30'} border rounded-xl p-4 mb-3`}>
+              <h3 className={`${exercise.isNightOnly ? 'text-indigo-400' : 'text-green-400'} font-semibold mb-1`}>
+                {exercise.isNightOnly ? '🌙' : '🧘'} {exercise.title}
+              </h3>
+              <p className="text-slate-400 text-sm mb-2">{exercise.subtitle}</p>
+              {exercise.description && (
+                <p className="text-slate-300 text-sm mb-3 italic">{exercise.description}</p>
+              )}
               {exercise.pattern && <BreathingGuide pattern={exercise.pattern} />}
               <ul className="space-y-1 text-sm mt-3">
-                {exercise.steps.map((s, i) => <li key={i} className="flex gap-2"><span className="text-green-400">•</span>{s}</li>)}
+                {exercise.steps.map((s, i) => (
+                  <li key={i} className="flex gap-2">
+                    <span className={exercise.isNightOnly ? 'text-indigo-400' : 'text-green-400'}>{i + 1}.</span>
+                    {s}
+                  </li>
+                ))}
               </ul>
             </div>
             <button
@@ -888,10 +1094,10 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearLeaderboard, o
         <div className="bg-green-400/10 border border-green-400/30 rounded-xl p-4 mb-6">
           <h3 className="font-semibold text-green-400 mb-2 flex items-center gap-2">🔒 Your Privacy</h3>
           <ul className="text-sm text-slate-300 space-y-1">
-            <li>• All data stored locally on your device</li>
-            <li>• Nothing sent to any server</li>
-            <li>• Only you can see your journal</li>
-            <li>• Clear anytime using options below</li>
+            <li>• Journal & personal data stored locally only</li>
+            <li>• Only anonymous counts shared (global counter)</li>
+            <li>• No personal info ever leaves your device</li>
+            <li>• Clear your data anytime below</li>
           </ul>
         </div>
 
@@ -964,6 +1170,25 @@ export default function App() {
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [activeTab, setActiveTab] = useState('timer');
   const [showReminder, setShowReminder] = useState(false);
+
+  // Track active streak globally (only once per session)
+  useEffect(() => {
+    const sessionKey = `happinessSessionTracked${CURRENT_YEAR}`;
+    const alreadyTracked = sessionStorage.getItem(sessionKey);
+    
+    if (!alreadyTracked) {
+      incrementActiveStreaks();
+      sessionStorage.setItem(sessionKey, 'true');
+    }
+    
+    // Decrement when user leaves
+    const handleUnload = () => {
+      decrementActiveStreaks();
+    };
+    
+    window.addEventListener('beforeunload', handleUnload);
+    return () => window.removeEventListener('beforeunload', handleUnload);
+  }, []);
 
   // Check for notification reminder
   useEffect(() => {
@@ -1070,6 +1295,9 @@ export default function App() {
     };
     setCheckins(prev => [...prev, checkin]);
     setShowCheckinModal(false);
+    
+    // Increment global check-in counter
+    incrementCheckins();
   };
 
   const handleDeleteCheckin = (id) => {
@@ -1158,6 +1386,11 @@ export default function App() {
         {/* Timer Tab */}
         {activeTab === 'timer' && (
           <>
+            {/* Global Counter */}
+            <div className="mb-4">
+              <GlobalCounter />
+            </div>
+
             {/* Reminder Banner */}
             {showReminder && (
               <div className="bg-gradient-to-r from-yellow-400/20 to-amber-400/20 border border-yellow-400/30 rounded-2xl p-4 mb-4 flex items-center justify-between">
