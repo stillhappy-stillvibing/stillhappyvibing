@@ -3,8 +3,8 @@ import { initializeApp } from 'firebase/app';
 import { getDatabase, ref, onValue, runTransaction, increment, set, get } from 'firebase/database';
 
 // App Version
-const APP_VERSION = '1.5.0';
-const BUILD_DATE = '2026-01-03 12:00 AM';
+const APP_VERSION = '1.6.0';
+const BUILD_DATE = '2026-01-03 1:00 AM';
 
 // Firebase Configuration
 const firebaseConfig = {
@@ -364,23 +364,15 @@ const journalPrompts = [
   "What would you tell your past self?",
 ];
 
-const badges = [
-  { id: 'first-hour', name: 'First Hour', threshold: 3600000, icon: '🌱' },
-  { id: 'half-day', name: 'Half Day', threshold: 43200000, icon: '🌤️' },
-  { id: 'full-day', name: 'Full Day', threshold: 86400000, icon: '☀️' },
-  { id: 'two-days', name: '2 Days', threshold: 172800000, icon: '🏆' },
-  { id: 'week', name: 'One Week', threshold: 604800000, icon: '🌈' },
-  { id: 'two-weeks', name: '2 Weeks', threshold: 1209600000, icon: '✨' },
-  { id: 'month', name: 'Month Master', threshold: 2592000000, icon: '👑' },
-];
-
-const checkinBadges = [
-  { id: 'first-checkin', name: 'First Check-in', threshold: 1, icon: '📝' },
+// Simplified badges - Day Streak based
+const streakBadges = [
+  { id: 'started', name: 'Getting Started', threshold: 1, icon: '🌱' },
   { id: 'streak-3', name: '3 Day Streak', threshold: 3, icon: '🔥' },
-  { id: 'streak-7', name: 'Week Streak', threshold: 7, icon: '⚡' },
-  { id: 'streak-30', name: 'Month Streak', threshold: 30, icon: '💫' },
-  { id: 'entries-10', name: '10 Entries', threshold: 10, icon: '📚', type: 'total' },
-  { id: 'entries-50', name: '50 Entries', threshold: 50, icon: '🎯', type: 'total' },
+  { id: 'streak-7', name: 'Week Warrior', threshold: 7, icon: '⚡' },
+  { id: 'streak-14', name: 'Two Week Champion', threshold: 14, icon: '💪' },
+  { id: 'streak-30', name: 'Monthly Master', threshold: 30, icon: '🌟' },
+  { id: 'streak-60', name: 'Unstoppable', threshold: 60, icon: '✨' },
+  { id: 'streak-100', name: 'Legendary', threshold: 100, icon: '👑' },
 ];
 
 // Dynamic - always uses current year
@@ -1421,17 +1413,6 @@ export default function App() {
   const checkinStreak = getCheckinStreak();
   const todayCheckins = checkins.filter(c => getDayKey(c.timestamp) === getDayKey(new Date())).length;
 
-  const sorted = [...entries].sort((a, b) => b.duration - a.duration).slice(0, 10);
-  const stats = entries.length > 0 ? {
-    total: entries.length,
-    avg: entries.reduce((a, b) => a + b.duration, 0) / entries.length,
-    best: Math.max(...entries.map(e => e.duration))
-  } : null;
-  const earnedBadges = badges.filter(b => stats && stats.best >= b.threshold);
-  const earnedCheckinBadges = checkinBadges.filter(b => 
-    b.type === 'total' ? checkins.length >= b.threshold : checkinStreak >= b.threshold
-  );
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white p-4">
       <div className="max-w-xl mx-auto">
@@ -1449,8 +1430,7 @@ export default function App() {
         <div className="flex bg-white/5 rounded-xl p-1 mb-4">
           {[
             { id: 'timer', label: '⏱️ Timer' },
-            { id: 'progress', label: '📊 Progress' },
-            { id: 'leaderboard', label: '🏆 Board' },
+            { id: 'journal', label: '📔 Journal' },
           ].map(tab => (
             <button
               key={tab.id}
@@ -1569,10 +1549,36 @@ export default function App() {
           </>
         )}
 
-        {/* Progress Tab */}
-        {activeTab === 'progress' && (
+        {/* Journal Tab */}
+        {activeTab === 'journal' && (
           <>
-            {/* Happiness Sources Chart */}
+            {/* Day Streak & Badges */}
+            <div className="bg-white/5 backdrop-blur rounded-2xl p-4 mb-4 border border-white/10">
+              <div className="text-center mb-4">
+                <div className="text-5xl font-bold text-orange-400 mb-1">{checkinStreak}</div>
+                <div className="text-slate-400">Day Streak 🔥</div>
+              </div>
+              
+              <h3 className="font-semibold mb-3 flex items-center justify-center gap-2">
+                🏅 Badges 
+                <span className="text-sm font-normal text-slate-400">
+                  ({streakBadges.filter(b => checkinStreak >= b.threshold).length}/{streakBadges.length})
+                </span>
+              </h3>
+              <div className="flex flex-wrap gap-2 justify-center">
+                {streakBadges.map(b => {
+                  const earned = checkinStreak >= b.threshold;
+                  return (
+                    <div key={b.id} className={`flex flex-col items-center p-2 rounded-lg transition ${earned ? 'bg-orange-400/20' : 'bg-white/5 opacity-40'}`}>
+                      <span className="text-2xl">{b.icon}</span>
+                      <span className="text-[9px] mt-1">{b.name}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Happiness Sources */}
             <div className="bg-white/5 backdrop-blur rounded-2xl p-4 mb-4 border border-white/10">
               <h3 className="font-semibold mb-3 flex items-center gap-2">💚 What Brings You Happiness</h3>
               {checkins.length === 0 ? (
@@ -1581,32 +1587,31 @@ export default function App() {
                 <div className="space-y-2">
                   {(() => {
                     const sourceLabels = {
-                      work: '💼 Work',
-                      relationship: '💕 Loved ones',
-                      health: '🏃 Health',
-                      peace: '😌 Peace',
-                      nature: '🌿 Nature',
-                      achievement: '🎯 Achievement',
-                      fun: '🎉 Fun',
-                      rest: '😴 Rest',
+                      work: '💼 Work', relationship: '💕 Loved ones', health: '🏃 Health',
+                      peace: '😌 Peace', nature: '🌿 Nature', achievement: '🎯 Achievement',
+                      fun: '🎉 Fun', rest: '😴 Rest', anticipation: '✨ Looking forward',
+                      gratitude: '🙏 Gratitude', coffee: '☕ Morning ritual', food: '🍽️ Food',
+                      progress: '📈 Progress', accomplishment: '✅ Accomplishment',
+                      growth: '📚 Growth', comfort: '🛏️ Comfort', reflection: '💭 Reflection',
+                      tomorrow: '✨ Tomorrow', 'letting-go': '🍃 Letting go'
                     };
                     const counts = checkins.reduce((acc, c) => {
                       if (c.source) acc[c.source] = (acc[c.source] || 0) + 1;
                       return acc;
                     }, {});
                     const maxCount = Math.max(...Object.values(counts), 1);
-                    const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+                    const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 5);
                     
                     if (sorted.length === 0) {
-                      return <p className="text-center text-slate-400 py-2 text-sm">Select a source during check-in to track patterns</p>;
+                      return <p className="text-center text-slate-400 py-2 text-sm">Select a source during check-in</p>;
                     }
                     
                     return sorted.map(([source, count]) => (
                       <div key={source} className="flex items-center gap-2">
-                        <span className="text-sm w-24 truncate">{sourceLabels[source] || source}</span>
-                        <div className="flex-1 h-6 bg-white/5 rounded-full overflow-hidden">
+                        <span className="text-sm w-28 truncate">{sourceLabels[source] || source}</span>
+                        <div className="flex-1 h-5 bg-white/5 rounded-full overflow-hidden">
                           <div 
-                            className="h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full transition-all"
+                            className="h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full"
                             style={{ width: `${(count / maxCount) * 100}%` }}
                           />
                         </div>
@@ -1618,91 +1623,43 @@ export default function App() {
               )}
             </div>
 
-            <div className="bg-white/5 backdrop-blur rounded-2xl p-4 mb-4 border border-white/10">
-              <h3 className="font-semibold mb-3 flex items-center gap-2">🏅 Check-in Badges <span className="text-sm font-normal text-slate-400">({earnedCheckinBadges.length}/{checkinBadges.length})</span></h3>
-              <div className="flex flex-wrap gap-2 justify-center">
-                {checkinBadges.map(b => (
-                  <div key={b.id} className={`flex flex-col items-center p-2 rounded-lg transition ${earnedCheckinBadges.some(e => e.id === b.id) ? 'bg-green-400/20' : 'bg-white/5 opacity-40'}`}>
-                    <span className="text-2xl">{b.icon}</span>
-                    <span className="text-[9px] mt-1">{b.name}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
+            {/* Gratitude Entries */}
             <div className="bg-white/5 backdrop-blur rounded-2xl p-4 border border-white/10">
-              <h3 className="font-semibold mb-3 flex items-center gap-2">⏱️ Streak Badges <span className="text-sm font-normal text-slate-400">({earnedBadges.length}/{badges.length})</span></h3>
-              <div className="flex flex-wrap gap-2 justify-center">
-                {badges.map(b => (
-                  <div key={b.id} className={`flex flex-col items-center p-2 rounded-lg transition ${earnedBadges.some(e => e.id === b.id) ? 'bg-yellow-400/20' : 'bg-white/5 opacity-40'}`}>
-                    <span className="text-2xl">{b.icon}</span>
-                    <span className="text-[9px] mt-1">{b.name}</span>
-                  </div>
-                ))}
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold flex items-center gap-2">🙏 Gratitude Journal</h3>
+                <span className="text-xs text-slate-400">{checkins.length} entries</span>
               </div>
+              
+              {checkins.length === 0 ? (
+                <div className="text-center py-6 text-slate-400">
+                  <p className="text-2xl mb-2">📔</p>
+                  <p className="text-sm">Your gratitude entries will appear here</p>
+                </div>
+              ) : (
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {[...checkins].reverse().slice(0, 10).map(c => (
+                    <div key={c.id} className="bg-white/5 rounded-lg p-3">
+                      {c.gratitude && (
+                        <p className="text-sm mb-1">"{c.gratitude}"</p>
+                      )}
+                      {c.intention && (
+                        <p className="text-xs text-amber-400 mb-1">✨ {c.intention}</p>
+                      )}
+                      <p className="text-[10px] text-slate-500">{formatDate(c.timestamp)}</p>
+                    </div>
+                  ))}
+                  {checkins.length > 10 && (
+                    <button 
+                      onClick={() => setShowJournalModal(true)}
+                      className="w-full text-center text-sm text-slate-400 py-2 hover:text-white"
+                    >
+                      View all {checkins.length} entries →
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </>
-        )}
-
-        {/* Leaderboard Tab */}
-        {activeTab === 'leaderboard' && (
-          <div className="bg-white/5 backdrop-blur rounded-2xl p-4 border border-white/10">
-            <h2 className="font-semibold mb-3">🏆 Completed Happiness Streaks</h2>
-            {sorted.length === 0 ? (
-              <div className="text-center py-8 text-slate-400">
-                <p className="text-2xl mb-2">🌟</p>
-                <p>No completed streaks yet</p>
-                <p className="text-sm">End a streak to record it here</p>
-              </div>
-            ) : (
-              <>
-                <ul className="space-y-2 mb-4">
-                  {sorted.map((e, i) => {
-                    const reasonLabels = {
-                      work: '💼 Work',
-                      relationship: '💔 Relationship',
-                      health: '🏥 Health',
-                      anxiety: '😰 Anxiety',
-                      news: '📰 News',
-                      money: '💸 Money',
-                      tired: '😴 Exhaustion',
-                      conflict: '⚡ Conflict',
-                    };
-                    return (
-                      <li key={e.id} className="flex items-center p-2 bg-white/5 rounded-lg">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold mr-2 text-sm ${i === 0 ? 'bg-yellow-400 text-slate-900' : i === 1 ? 'bg-slate-300 text-slate-900' : i === 2 ? 'bg-amber-600' : 'bg-white/10'}`}>
-                          {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium truncate text-sm">
-                            {e.reason ? reasonLabels[e.reason] || e.reason : '—'}
-                          </div>
-                          <div className="text-[10px] text-slate-400">{formatDate(e.timestamp)}</div>
-                        </div>
-                        <div className="text-green-400 font-bold text-sm">{formatDuration(e.duration)}</div>
-                      </li>
-                    );
-                  })}
-                </ul>
-                {stats && (
-                  <div className="grid grid-cols-3 gap-2">
-                    <div className="bg-white/5 rounded-lg p-2 text-center">
-                      <div className="text-lg font-bold text-yellow-400">{stats.total}</div>
-                      <div className="text-[9px] text-slate-400 uppercase">Streaks</div>
-                    </div>
-                    <div className="bg-white/5 rounded-lg p-2 text-center">
-                      <div className="text-lg font-bold text-yellow-400">{formatDuration(stats.avg)}</div>
-                      <div className="text-[9px] text-slate-400 uppercase">Average</div>
-                    </div>
-                    <div className="bg-white/5 rounded-lg p-2 text-center">
-                      <div className="text-lg font-bold text-yellow-400">{formatDuration(stats.best)}</div>
-                      <div className="text-[9px] text-slate-400 uppercase">Record</div>
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
         )}
 
         <footer className="text-center mt-6 text-slate-500 text-xs">Made with 💛 for a happier {CURRENT_YEAR}</footer>
