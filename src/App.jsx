@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 
 // App Version
-const APP_VERSION = '1.1.0';
-const BUILD_DATE = '2026-01-02 8:45 PM';
+const APP_VERSION = '1.2.0';
+const BUILD_DATE = '2026-01-02 9:30 PM';
 
 // Wisdom quotes from various traditions
 const wisdomQuotes = [
@@ -35,11 +35,124 @@ const wisdomQuotes = [
 const exercises = [
   { title: "4-7-8 Breathing", subtitle: "Calms your nervous system", steps: ["Exhale completely through your mouth", "Inhale through nose for 4 counts", "Hold breath for 7 counts", "Exhale through mouth for 8 counts", "Repeat 3-4 times"], pattern: { inhale: 4, hold1: 7, exhale: 8, hold2: 0 } },
   { title: "Box Breathing", subtitle: "Used by Navy SEALs", steps: ["Breathe in for 4 counts", "Hold at top for 4 counts", "Breathe out for 4 counts", "Hold at bottom for 4 counts", "Repeat 4-6 times"], pattern: { inhale: 4, hold1: 4, exhale: 4, hold2: 4 } },
+  { title: "Heart Coherence Breathing", subtitle: "Sync your heart and mind", steps: ["Place your hand on your heart", "Breathe slowly: 5 counts in, 5 counts out", "Focus attention on your heart area", "Recall a feeling of love or gratitude", "Breathe that feeling in and out", "Continue for 2-3 minutes"], pattern: { inhale: 5, hold1: 0, exhale: 5, hold2: 0 } },
   { title: "Gratitude Visualization", subtitle: "Shift to abundance", steps: ["Close eyes, take 3 deep breaths", "Picture someone you love smiling", "Feel warmth in your chest", "Think of 3 things you're grateful for", "Let a gentle smile form"], pattern: null },
   { title: "Loving-Kindness", subtitle: "Buddhist practice for joy", steps: ["Place hand on heart", "Say: May I be happy, peaceful", "Wish the same to someone you love", "Extend to all beings", "Rest in this feeling"], pattern: null },
   { title: "Body Scan Release", subtitle: "Release hidden tension", steps: ["Start at top of head", "Notice tension in forehead, jaw", "With each exhale, let it melt", "Move down: neck, chest, belly, legs", "End at feet, feeling grounded"], pattern: null },
   { title: "Mindful Minute", subtitle: "Quick reset anywhere", steps: ["Stop and close your eyes", "Take 5 slow, deep breaths", "Notice 3 things you can hear", "Notice 2 things you can feel", "Notice 1 thing you're grateful for"], pattern: null },
+  { title: "Joy Recall", subtitle: "Relive your happiest moments", steps: ["Close your eyes and relax", "Remember a moment of pure joy", "Where were you? Who was there?", "Feel the emotions fully again", "Let a smile spread across your face", "Carry this feeling with you"], pattern: null },
+  { title: "Smile Meditation", subtitle: "The happiness feedback loop", steps: ["Sit comfortably and close your eyes", "Gently smile — even if you don't feel it", "Notice how your face muscles feel", "Let the smile soften your eyes", "Feel warmth spreading through you", "Your body tells your mind: be happy"], pattern: null },
+  { title: "GLAD Technique", subtitle: "Find four daily wins", steps: ["G — One GOOD thing today", "L — One thing you LEARNED", "A — One small ACCOMPLISHMENT", "D — One thing that DELIGHTED you", "Reflect on each one with gratitude"], pattern: null },
 ];
+
+// CBT Tools matched to end-streak reasons
+const cbtTools = {
+  work: {
+    title: "Decatastrophizing",
+    subtitle: "Put work stress in perspective",
+    steps: [
+      "What's the WORST that could realistically happen?",
+      "What's the BEST that could happen?",
+      "What's MOST LIKELY to happen?",
+      "How will this matter in 1 week? 1 year?",
+      "What's one small thing you can control right now?"
+    ]
+  },
+  relationship: {
+    title: "Best Friend Technique",
+    subtitle: "Treat yourself like you'd treat a friend",
+    steps: [
+      "Imagine a close friend in your exact situation",
+      "What would you say to comfort them?",
+      "What advice would you give them?",
+      "Now say those same words to yourself",
+      "You deserve the same compassion you give others"
+    ]
+  },
+  health: {
+    title: "Self-Compassion Break",
+    subtitle: "Be gentle with yourself",
+    steps: [
+      "Say: 'This is a moment of suffering'",
+      "Say: 'Suffering is part of being human'",
+      "Place your hand on your heart",
+      "Say: 'May I be kind to myself'",
+      "Say: 'May I give myself the compassion I need'"
+    ]
+  },
+  anxiety: {
+    title: "5-4-3-2-1 Grounding",
+    subtitle: "Come back to the present moment",
+    steps: [
+      "Name 5 things you can SEE right now",
+      "Name 4 things you can TOUCH or feel",
+      "Name 3 things you can HEAR",
+      "Name 2 things you can SMELL",
+      "Name 1 thing you can TASTE",
+      "Take a deep breath — you are here, you are safe"
+    ]
+  },
+  news: {
+    title: "Circle of Control",
+    subtitle: "Focus on what you can influence",
+    steps: [
+      "Draw two circles in your mind",
+      "OUTER circle: things you CAN'T control",
+      "INNER circle: things you CAN control",
+      "The news belongs in the outer circle",
+      "What's ONE thing in your inner circle you can do?",
+      "Put your energy there instead"
+    ]
+  },
+  money: {
+    title: "Decatastrophizing",
+    subtitle: "Put financial stress in perspective",
+    steps: [
+      "What's the WORST that could realistically happen?",
+      "What's the BEST that could happen?",
+      "What's MOST LIKELY to happen?",
+      "Have you survived money stress before? You're resilient.",
+      "What's one tiny step you can take today?"
+    ]
+  },
+  tired: {
+    title: "Behavioral Activation",
+    subtitle: "One tiny step forward",
+    steps: [
+      "When exhausted, our brain says 'do nothing'",
+      "But small actions create energy, not drain it",
+      "Pick ONE tiny thing (2 minutes or less)",
+      "Examples: drink water, step outside, stretch",
+      "Notice how you feel after — even slightly better counts",
+      "Small wins build momentum"
+    ]
+  },
+  conflict: {
+    title: "Thought Reframe",
+    subtitle: "Challenge the harsh narrative",
+    steps: [
+      "What thought is bothering you most?",
+      "Is this thought 100% true? What's the evidence?",
+      "What would a neutral observer say?",
+      "Is there another way to see this situation?",
+      "Write a more balanced thought",
+      "Example: 'We disagreed' vs 'They hate me'"
+    ]
+  }
+};
+
+// Default CBT tool if no reason selected
+const defaultCbtTool = {
+  title: "Self-Compassion Break",
+  subtitle: "A moment of kindness for yourself",
+  steps: [
+    "Acknowledge: 'This is hard right now'",
+    "Remember: 'Everyone struggles sometimes'",
+    "Place your hand on your heart",
+    "Say: 'May I be kind to myself'",
+    "Take a deep breath and begin again"
+  ]
+};
 
 const journalPrompts = [
   "What made you smile today?",
@@ -329,14 +442,12 @@ function CheckinModal({ isOpen, onClose, onSave, streakMs }) {
                 placeholder="Share your gratitude... (optional)"
                 className="w-full h-28 p-4 rounded-xl bg-white/5 border border-white/20 text-white placeholder-slate-500 resize-none focus:outline-none focus:border-green-400/50"
               />
-              {gratitude.trim() && (
-                <button
-                  onClick={() => shareGratitude(gratitude)}
-                  className="mt-2 w-full py-2 rounded-lg bg-pink-500/20 border border-pink-500/30 text-pink-400 text-sm flex items-center justify-center gap-2 hover:bg-pink-500/30 transition"
-                >
-                  💌 Send as Thank You Card
-                </button>
-              )}
+              <button
+                onClick={() => shareGratitude(gratitude || (selectedSource ? `Feeling grateful for ${selectedSource.prompt}` : 'this moment of happiness'))}
+                className="mt-2 w-full py-2 rounded-lg bg-pink-500/20 border border-pink-500/30 text-pink-400 text-sm flex items-center justify-center gap-2 hover:bg-pink-500/30 transition"
+              >
+                💌 Send as Thank You Card
+              </button>
             </div>
             <div className="flex gap-3">
               <button onClick={() => setStep('source')} className="flex-1 bg-white/10 py-3 rounded-xl">← Back</button>
@@ -379,7 +490,7 @@ function CheckinModal({ isOpen, onClose, onSave, streakMs }) {
               onClick={() => shareExercise(exercise)}
               className="w-full py-2 rounded-lg bg-blue-500/20 border border-blue-500/30 text-blue-400 text-sm flex items-center justify-center gap-2 hover:bg-blue-500/30 transition mb-5"
             >
-              🧘 Share this with someone who needs calm
+              😊 Smile and the world smiles with you — share a smile!
             </button>
             <div className="flex gap-3">
               <button onClick={handleSkip} className="flex-1 bg-white/10 py-3 rounded-xl">Skip & Save</button>
@@ -410,6 +521,9 @@ function EndModal({ isOpen, onClose, streakMs, onSave }) {
     { id: 'tired', label: '😴 Exhaustion' },
     { id: 'conflict', label: '⚡ Conflict' },
   ];
+
+  // Get targeted CBT tool based on reason
+  const cbtTool = reason ? cbtTools[reason] : defaultCbtTool;
 
   const handleSave = () => {
     onSave({ reason, journal });
@@ -442,7 +556,7 @@ function EndModal({ isOpen, onClose, streakMs, onSave }) {
         </div>
 
         <div className="flex justify-center gap-2 mb-5">
-          {['wisdom', 'reason', 'exercise'].map(s => (
+          {['wisdom', 'reason', 'reframe', 'exercise'].map(s => (
             <button key={s} onClick={() => setStep(s)} className={`w-2.5 h-2.5 rounded-full transition ${step === s ? 'bg-yellow-400' : 'bg-white/20'}`} />
           ))}
         </div>
@@ -467,7 +581,7 @@ function EndModal({ isOpen, onClose, streakMs, onSave }) {
         {step === 'reason' && (
           <>
             <div className="mb-4">
-              <p className="text-yellow-400 text-sm mb-3">What broke your streak? (optional)</p>
+              <p className="text-yellow-400 text-sm mb-3">What broke your streak? (helps us personalize support)</p>
               <div className="grid grid-cols-2 gap-2 mb-4">
                 {breakReasons.map(r => (
                   <button
@@ -489,6 +603,27 @@ function EndModal({ isOpen, onClose, streakMs, onSave }) {
             </div>
             <div className="flex gap-3">
               <button onClick={() => setStep('wisdom')} className="flex-1 bg-white/10 py-3 rounded-xl">← Back</button>
+              <button onClick={() => setStep('reframe')} className="flex-1 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-900 font-bold py-3 rounded-xl">Continue →</button>
+            </div>
+          </>
+        )}
+
+        {step === 'reframe' && (
+          <>
+            <div className="bg-purple-400/10 border border-purple-400/30 rounded-xl p-4 mb-5">
+              <h3 className="text-purple-400 font-semibold mb-1 flex items-center gap-2">🧠 {cbtTool.title}</h3>
+              <p className="text-slate-400 text-sm mb-3">{cbtTool.subtitle}</p>
+              <ul className="space-y-2 text-sm">
+                {cbtTool.steps.map((s, i) => (
+                  <li key={i} className="flex gap-2">
+                    <span className="text-purple-400 font-bold">{i + 1}.</span>
+                    <span>{s}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="flex gap-3">
+              <button onClick={() => setStep('reason')} className="flex-1 bg-white/10 py-3 rounded-xl">← Back</button>
               <button onClick={() => setStep('exercise')} className="flex-1 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-900 font-bold py-3 rounded-xl">Continue →</button>
             </div>
           </>
@@ -508,7 +643,7 @@ function EndModal({ isOpen, onClose, streakMs, onSave }) {
               onClick={() => shareExercise(exercise)}
               className="w-full py-2 rounded-lg bg-blue-500/20 border border-blue-500/30 text-blue-400 text-sm flex items-center justify-center gap-2 hover:bg-blue-500/30 transition mb-4"
             >
-              🧘 Share this with someone who needs calm
+              😊 Smile and the world smiles with you — share a smile!
             </button>
             <div className="flex gap-3 mb-3">
               <button onClick={handleSave} className="flex-1 bg-gradient-to-r from-green-400 to-emerald-500 text-slate-900 font-bold py-3 rounded-xl">🌟 Begin Again</button>
