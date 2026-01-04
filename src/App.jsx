@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '2.6.2';
+const APP_VERSION = '2.7.0';
 const BUILD_DATE = '2026-01-04';
 
 // Firebase Configuration
@@ -54,6 +54,25 @@ const incrementHappinessSource = (source) => {
 // Reference for global happiness sources
 const globalHappinessSourcesRef = ref(database, 'globalHappinessSources');
 
+// Micro-moments - gentle mindfulness prompts
+const microMoments = [
+  { icon: "🌬️", text: "Take a deep breath right now" },
+  { icon: "🌸", text: "Notice something beautiful around you" },
+  { icon: "💛", text: "Who could you thank today?" },
+  { icon: "😊", text: "Smile - even if you don't feel like it" },
+  { icon: "👂", text: "What can you hear? Really listen" },
+  { icon: "🌿", text: "Right now, you're alive and breathing" },
+  { icon: "✨", text: "What small joy is right in front of you?" },
+  { icon: "🎨", text: "Notice a color that brings you peace" },
+  { icon: "💫", text: "Place your hand on your heart. Breathe" },
+  { icon: "🙏", text: "What are you grateful for right now?" },
+  { icon: "🌅", text: "This moment will never come again" },
+  { icon: "💚", text: "You're doing better than you think" },
+  { icon: "🌊", text: "Let go of what you can't control" },
+  { icon: "🦋", text: "Change begins with this breath" },
+  { icon: "🌟", text: "You are exactly where you need to be" }
+];
+
 // Wisdom quotes from various traditions
 const wisdomQuotes = [
   { text: "Pain is inevitable, but suffering is optional. The present moment is filled with joy and happiness.", author: "Thich Nhat Hanh", tradition: "Buddhist Monk" },
@@ -80,19 +99,47 @@ const wisdomQuotes = [
   { text: "The only way to do great work is to love what you do.", author: "Steve Jobs", tradition: "Tech Visionary" },
   { text: "In three words I can sum up everything I've learned about life: it goes on.", author: "Robert Frost", tradition: "American Poet" },
   { text: "Let yourself be silently drawn by the strange pull of what you really love.", author: "Rumi", tradition: "Sufi Mysticism" },
+  { text: "We do not inherit the earth from our ancestors; we borrow it from our children.", author: "Native American Proverb", tradition: "Indigenous Wisdom" },
+  { text: "If you want others to be happy, practice compassion. If you want to be happy, practice compassion.", author: "Dalai Lama XIV", tradition: "Tibetan Buddhism" },
+  { text: "The best time to plant a tree was 20 years ago. The second best time is now.", author: "Chinese Proverb", tradition: "Traditional Wisdom" },
+  { text: "Joy is not in things; it is in us.", author: "Richard Wagner", tradition: "German Composer" },
+  { text: "Happiness is not a station you arrive at, but a manner of traveling.", author: "Margaret Lee Runbeck", tradition: "American Author" },
+  { text: "The most wasted of days is one without laughter.", author: "E.E. Cummings", tradition: "American Poet" },
+  { text: "Peace comes from within. Do not seek it without.", author: "Buddha", tradition: "Buddhist Teaching" },
+  { text: "Turn your wounds into wisdom.", author: "Oprah Winfrey", tradition: "Media Pioneer" },
+  { text: "Everything you can imagine is real.", author: "Pablo Picasso", tradition: "Spanish Artist" },
+  { text: "A joyful heart is the inevitable result of a heart burning with love.", author: "Mother Teresa", tradition: "Missionary of Charity" },
+  { text: "Life shrinks or expands in proportion to one's courage.", author: "Anaïs Nin", tradition: "French-Cuban Author" },
+  { text: "The privilege of a lifetime is to become who you truly are.", author: "Carl Jung", tradition: "Swiss Psychiatrist" },
+  { text: "When we are no longer able to change a situation, we are challenged to change ourselves.", author: "Viktor Frankl", tradition: "Logotherapy" },
+  { text: "El que no vive para servir, no sirve para vivir. (Those who don't live to serve, don't serve to live.)", author: "Mother Teresa", tradition: "Spanish Proverb" },
+  { text: "Flectere si nequeo superos, Acheronta movebo. (If I cannot bend heaven, I will move hell.)", author: "Virgil", tradition: "Roman Poetry" },
+  { text: "The two most important days in your life are the day you are born and the day you find out why.", author: "Mark Twain", tradition: "American Humorist" },
+  { text: "Wherever you go, go with all your heart.", author: "Confucius", tradition: "Chinese Philosophy" },
+  { text: "Keep your face to the sunshine and you cannot see a shadow.", author: "Helen Keller", tradition: "American Author" },
+  { text: "Not all those who wander are lost.", author: "J.R.R. Tolkien", tradition: "British Author" },
+  { text: "In every walk with nature, one receives far more than he seeks.", author: "John Muir", tradition: "Naturalist" },
+  { text: "The soul always knows what to do to heal itself. The challenge is to silence the mind.", author: "Caroline Myss", tradition: "Medical Intuitive" },
+  { text: "Begin anywhere.", author: "John Cage", tradition: "Avant-garde Composer" },
+  { text: "What lies behind us and what lies before us are tiny matters compared to what lies within us.", author: "Ralph Waldo Emerson", tradition: "Transcendentalist" },
 ];
 
 const exercises = [
   { title: "4-7-8 Breathing", subtitle: "Calms your nervous system", steps: ["Exhale completely through your mouth", "Inhale through nose for 4 counts", "Hold breath for 7 counts", "Exhale through mouth for 8 counts", "Repeat 3-4 times"], pattern: { inhale: 4, hold1: 7, exhale: 8, hold2: 0 } },
   { title: "Box Breathing", subtitle: "Used by Navy SEALs", steps: ["Breathe in for 4 counts", "Hold at top for 4 counts", "Breathe out for 4 counts", "Hold at bottom for 4 counts", "Repeat 4-6 times"], pattern: { inhale: 4, hold1: 4, exhale: 4, hold2: 4 } },
   { title: "Heart Coherence Breathing", subtitle: "Sync your heart and mind", steps: ["Place your hand on your heart", "Breathe slowly: 5 counts in, 5 counts out", "Focus attention on your heart area", "Recall a feeling of love or gratitude", "Breathe that feeling in and out", "Continue for 2-3 minutes"], pattern: { inhale: 5, hold1: 0, exhale: 5, hold2: 0 } },
+  { title: "Progressive Muscle Relaxation", subtitle: "Release physical tension", steps: ["Sit or lie down comfortably", "Tense your toes for 5 seconds, then release", "Move up: calves, thighs, belly, chest", "Tense and release hands, arms, shoulders", "Finish with jaw and face muscles", "Notice the wave of relaxation throughout your body"], pattern: null },
+  { title: "Savoring Exercise", subtitle: "Amplify positive moments", steps: ["Find something pleasant happening now", "Close other tabs in your mind", "Notice every detail - sight, sound, feeling", "Let yourself fully enjoy this moment", "Store this memory for later", "Thank yourself for pausing to notice"], pattern: null },
   { title: "Gratitude Visualization", subtitle: "Shift to abundance", steps: ["Close eyes, take 3 deep breaths", "Picture someone you love smiling", "Feel warmth in your chest", "Think of 3 things you're grateful for", "Let a gentle smile form"], pattern: null },
-  { title: "Loving-Kindness", subtitle: "Buddhist practice for joy", steps: ["Place hand on heart", "Say: May I be happy, peaceful", "Wish the same to someone you love", "Extend to all beings", "Rest in this feeling"], pattern: null },
+  { title: "Loving-Kindness Meditation", subtitle: "Buddhist practice for joy", steps: ["Place hand on heart", "Say: May I be happy, healthy, safe", "Wish the same to someone you love", "Extend to a neutral person", "Extend to someone difficult", "Finally, wish this for all beings"], pattern: null },
   { title: "Body Scan Release", subtitle: "Release hidden tension", steps: ["Start at top of head", "Notice tension in forehead, jaw", "With each exhale, let it melt", "Move down: neck, chest, belly, legs", "End at feet, feeling grounded"], pattern: null },
+  { title: "Safe Place Visualization", subtitle: "Create inner sanctuary", steps: ["Close your eyes and breathe deeply", "Imagine a place where you feel completely safe", "It can be real or imaginary", "Notice the colors, sounds, temperature", "Feel the peace of this place", "Know you can return here anytime"], pattern: null },
   { title: "Mindful Minute", subtitle: "Quick reset anywhere", steps: ["Stop and close your eyes", "Take 5 slow, deep breaths", "Notice 3 things you can hear", "Notice 2 things you can feel", "Notice 1 thing you're grateful for"], pattern: null },
   { title: "Joy Recall", subtitle: "Relive your happiest moments", steps: ["Close your eyes and relax", "Remember a moment of pure joy", "Where were you? Who was there?", "Feel the emotions fully again", "Let a smile spread across your face", "Carry this feeling with you"], pattern: null },
   { title: "Smile Meditation", subtitle: "The happiness feedback loop", steps: ["Sit comfortably and close your eyes", "Gently smile — even if you don't feel it", "Notice how your face muscles feel", "Let the smile soften your eyes", "Feel warmth spreading through you", "Your body tells your mind: be happy"], pattern: null },
   { title: "GLAD Technique", subtitle: "Find four daily wins", steps: ["G — One GOOD thing today", "L — One thing you LEARNED", "A — One small ACCOMPLISHMENT", "D — One thing that DELIGHTED you", "Reflect on each one with gratitude"], pattern: null },
+  { title: "Three Good Things", subtitle: "Rewire your brain for positivity", steps: ["Think of three good things from today", "They can be tiny: a warm cup of tea, a kind word", "For each one, ask: Why did this happen?", "Write them down or just reflect", "Do this daily for two weeks", "Watch your brain start noticing more good"], pattern: null },
+  { title: "Acts of Kindness Practice", subtitle: "Boost happiness through giving", steps: ["Think of one small kind act you can do today", "It can be tiny: hold a door, send a text, smile", "Do it without expecting anything back", "Notice how it feels in your body", "Kindness to others is kindness to yourself"], pattern: null },
 ];
 
 // Night-only exercise for hypnagogia/dream problem-solving
@@ -999,6 +1046,211 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
   );
 }
 
+// Quote Browser/Carousel Component
+function QuoteBrowser({ isOpen, onClose }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [favorites, setFavorites] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('happinessFavoriteQuotes') || '[]');
+    } catch {
+      return [];
+    }
+  });
+
+  const currentQuote = wisdomQuotes[currentIndex];
+  const isFavorite = favorites.includes(currentIndex);
+
+  const toggleFavorite = () => {
+    const newFavorites = isFavorite
+      ? favorites.filter(i => i !== currentIndex)
+      : [...favorites, currentIndex];
+    setFavorites(newFavorites);
+    localStorage.setItem('happinessFavoriteQuotes', JSON.stringify(newFavorites));
+  };
+
+  const nextQuote = () => {
+    setCurrentIndex((currentIndex + 1) % wisdomQuotes.length);
+  };
+
+  const prevQuote = () => {
+    setCurrentIndex((currentIndex - 1 + wisdomQuotes.length) % wisdomQuotes.length);
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50" onClick={onClose}>
+      <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-lg w-full p-6 border border-purple-400/20" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-xl font-bold flex items-center gap-2">📖 Browse Wisdom</h2>
+          <button onClick={onClose} className="text-slate-400 hover:text-white text-xl">✕</button>
+        </div>
+
+        <div className="mb-4 text-center">
+          <p className="text-xs text-slate-400 mb-4">{currentIndex + 1} of {wisdomQuotes.length}</p>
+
+          <div className="border-l-4 border-purple-400 bg-white/5 p-5 rounded-r-xl mb-4 min-h-[200px] flex flex-col justify-center">
+            <p className="text-lg italic mb-3 leading-relaxed">"{currentQuote.text}"</p>
+            <p className="text-purple-400 font-medium">— {currentQuote.author}</p>
+            <p className="text-slate-400 text-sm">{currentQuote.tradition}</p>
+          </div>
+
+          <div className="flex items-center justify-between gap-4 mb-4">
+            <button
+              onClick={prevQuote}
+              className="flex-1 py-3 bg-white/5 hover:bg-white/10 rounded-xl font-semibold transition"
+            >
+              ← Previous
+            </button>
+            <button
+              onClick={toggleFavorite}
+              className={`px-4 py-3 rounded-xl transition ${isFavorite ? 'bg-pink-500/20 text-pink-400' : 'bg-white/5 text-slate-400'}`}
+              title={isFavorite ? "Remove from favorites" : "Add to favorites"}
+            >
+              {isFavorite ? '❤️' : '🤍'}
+            </button>
+            <button
+              onClick={nextQuote}
+              className="flex-1 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-xl font-semibold transition"
+            >
+              Next →
+            </button>
+          </div>
+
+          <button
+            onClick={() => shareQuote(currentQuote)}
+            className="w-full py-2 rounded-lg bg-purple-500/20 border border-purple-500/30 text-purple-400 text-sm hover:bg-purple-500/30 transition"
+          >
+            📤 Share this quote
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Exercise Browser/Carousel Component
+function ExerciseBrowser({ isOpen, onClose }) {
+  const allExercises = [...exercises, nightExercise];
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [favorites, setFavorites] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('happinessFavoriteExercises') || '[]');
+    } catch {
+      return [];
+    }
+  });
+
+  const currentExercise = allExercises[currentIndex];
+  const isFavorite = favorites.includes(currentIndex);
+
+  const toggleFavorite = () => {
+    const newFavorites = isFavorite
+      ? favorites.filter(i => i !== currentIndex)
+      : [...favorites, currentIndex];
+    setFavorites(newFavorites);
+    localStorage.setItem('happinessFavoriteExercises', JSON.stringify(newFavorites));
+  };
+
+  const nextExercise = () => {
+    setCurrentIndex((currentIndex + 1) % allExercises.length);
+  };
+
+  const prevExercise = () => {
+    setCurrentIndex((currentIndex - 1 + allExercises.length) % allExercises.length);
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50 overflow-y-auto" onClick={onClose}>
+      <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-lg w-full p-6 border border-green-400/20 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-xl font-bold flex items-center gap-2">🧘 Browse Exercises</h2>
+          <button onClick={onClose} className="text-slate-400 hover:text-white text-xl">✕</button>
+        </div>
+
+        <div className="mb-4">
+          <p className="text-xs text-slate-400 mb-4 text-center">{currentIndex + 1} of {allExercises.length}</p>
+
+          <div className={`${currentExercise.isNightOnly ? 'bg-indigo-400/10 border-indigo-400/30' : 'bg-green-400/10 border-green-400/30'} border rounded-xl p-4 mb-4`}>
+            <h3 className={`${currentExercise.isNightOnly ? 'text-indigo-400' : 'text-green-400'} font-semibold text-lg mb-1`}>
+              {currentExercise.isNightOnly ? '🌙' : '🧘'} {currentExercise.title}
+            </h3>
+            <p className="text-slate-400 text-sm mb-3">{currentExercise.subtitle}</p>
+            {currentExercise.description && (
+              <p className="text-slate-300 text-sm mb-3 italic">{currentExercise.description}</p>
+            )}
+            {currentExercise.pattern && <BreathingGuide pattern={currentExercise.pattern} />}
+            <ul className="space-y-1.5 text-sm mt-3">
+              {currentExercise.steps.map((s, i) => (
+                <li key={i} className="flex gap-2">
+                  <span className={currentExercise.isNightOnly ? 'text-indigo-400' : 'text-green-400'}>{i + 1}.</span>
+                  {s}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="flex items-center justify-between gap-4 mb-4">
+            <button
+              onClick={prevExercise}
+              className="flex-1 py-3 bg-white/5 hover:bg-white/10 rounded-xl font-semibold transition"
+            >
+              ← Previous
+            </button>
+            <button
+              onClick={toggleFavorite}
+              className={`px-4 py-3 rounded-xl transition ${isFavorite ? 'bg-pink-500/20 text-pink-400' : 'bg-white/5 text-slate-400'}`}
+              title={isFavorite ? "Remove from favorites" : "Add to favorites"}
+            >
+              {isFavorite ? '❤️' : '🤍'}
+            </button>
+            <button
+              onClick={nextExercise}
+              className="flex-1 py-3 bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-slate-900 rounded-xl font-semibold transition"
+            >
+              Next →
+            </button>
+          </div>
+
+          <button
+            onClick={() => shareExercise(currentExercise)}
+            className="w-full py-2 rounded-lg bg-blue-500/20 border border-blue-500/30 text-blue-400 text-sm hover:bg-blue-500/30 transition"
+          >
+            📤 Share this exercise
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Micro-Moment Component - Gentle rotating mindfulness prompts
+function MicroMoment() {
+  const [currentMoment, setCurrentMoment] = useState(() =>
+    microMoments[Math.floor(Math.random() * microMoments.length)]
+  );
+
+  useEffect(() => {
+    // Rotate to a new micro-moment every 45 seconds
+    const interval = setInterval(() => {
+      setCurrentMoment(microMoments[Math.floor(Math.random() * microMoments.length)]);
+    }, 45000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 backdrop-blur rounded-2xl p-4 mb-4 border border-purple-500/20 text-center">
+      <div className="flex items-center justify-center gap-2">
+        <span className="text-2xl">{currentMoment.icon}</span>
+        <p className="text-sm text-slate-200 italic">{currentMoment.text}</p>
+      </div>
+    </div>
+  );
+}
+
 // The World Tab Component - Global happiness data only
 function TheWorldTab() {
   const [globalSources, setGlobalSources] = useState({});
@@ -1762,6 +2014,8 @@ export default function App() {
   const [showShareCard, setShowShareCard] = useState(false);
   const [activeTab, setActiveTab] = useState('timer');
   const [showReminder, setShowReminder] = useState(false);
+  const [showQuoteBrowser, setShowQuoteBrowser] = useState(false);
+  const [showExerciseBrowser, setShowExerciseBrowser] = useState(false);
 
   // Version update notification
   const { updateAvailable, newVersion } = useVersionCheck(APP_VERSION);
@@ -2059,13 +2313,16 @@ export default function App() {
                 </div>
               )}
               
-              <button 
-                onClick={() => setShowCheckinModal(true)} 
+              <button
+                onClick={() => setShowCheckinModal(true)}
                 className="w-full bg-gradient-to-r from-green-400 to-emerald-500 text-slate-900 px-4 py-3 rounded-xl font-semibold hover:scale-105 transition shadow-lg shadow-green-500/20"
               >
                 ✓ Check In
               </button>
             </div>
+
+            {/* Micro-Moment */}
+            <MicroMoment />
 
             {/* Quick Stats */}
             <div className="grid grid-cols-3 gap-3 mb-4">
@@ -2098,23 +2355,39 @@ export default function App() {
               <span className="text-slate-400">→</span>
             </button>
 
-            {/* Weekly Reflection & Challenge Buttons */}
+            {/* Quick Actions */}
             <div className="mt-3 grid grid-cols-3 gap-2">
-              <button 
-                onClick={() => setShowWeeklyReflection(true)}
-                className="bg-white/5 border border-white/10 rounded-xl p-3 flex flex-col items-center gap-1 hover:bg-white/10 transition"
+              <button
+                onClick={() => setShowQuoteBrowser(true)}
+                className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl p-3 flex flex-col items-center gap-1 hover:from-purple-500/30 hover:to-pink-500/30 transition"
               >
-                <span className="text-xl">📊</span>
-                <span className="text-xs font-medium">Week</span>
+                <span className="text-xl">📖</span>
+                <span className="text-xs font-medium">Quotes</span>
               </button>
-              <button 
+              <button
+                onClick={() => setShowExerciseBrowser(true)}
+                className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30 rounded-xl p-3 flex flex-col items-center gap-1 hover:from-green-500/30 hover:to-emerald-500/30 transition"
+              >
+                <span className="text-xl">🧘</span>
+                <span className="text-xs font-medium">Exercises</span>
+              </button>
+              <button
                 onClick={() => setShowChallengeModal(true)}
                 className="bg-gradient-to-r from-pink-500/20 to-purple-500/20 border border-pink-500/30 rounded-xl p-3 flex flex-col items-center gap-1 hover:from-pink-500/30 hover:to-purple-500/30 transition"
               >
                 <span className="text-xl">🎯</span>
                 <span className="text-xs font-medium">Challenge</span>
               </button>
-              <button 
+            </div>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              <button
+                onClick={() => setShowWeeklyReflection(true)}
+                className="bg-white/5 border border-white/10 rounded-xl p-3 flex flex-col items-center gap-1 hover:bg-white/10 transition"
+              >
+                <span className="text-xl">📊</span>
+                <span className="text-xs font-medium">Week</span>
+              </button>
+              <button
                 onClick={() => setShowShareCard(true)}
                 className="bg-gradient-to-r from-purple-500/20 to-blue-500/20 border border-purple-500/30 rounded-xl p-3 flex flex-col items-center gap-1 hover:from-purple-500/30 hover:to-blue-500/30 transition"
               >
@@ -2161,6 +2434,8 @@ export default function App() {
 
       {/* Modals */}
       <CheckinModal isOpen={showCheckinModal} onClose={() => setShowCheckinModal(false)} onSave={handleCheckinSave} />
+      <QuoteBrowser isOpen={showQuoteBrowser} onClose={() => setShowQuoteBrowser(false)} />
+      <ExerciseBrowser isOpen={showExerciseBrowser} onClose={() => setShowExerciseBrowser(false)} />
       <JournalModal 
         isOpen={showJournalModal} 
         onClose={() => setShowJournalModal(false)} 
