@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '2.8.0';
+const APP_VERSION = '2.8.3';
 const BUILD_DATE = '2026-01-04';
 
 // Firebase Configuration
@@ -146,6 +146,29 @@ const wisdomQuotes = [
   { text: "The soul always knows what to do to heal itself. The challenge is to silence the mind.", author: "Caroline Myss", tradition: "Medical Intuitive" },
   { text: "Begin anywhere.", author: "John Cage", tradition: "Avant-garde Composer" },
   { text: "What lies behind us and what lies before us are tiny matters compared to what lies within us.", author: "Ralph Waldo Emerson", tradition: "Transcendentalist" },
+  { text: "Do not worry about tomorrow, for tomorrow will worry about itself. Each day has enough trouble of its own.", author: "Jesus", tradition: "Gospel of Matthew" },
+  { text: "Blessed are the peacemakers, for they shall be called children of God.", author: "Jesus", tradition: "Sermon on the Mount" },
+  { text: "Love your neighbor as yourself.", author: "Jesus", tradition: "Christian Teaching" },
+  { text: "Make me an instrument of your peace. Where there is hatred, let me sow love.", author: "St. Francis of Assisi", tradition: "Christian Mystic" },
+  { text: "This is the day the Lord has made; let us rejoice and be glad in it.", author: "Psalm 118", tradition: "Hebrew Scripture" },
+  { text: "A joyful heart is good medicine, but a crushed spirit dries up the bones.", author: "Proverbs 17:22", tradition: "Book of Proverbs" },
+  { text: "What is hateful to you, do not do to your neighbor. This is the whole Torah; the rest is commentary.", author: "Hillel the Elder", tradition: "Jewish Wisdom" },
+  { text: "Who is rich? One who is happy with their portion.", author: "Pirkei Avot", tradition: "Ethics of the Fathers" },
+  { text: "Verily, with hardship comes ease.", author: "Quran 94:6", tradition: "Islamic Scripture" },
+  { text: "The best among you are those who have the best manners and character.", author: "Prophet Muhammad", tradition: "Hadith" },
+  { text: "Kindness is a mark of faith, and whoever is not kind has no faith.", author: "Prophet Muhammad", tradition: "Islamic Teaching" },
+  { text: "When the power of love overcomes the love of power, the world will know peace.", author: "Attributed to Sufi Wisdom", tradition: "Islamic Mysticism" },
+  { text: "You are what your deep, driving desire is. As your desire is, so is your will. As your will is, so is your deed.", author: "Brihadaranyaka Upanishad", tradition: "Hindu Scripture" },
+  { text: "When meditation is mastered, the mind is unwavering like the flame of a lamp in a windless place.", author: "Bhagavad Gita", tradition: "Hindu Scripture" },
+  { text: "The soul is neither born, and nor does it die. It is unborn, eternal, ever-existing and primeval.", author: "Bhagavad Gita", tradition: "Hindu Philosophy" },
+  { text: "Look within. Within is the fountain of good, and it will ever bubble up, if you will ever dig.", author: "Marcus Aurelius", tradition: "Stoic Philosophy" },
+  { text: "A journey of a thousand miles begins with a single step.", author: "Lao Tzu", tradition: "Chinese Wisdom" },
+  { text: "When I let go of what I am, I become what I might be.", author: "Lao Tzu", tradition: "Taoist Philosophy" },
+  { text: "Before you embark on a journey of revenge, dig two graves.", author: "Confucius", tradition: "Chinese Philosophy" },
+  { text: "The quieter you become, the more you can hear.", author: "Zen Proverb", tradition: "Japanese Zen" },
+  { text: "Let go or be dragged.", author: "Zen Saying", tradition: "Japanese Wisdom" },
+  { text: "The obstacle is the path.", author: "Zen Proverb", tradition: "Zen Buddhism" },
+  { text: "Sitting quietly, doing nothing, spring comes, and the grass grows by itself.", author: "Matsuo Bashō", tradition: "Japanese Poet" },
 ];
 
 const exercises = [
@@ -1289,6 +1312,121 @@ function MicroMoment() {
   );
 }
 
+// World Quote Carousel - Shows top favorites with navigation
+function WorldQuoteCarousel({ topQuotes, formatNumber }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  if (topQuotes.length === 0) return null;
+
+  const currentItem = topQuotes[currentIndex];
+  const medalIcons = ['🥇', '🥈', '🥉'];
+
+  const nextQuote = () => {
+    setCurrentIndex((currentIndex + 1) % topQuotes.length);
+  };
+
+  const prevQuote = () => {
+    setCurrentIndex((currentIndex - 1 + topQuotes.length) % topQuotes.length);
+  };
+
+  return (
+    <div className="bg-white/5 backdrop-blur rounded-2xl p-4 mb-4 border border-white/10">
+      <h3 className="font-semibold mb-4 flex items-center gap-2">💝 Most Loved Wisdom</h3>
+      <p className="text-center text-xs text-slate-400 mb-3">
+        {medalIcons[currentIndex] || '⭐'} #{currentIndex + 1} of {topQuotes.length} most favorited
+      </p>
+      <div className="border-l-4 border-purple-400/50 bg-white/5 p-4 rounded-r-xl mb-4">
+        <p className="text-sm italic leading-snug mb-2">"{currentItem.quote.text}"</p>
+        <p className="text-xs text-purple-400 mb-2">— {currentItem.quote.author}</p>
+        <p className="text-xs text-slate-500">{currentItem.quote.tradition}</p>
+        <div className="flex items-center gap-2 text-xs text-slate-400 mt-3 pt-3 border-t border-white/10">
+          <span>❤️ {formatNumber(currentItem.count)} {currentItem.count === 1 ? 'favorite' : 'favorites'}</span>
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        <button
+          onClick={prevQuote}
+          disabled={topQuotes.length === 1}
+          className="flex-1 py-2 bg-white/10 hover:bg-white/20 rounded-xl font-semibold transition text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          ← Previous
+        </button>
+        <button
+          onClick={nextQuote}
+          disabled={topQuotes.length === 1}
+          className="flex-1 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-xl font-semibold transition text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          Next →
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// World Exercise Carousel - Shows top favorites with navigation
+function WorldExerciseCarousel({ topExercises, formatNumber }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  if (topExercises.length === 0) return null;
+
+  const currentItem = topExercises[currentIndex];
+  const medalIcons = ['🥇', '🥈', '🥉'];
+
+  const nextExercise = () => {
+    setCurrentIndex((currentIndex + 1) % topExercises.length);
+  };
+
+  const prevExercise = () => {
+    setCurrentIndex((currentIndex - 1 + topExercises.length) % topExercises.length);
+  };
+
+  return (
+    <div className="bg-white/5 backdrop-blur rounded-2xl p-4 mb-4 border border-white/10">
+      <h3 className="font-semibold mb-4 flex items-center gap-2">🌟 Most Loved Practices</h3>
+      <p className="text-center text-xs text-slate-400 mb-3">
+        {medalIcons[currentIndex] || '⭐'} #{currentIndex + 1} of {topExercises.length} most favorited
+      </p>
+      <div className="border-l-4 border-green-400/50 bg-white/5 p-4 rounded-r-xl mb-4">
+        <p className="text-sm font-semibold text-green-400 mb-1">{currentItem.exercise.title}</p>
+        <p className="text-xs text-slate-400 mb-3">{currentItem.exercise.subtitle}</p>
+        {currentItem.exercise.description && (
+          <p className="text-xs text-slate-300 mb-2 italic">{currentItem.exercise.description}</p>
+        )}
+        <ul className="space-y-1 text-xs mb-3">
+          {currentItem.exercise.steps.slice(0, 3).map((step, i) => (
+            <li key={i} className="flex gap-2">
+              <span className="text-green-400">{i + 1}.</span>
+              <span className="text-slate-300">{step}</span>
+            </li>
+          ))}
+          {currentItem.exercise.steps.length > 3 && (
+            <li className="text-slate-500 text-xs">... {currentItem.exercise.steps.length - 3} more steps</li>
+          )}
+        </ul>
+        <div className="flex items-center gap-2 text-xs text-slate-400 pt-3 border-t border-white/10">
+          <span>❤️ {formatNumber(currentItem.count)} {currentItem.count === 1 ? 'favorite' : 'favorites'}</span>
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        <button
+          onClick={prevExercise}
+          disabled={topExercises.length === 1}
+          className="flex-1 py-2 bg-white/10 hover:bg-white/20 rounded-xl font-semibold transition text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          ← Previous
+        </button>
+        <button
+          onClick={nextExercise}
+          disabled={topExercises.length === 1}
+          className="flex-1 py-2 bg-gradient-to-r from-teal-500 to-green-500 hover:from-teal-600 hover:to-green-600 rounded-xl font-semibold transition text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          Next →
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // The World Tab Component - Global happiness data only
 function TheWorldTab() {
   const [globalSources, setGlobalSources] = useState({});
@@ -1436,50 +1574,14 @@ function TheWorldTab() {
         )}
       </div>
 
-      {/* Top Favorite Quotes */}
+      {/* Top Favorite Quotes - Carousel */}
       {topQuotes.length > 0 && (
-        <div className="bg-white/5 backdrop-blur rounded-2xl p-4 mb-4 border border-white/10">
-          <h3 className="font-semibold mb-4 flex items-center gap-2">💝 Most Loved Wisdom</h3>
-          <div className="space-y-3">
-            {topQuotes.map((item, index) => (
-              <div key={item.index} className="border-l-4 border-purple-400/50 bg-white/5 p-3 rounded-r-xl">
-                <div className="flex items-start gap-2 mb-2">
-                  <span className="text-lg">{index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}</span>
-                  <div className="flex-1">
-                    <p className="text-sm italic leading-snug mb-1">"{item.quote.text}"</p>
-                    <p className="text-xs text-purple-400">— {item.quote.author}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 text-xs text-slate-400 ml-7">
-                  <span>❤️ {formatNumber(item.count)} {item.count === 1 ? 'favorite' : 'favorites'}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <WorldQuoteCarousel topQuotes={topQuotes} formatNumber={formatNumber} />
       )}
 
-      {/* Top Favorite Exercises */}
+      {/* Top Favorite Exercises - Carousel */}
       {topExercises.length > 0 && (
-        <div className="bg-white/5 backdrop-blur rounded-2xl p-4 mb-4 border border-white/10">
-          <h3 className="font-semibold mb-4 flex items-center gap-2">🌟 Most Loved Practices</h3>
-          <div className="space-y-3">
-            {topExercises.map((item, index) => (
-              <div key={item.index} className="border-l-4 border-green-400/50 bg-white/5 p-3 rounded-r-xl">
-                <div className="flex items-start gap-2 mb-2">
-                  <span className="text-lg">{index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}</span>
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold text-green-400">{item.exercise.title}</p>
-                    <p className="text-xs text-slate-400">{item.exercise.subtitle}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 text-xs text-slate-400 ml-7">
-                  <span>❤️ {formatNumber(item.count)} {item.count === 1 ? 'favorite' : 'favorites'}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <WorldExerciseCarousel topExercises={topExercises} formatNumber={formatNumber} />
       )}
 
       {/* Global Milestones */}
@@ -1586,16 +1688,40 @@ function CheckinModal({ isOpen, onClose, onSave }) {
   const [sources, setSources] = useState([]);
   const [gratitude, setGratitude] = useState('');
   const [intention, setIntention] = useState('');
-  const [quote] = useState(() => getRandomItem(wisdomQuotes));
-  
+
   // Get config based on time and whether ritual was done
   const [checkinConfig] = useState(() => getCheckinConfig());
   const { ritual, isRitual, timeOfDay } = checkinConfig;
-  
-  // Night ritual gets Dream Insight, others get random exercise
-  const [exercise] = useState(() =>
-    isRitual && timeOfDay === 'night' ? nightExercise : getRandomItem(exercises)
-  );
+
+  // Carousel for quotes
+  const [quoteIndex, setQuoteIndex] = useState(() => Math.floor(Math.random() * wisdomQuotes.length));
+  const quote = wisdomQuotes[quoteIndex];
+
+  const nextQuote = () => {
+    setQuoteIndex((quoteIndex + 1) % wisdomQuotes.length);
+  };
+
+  const prevQuote = () => {
+    setQuoteIndex((quoteIndex - 1 + wisdomQuotes.length) % wisdomQuotes.length);
+  };
+
+  // Carousel for exercises
+  const allExercises = [...exercises, nightExercise];
+  const [exerciseIndex, setExerciseIndex] = useState(() => {
+    if (isRitual && timeOfDay === 'night') {
+      return exercises.length; // nightExercise is last in allExercises
+    }
+    return Math.floor(Math.random() * exercises.length); // Random from regular exercises
+  });
+  const exercise = allExercises[exerciseIndex];
+
+  const nextExercise = () => {
+    setExerciseIndex((exerciseIndex + 1) % allExercises.length);
+  };
+
+  const prevExercise = () => {
+    setExerciseIndex((exerciseIndex - 1 + allExercises.length) % allExercises.length);
+  };
 
   // Share modal states
   const [showQuoteShare, setShowQuoteShare] = useState(false);
@@ -1686,10 +1812,25 @@ function CheckinModal({ isOpen, onClose, onSave }) {
 
         {step === 'wisdom' && (
           <>
+            <p className="text-center text-xs text-slate-400 mb-3">{quoteIndex + 1} of {wisdomQuotes.length}</p>
             <div className="border-l-4 border-green-400 bg-white/5 p-4 rounded-r-xl mb-3">
               <p className="text-lg italic mb-2">"{quote.text}"</p>
               <p className="text-green-400 font-medium">— {quote.author}</p>
               <p className="text-slate-400 text-sm">{quote.tradition}</p>
+            </div>
+            <div className="flex items-center gap-2 mb-3">
+              <button
+                onClick={prevQuote}
+                className="flex-1 py-2 bg-white/10 hover:bg-white/20 rounded-xl font-semibold transition text-sm"
+              >
+                ← Previous
+              </button>
+              <button
+                onClick={nextQuote}
+                className="flex-1 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-xl font-semibold transition text-sm"
+              >
+                Next →
+              </button>
             </div>
             <div className="flex gap-2 mb-5">
               <button
@@ -1714,6 +1855,7 @@ function CheckinModal({ isOpen, onClose, onSave }) {
 
         {step === 'exercise' && (
           <>
+            <p className="text-center text-xs text-slate-400 mb-3">{exerciseIndex + 1} of {allExercises.length}</p>
             <div className={`${exercise.isNightOnly ? 'bg-indigo-400/10 border-indigo-400/30' : 'bg-green-400/10 border-green-400/30'} border rounded-xl p-4 mb-3`}>
               <h3 className={`${exercise.isNightOnly ? 'text-indigo-400' : 'text-green-400'} font-semibold mb-1`}>
                 {exercise.isNightOnly ? '🌙' : '🧘'} {exercise.title}
@@ -1731,6 +1873,20 @@ function CheckinModal({ isOpen, onClose, onSave }) {
                   </li>
                 ))}
               </ul>
+            </div>
+            <div className="flex items-center gap-2 mb-3">
+              <button
+                onClick={prevExercise}
+                className="flex-1 py-2 bg-white/10 hover:bg-white/20 rounded-xl font-semibold transition text-sm"
+              >
+                ← Previous
+              </button>
+              <button
+                onClick={nextExercise}
+                className="flex-1 py-2 bg-gradient-to-r from-teal-500 to-green-500 hover:from-teal-600 hover:to-green-600 rounded-xl font-semibold transition text-sm"
+              >
+                Next →
+              </button>
             </div>
             <div className="flex gap-2 mb-5">
               <button
@@ -2454,56 +2610,8 @@ export default function App() {
               </button>
             </div>
 
-            {/* Micro-Moment */}
-            <MicroMoment />
-
-            {/* Quick Stats */}
-            <div className="grid grid-cols-3 gap-3 mb-4">
-              <div className="bg-white/5 rounded-xl p-3 text-center border border-white/10">
-                <div className="text-2xl font-bold text-orange-400">{checkinStreak}</div>
-                <div className="text-[10px] text-slate-400 uppercase">Day Streak 🔥</div>
-              </div>
-              <div className="bg-white/5 rounded-xl p-3 text-center border border-white/10">
-                <div className="text-2xl font-bold text-blue-400">{todayCheckins}</div>
-                <div className="text-[10px] text-slate-400 uppercase">Check-ins Today</div>
-              </div>
-              <div className="bg-white/5 rounded-xl p-3 text-center border border-white/10">
-                <div className="text-2xl font-bold text-purple-400">{checkins.length}</div>
-                <div className="text-[10px] text-slate-400 uppercase">Total Check-ins</div>
-              </div>
-            </div>
-
-            {/* Journal Button */}
-            <button 
-              onClick={() => setShowJournalModal(true)}
-              className="w-full bg-white/5 border border-white/10 rounded-xl p-4 flex items-center justify-between hover:bg-white/10 transition"
-            >
-              <span className="flex items-center gap-3">
-                <span className="text-2xl">🙏</span>
-                <span>
-                  <span className="font-medium block text-left">Gratitude Journal</span>
-                  <span className="text-xs text-slate-400">{checkins.length} check-ins</span>
-                </span>
-              </span>
-              <span className="text-slate-400">→</span>
-            </button>
-
             {/* Quick Actions */}
-            <div className="mt-3 grid grid-cols-3 gap-2">
-              <button
-                onClick={() => setShowQuoteBrowser(true)}
-                className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl p-3 flex flex-col items-center gap-1 hover:from-purple-500/30 hover:to-pink-500/30 transition"
-              >
-                <span className="text-xl">📖</span>
-                <span className="text-xs font-medium">Quotes</span>
-              </button>
-              <button
-                onClick={() => setShowExerciseBrowser(true)}
-                className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30 rounded-xl p-3 flex flex-col items-center gap-1 hover:from-green-500/30 hover:to-emerald-500/30 transition"
-              >
-                <span className="text-xl">🧘</span>
-                <span className="text-xs font-medium">Exercises</span>
-              </button>
+            <div className="mt-3 grid grid-cols-1 gap-2">
               <button
                 onClick={() => setShowChallengeModal(true)}
                 className="bg-gradient-to-r from-pink-500/20 to-purple-500/20 border border-pink-500/30 rounded-xl p-3 flex flex-col items-center gap-1 hover:from-pink-500/30 hover:to-purple-500/30 transition"
@@ -2562,7 +2670,12 @@ export default function App() {
           <TheWorldTab />
         )}
 
-        <footer className="text-center mt-6 text-slate-500 text-xs">Made with 💛 for a happier {CURRENT_YEAR}</footer>
+        {/* Micro-Moment Footer */}
+        <div className="mt-6">
+          <MicroMoment />
+        </div>
+
+        <footer className="text-center mt-4 text-slate-500 text-xs">Made with 💛 for a happier {CURRENT_YEAR}</footer>
       </div>
 
       {/* Modals */}
