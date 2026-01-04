@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '2.8.5';
+const APP_VERSION = '2.8.6';
 const BUILD_DATE = '2026-01-04';
 
 // Firebase Configuration
@@ -2668,7 +2668,7 @@ export default function App() {
                 className="bg-gradient-to-r from-pink-500/20 to-purple-500/20 border border-pink-500/30 rounded-xl p-3 flex flex-col items-center gap-1 hover:from-pink-500/30 hover:to-purple-500/30 transition"
               >
                 <span className="text-xl">🎯</span>
-                <span className="text-xs font-medium">Challenge</span>
+                <span className="text-xs font-medium">Challenge A Friend</span>
               </button>
             </div>
             <div className="mt-2 grid grid-cols-2 gap-2">
@@ -2677,14 +2677,14 @@ export default function App() {
                 className="bg-white/5 border border-white/10 rounded-xl p-3 flex flex-col items-center gap-1 hover:bg-white/10 transition"
               >
                 <span className="text-xl">📊</span>
-                <span className="text-xs font-medium">Week</span>
+                <span className="text-xs font-medium">Share Weekly Update</span>
               </button>
               <button
                 onClick={() => setShowShareCard(true)}
                 className="bg-gradient-to-r from-purple-500/20 to-blue-500/20 border border-purple-500/30 rounded-xl p-3 flex flex-col items-center gap-1 hover:from-purple-500/30 hover:to-blue-500/30 transition"
               >
                 <span className="text-xl">📸</span>
-                <span className="text-xs font-medium">Share</span>
+                <span className="text-xs font-medium">Share A Smile</span>
               </button>
             </div>
 
