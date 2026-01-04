@@ -1018,6 +1018,186 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
   );
 }
 
+// Quote Browser/Carousel Component
+function QuoteBrowser({ isOpen, onClose }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [favorites, setFavorites] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('happinessFavoriteQuotes') || '[]');
+    } catch {
+      return [];
+    }
+  });
+
+  const currentQuote = wisdomQuotes[currentIndex];
+  const isFavorite = favorites.includes(currentIndex);
+
+  const toggleFavorite = () => {
+    const newFavorites = isFavorite
+      ? favorites.filter(i => i !== currentIndex)
+      : [...favorites, currentIndex];
+    setFavorites(newFavorites);
+    localStorage.setItem('happinessFavoriteQuotes', JSON.stringify(newFavorites));
+  };
+
+  const nextQuote = () => {
+    setCurrentIndex((currentIndex + 1) % wisdomQuotes.length);
+  };
+
+  const prevQuote = () => {
+    setCurrentIndex((currentIndex - 1 + wisdomQuotes.length) % wisdomQuotes.length);
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50" onClick={onClose}>
+      <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-lg w-full p-6 border border-purple-400/20" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-xl font-bold flex items-center gap-2">📖 Browse Wisdom</h2>
+          <button onClick={onClose} className="text-slate-400 hover:text-white text-xl">✕</button>
+        </div>
+
+        <div className="mb-4 text-center">
+          <p className="text-xs text-slate-400 mb-4">{currentIndex + 1} of {wisdomQuotes.length}</p>
+
+          <div className="border-l-4 border-purple-400 bg-white/5 p-5 rounded-r-xl mb-4 min-h-[200px] flex flex-col justify-center">
+            <p className="text-lg italic mb-3 leading-relaxed">"{currentQuote.text}"</p>
+            <p className="text-purple-400 font-medium">— {currentQuote.author}</p>
+            <p className="text-slate-400 text-sm">{currentQuote.tradition}</p>
+          </div>
+
+          <div className="flex items-center justify-between gap-4 mb-4">
+            <button
+              onClick={prevQuote}
+              className="flex-1 py-3 bg-white/5 hover:bg-white/10 rounded-xl font-semibold transition"
+            >
+              ← Previous
+            </button>
+            <button
+              onClick={toggleFavorite}
+              className={`px-4 py-3 rounded-xl transition ${isFavorite ? 'bg-pink-500/20 text-pink-400' : 'bg-white/5 text-slate-400'}`}
+              title={isFavorite ? "Remove from favorites" : "Add to favorites"}
+            >
+              {isFavorite ? '❤️' : '🤍'}
+            </button>
+            <button
+              onClick={nextQuote}
+              className="flex-1 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-xl font-semibold transition"
+            >
+              Next →
+            </button>
+          </div>
+
+          <button
+            onClick={() => shareQuote(currentQuote)}
+            className="w-full py-2 rounded-lg bg-purple-500/20 border border-purple-500/30 text-purple-400 text-sm hover:bg-purple-500/30 transition"
+          >
+            📤 Share this quote
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Exercise Browser/Carousel Component
+function ExerciseBrowser({ isOpen, onClose }) {
+  const allExercises = [...exercises, nightExercise];
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [favorites, setFavorites] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('happinessFavoriteExercises') || '[]');
+    } catch {
+      return [];
+    }
+  });
+
+  const currentExercise = allExercises[currentIndex];
+  const isFavorite = favorites.includes(currentIndex);
+
+  const toggleFavorite = () => {
+    const newFavorites = isFavorite
+      ? favorites.filter(i => i !== currentIndex)
+      : [...favorites, currentIndex];
+    setFavorites(newFavorites);
+    localStorage.setItem('happinessFavoriteExercises', JSON.stringify(newFavorites));
+  };
+
+  const nextExercise = () => {
+    setCurrentIndex((currentIndex + 1) % allExercises.length);
+  };
+
+  const prevExercise = () => {
+    setCurrentIndex((currentIndex - 1 + allExercises.length) % allExercises.length);
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50 overflow-y-auto" onClick={onClose}>
+      <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-lg w-full p-6 border border-green-400/20 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-xl font-bold flex items-center gap-2">🧘 Browse Exercises</h2>
+          <button onClick={onClose} className="text-slate-400 hover:text-white text-xl">✕</button>
+        </div>
+
+        <div className="mb-4">
+          <p className="text-xs text-slate-400 mb-4 text-center">{currentIndex + 1} of {allExercises.length}</p>
+
+          <div className={`${currentExercise.isNightOnly ? 'bg-indigo-400/10 border-indigo-400/30' : 'bg-green-400/10 border-green-400/30'} border rounded-xl p-4 mb-4`}>
+            <h3 className={`${currentExercise.isNightOnly ? 'text-indigo-400' : 'text-green-400'} font-semibold text-lg mb-1`}>
+              {currentExercise.isNightOnly ? '🌙' : '🧘'} {currentExercise.title}
+            </h3>
+            <p className="text-slate-400 text-sm mb-3">{currentExercise.subtitle}</p>
+            {currentExercise.description && (
+              <p className="text-slate-300 text-sm mb-3 italic">{currentExercise.description}</p>
+            )}
+            {currentExercise.pattern && <BreathingGuide pattern={currentExercise.pattern} />}
+            <ul className="space-y-1.5 text-sm mt-3">
+              {currentExercise.steps.map((s, i) => (
+                <li key={i} className="flex gap-2">
+                  <span className={currentExercise.isNightOnly ? 'text-indigo-400' : 'text-green-400'}>{i + 1}.</span>
+                  {s}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="flex items-center justify-between gap-4 mb-4">
+            <button
+              onClick={prevExercise}
+              className="flex-1 py-3 bg-white/5 hover:bg-white/10 rounded-xl font-semibold transition"
+            >
+              ← Previous
+            </button>
+            <button
+              onClick={toggleFavorite}
+              className={`px-4 py-3 rounded-xl transition ${isFavorite ? 'bg-pink-500/20 text-pink-400' : 'bg-white/5 text-slate-400'}`}
+              title={isFavorite ? "Remove from favorites" : "Add to favorites"}
+            >
+              {isFavorite ? '❤️' : '🤍'}
+            </button>
+            <button
+              onClick={nextExercise}
+              className="flex-1 py-3 bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-slate-900 rounded-xl font-semibold transition"
+            >
+              Next →
+            </button>
+          </div>
+
+          <button
+            onClick={() => shareExercise(currentExercise)}
+            className="w-full py-2 rounded-lg bg-blue-500/20 border border-blue-500/30 text-blue-400 text-sm hover:bg-blue-500/30 transition"
+          >
+            📤 Share this exercise
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Micro-Moment Component - Gentle rotating mindfulness prompts
 function MicroMoment() {
   const [currentMoment, setCurrentMoment] = useState(() =>
