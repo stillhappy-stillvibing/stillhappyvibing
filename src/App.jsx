@@ -3,8 +3,8 @@ import { initializeApp } from 'firebase/app';
 import { getDatabase, ref, onValue, runTransaction, increment, set, get } from 'firebase/database';
 
 // App Version
-const APP_VERSION = '2.0.2';
-const BUILD_DATE = '2026-01-03 4:20 AM';
+const APP_VERSION = '2.1.0';
+const BUILD_DATE = '2026-01-03 4:30 AM';
 
 // Firebase Configuration
 const firebaseConfig = {
@@ -680,7 +680,7 @@ function ConfirmDialog({ isOpen, onClose, onConfirm, title, message, confirmText
 // Check-in Modal Component - Gratitude & Happiness Source Tracker
 function CheckinModal({ isOpen, onClose, onSave }) {
   const [step, setStep] = useState('source');
-  const [source, setSource] = useState('');
+  const [sources, setSources] = useState([]);
   const [gratitude, setGratitude] = useState('');
   const [intention, setIntention] = useState('');
   const [quote] = useState(() => getRandomItem(wisdomQuotes));
@@ -694,7 +694,15 @@ function CheckinModal({ isOpen, onClose, onSave }) {
     isRitual && timeOfDay === 'night' ? nightExercise : getRandomItem(exercises)
   );
 
-  const selectedSource = ritual.sources.find(s => s.id === source);
+  const selectedSources = ritual.sources.filter(s => sources.includes(s.id));
+
+  const toggleSource = (id) => {
+    setSources(prev => 
+      prev.includes(id) 
+        ? prev.filter(s => s !== id) 
+        : [...prev, id]
+    );
+  };
 
   const handleSave = () => {
     // Mark ritual as done if this was a ritual check-in
@@ -702,8 +710,8 @@ function CheckinModal({ isOpen, onClose, onSave }) {
       markRitualDone(timeOfDay);
     }
     
-    onSave({ source, gratitude, intention, quote: quote.author, timeOfDay, isRitual });
-    setSource('');
+    onSave({ sources, gratitude, intention, quote: quote.author, timeOfDay, isRitual });
+    setSources([]);
     setGratitude('');
     setIntention('');
     setStep('source');
@@ -715,8 +723,8 @@ function CheckinModal({ isOpen, onClose, onSave }) {
       markRitualDone(timeOfDay);
     }
     
-    onSave({ source: source || '', gratitude: '', intention: '', quote: quote.author, timeOfDay, isRitual });
-    setSource('');
+    onSave({ sources: [], gratitude: '', intention: '', quote: quote.author, timeOfDay, isRitual });
+    setSources([]);
     setGratitude('');
     setIntention('');
     setStep('source');
@@ -749,13 +757,14 @@ function CheckinModal({ isOpen, onClose, onSave }) {
 
         {step === 'source' && (
           <>
-            <p className="text-center text-slate-300 mb-4">{ritual.sourcePrompt}</p>
+            <p className="text-center text-slate-300 mb-2">{ritual.sourcePrompt}</p>
+            <p className="text-center text-slate-500 text-xs mb-4">Select all that apply</p>
             <div className="grid grid-cols-2 gap-2 mb-5">
               {ritual.sources.map(s => (
                 <button
                   key={s.id}
-                  onClick={() => setSource(source === s.id ? '' : s.id)}
-                  className={`p-3 rounded-xl text-sm text-left transition ${source === s.id ? 'bg-green-400/20 border border-green-400/50' : 'bg-white/5 hover:bg-white/10'}`}
+                  onClick={() => toggleSource(s.id)}
+                  className={`p-3 rounded-xl text-sm text-left transition ${sources.includes(s.id) ? 'bg-green-400/20 border border-green-400/50' : 'bg-white/5 hover:bg-white/10'}`}
                 >
                   {s.label}
                 </button>
@@ -779,7 +788,7 @@ function CheckinModal({ isOpen, onClose, onSave }) {
               <textarea
                 value={gratitude}
                 onChange={e => setGratitude(e.target.value)}
-                placeholder={selectedSource ? `Grateful for ${selectedSource.prompt}...` : "Share your gratitude... (optional)"}
+                placeholder={selectedSources.length > 0 ? `Grateful for ${selectedSources.map(s => s.prompt).join(', ')}...` : "Share your gratitude... (optional)"}
                 className={`w-full ${isRitual && ritual.intentionPrompt ? 'h-20' : 'h-28'} p-4 rounded-xl bg-white/5 border border-white/20 text-white placeholder-slate-500 resize-none focus:outline-none focus:border-green-400/50 mb-3`}
               />
               {isRitual && ritual.intentionPrompt && (
@@ -796,7 +805,7 @@ function CheckinModal({ isOpen, onClose, onSave }) {
                 </>
               )}
               <button
-                onClick={() => shareGratitude(gratitude || (selectedSource ? `Feeling grateful for ${selectedSource.prompt}` : 'this moment of happiness'))}
+                onClick={() => shareGratitude(gratitude || (selectedSources.length > 0 ? `Feeling grateful for ${selectedSources.map(s => s.prompt).join(', ')}` : 'this moment of happiness'))}
                 className="w-full py-2 rounded-lg bg-pink-500/20 border border-pink-500/30 text-pink-400 text-sm flex items-center justify-center gap-2 hover:bg-pink-500/30 transition"
               >
                 💌 Send as Thank You Card
@@ -903,35 +912,41 @@ function JournalModal({ isOpen, onClose, checkins, onDeleteEntry, onClearAll }) 
         ) : (
           <>
             <div className="space-y-3 mb-6">
-              {sorted.map((entry) => (
-                <div key={entry.id} className="bg-white/5 rounded-xl p-4 relative group">
-                  <button 
-                    onClick={() => setConfirmDelete(entry.id)}
-                    className="absolute top-2 right-2 text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity text-sm"
-                  >
-                    🗑️
-                  </button>
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      {entry.source ? (
-                        <span className="text-sm bg-green-400/20 text-green-400 px-2 py-1 rounded-full">
-                          {sourceLabels[entry.source] || entry.source}
-                        </span>
-                      ) : (
-                        <span className="text-sm text-slate-500">😊 Happy moment</span>
-                      )}
+              {sorted.map((entry) => {
+                // Handle both old (source) and new (sources) format
+                const sourcesArray = entry.sources || (entry.source ? [entry.source] : []);
+                return (
+                  <div key={entry.id} className="bg-white/5 rounded-xl p-4 relative group">
+                    <button 
+                      onClick={() => setConfirmDelete(entry.id)}
+                      className="absolute top-2 right-2 text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity text-sm"
+                    >
+                      🗑️
+                    </button>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {sourcesArray.length > 0 ? (
+                          sourcesArray.map(src => (
+                            <span key={src} className="text-sm bg-green-400/20 text-green-400 px-2 py-1 rounded-full">
+                              {sourceLabels[src] || src}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-sm text-slate-500">😊 Happy moment</span>
+                        )}
+                      </div>
+                      <span className="text-xs text-slate-400">{formatDate(entry.timestamp)}</span>
                     </div>
-                    <span className="text-xs text-slate-400">{formatDate(entry.timestamp)}</span>
+                    {entry.gratitude && (
+                      <p className="text-sm text-slate-300 leading-relaxed">{entry.gratitude}</p>
+                    )}
+                    {/* Support old journal field too */}
+                    {entry.journal && !entry.gratitude && (
+                      <p className="text-sm text-slate-300 leading-relaxed">{entry.journal}</p>
+                    )}
                   </div>
-                  {entry.gratitude && (
-                    <p className="text-sm text-slate-300 leading-relaxed">{entry.gratitude}</p>
-                  )}
-                  {/* Support old journal field too */}
-                  {entry.journal && !entry.gratitude && (
-                    <p className="text-sm text-slate-300 leading-relaxed">{entry.journal}</p>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </div>
             
             <button 
@@ -1219,10 +1234,10 @@ export default function App() {
     localStorage.setItem(`happinessCheckins${CURRENT_YEAR}`, JSON.stringify(checkins));
   }, [checkins]);
 
-  const handleCheckinSave = ({ source, gratitude, quote }) => {
+  const handleCheckinSave = ({ sources, gratitude, quote }) => {
     const checkin = { 
       id: Date.now(), 
-      source,
+      sources: sources || [],
       gratitude,
       quote, 
       timestamp: new Date().toISOString() 
@@ -1232,7 +1247,10 @@ export default function App() {
     
     // Increment global counters
     incrementCheckins();
-    incrementHappinessSource(source);
+    // Increment each selected source
+    (sources || []).forEach(source => {
+      incrementHappinessSource(source);
+    });
   };
 
   const handleDeleteCheckin = (id) => {
@@ -1356,7 +1374,11 @@ export default function App() {
                   <div className="space-y-2">
                     {(() => {
                       const counts = checkins.reduce((acc, c) => {
-                        if (c.source) acc[c.source] = (acc[c.source] || 0) + 1;
+                        // Handle both old (source) and new (sources) format
+                        const sourcesArray = c.sources || (c.source ? [c.source] : []);
+                        sourcesArray.forEach(source => {
+                          if (source) acc[source] = (acc[source] || 0) + 1;
+                        });
                         return acc;
                       }, {});
                       const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 4);
