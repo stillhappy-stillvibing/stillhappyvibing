@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '2.7.0';
+const APP_VERSION = '2.8.0';
 const BUILD_DATE = '2026-01-04';
 
 // Firebase Configuration
@@ -51,8 +51,32 @@ const incrementHappinessSource = (source) => {
   runTransaction(sourceRef, (current) => (current || 0) + 1);
 };
 
+// Track global favorites for quotes and exercises
+const incrementQuoteFavorite = (quoteIndex) => {
+  const favoriteRef = ref(database, `globalFavorites/quotes/${quoteIndex}`);
+  runTransaction(favoriteRef, (current) => (current || 0) + 1);
+};
+
+const decrementQuoteFavorite = (quoteIndex) => {
+  const favoriteRef = ref(database, `globalFavorites/quotes/${quoteIndex}`);
+  runTransaction(favoriteRef, (current) => Math.max((current || 0) - 1, 0));
+};
+
+const incrementExerciseFavorite = (exerciseIndex) => {
+  const favoriteRef = ref(database, `globalFavorites/exercises/${exerciseIndex}`);
+  runTransaction(favoriteRef, (current) => (current || 0) + 1);
+};
+
+const decrementExerciseFavorite = (exerciseIndex) => {
+  const favoriteRef = ref(database, `globalFavorites/exercises/${exerciseIndex}`);
+  runTransaction(favoriteRef, (current) => Math.max((current || 0) - 1, 0));
+};
+
 // Reference for global happiness sources
 const globalHappinessSourcesRef = ref(database, 'globalHappinessSources');
+// References for global favorites
+const globalFavoriteQuotesRef = ref(database, 'globalFavorites/quotes');
+const globalFavoriteExercisesRef = ref(database, 'globalFavorites/exercises');
 
 // Micro-moments - gentle mindfulness prompts
 const microMoments = [
@@ -1066,6 +1090,13 @@ function QuoteBrowser({ isOpen, onClose }) {
       : [...favorites, currentIndex];
     setFavorites(newFavorites);
     localStorage.setItem('happinessFavoriteQuotes', JSON.stringify(newFavorites));
+
+    // Update global favorites counter
+    if (isFavorite) {
+      decrementQuoteFavorite(currentIndex);
+    } else {
+      incrementQuoteFavorite(currentIndex);
+    }
   };
 
   const nextQuote = () => {
@@ -1150,6 +1181,13 @@ function ExerciseBrowser({ isOpen, onClose }) {
       : [...favorites, currentIndex];
     setFavorites(newFavorites);
     localStorage.setItem('happinessFavoriteExercises', JSON.stringify(newFavorites));
+
+    // Update global favorites counter
+    if (isFavorite) {
+      decrementExerciseFavorite(currentIndex);
+    } else {
+      incrementExerciseFavorite(currentIndex);
+    }
   };
 
   const nextExercise = () => {
@@ -1254,6 +1292,8 @@ function MicroMoment() {
 // The World Tab Component - Global happiness data only
 function TheWorldTab() {
   const [globalSources, setGlobalSources] = useState({});
+  const [globalFavoriteQuotes, setGlobalFavoriteQuotes] = useState({});
+  const [globalFavoriteExercises, setGlobalFavoriteExercises] = useState({});
   const [loading, setLoading] = useState(true);
   const [showWorldShare, setShowWorldShare] = useState(false);
 
@@ -1270,15 +1310,62 @@ function TheWorldTab() {
     return () => unsubscribe();
   }, []);
 
+  // Fetch global favorite quotes
+  useEffect(() => {
+    const unsubscribe = onValue(globalFavoriteQuotesRef, (snapshot) => {
+      const data = snapshot.val() || {};
+      setGlobalFavoriteQuotes(data);
+    }, (error) => {
+      console.log('Firebase read error (quotes):', error);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Fetch global favorite exercises
+  useEffect(() => {
+    const unsubscribe = onValue(globalFavoriteExercisesRef, (snapshot) => {
+      const data = snapshot.val() || {};
+      setGlobalFavoriteExercises(data);
+    }, (error) => {
+      console.log('Firebase read error (exercises):', error);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   const formatNumber = (num) => num.toLocaleString();
 
   // Sort global sources by count
   const sortedGlobal = Object.entries(globalSources)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 10);
-  
+
   const maxGlobal = sortedGlobal.length > 0 ? sortedGlobal[0][1] : 1;
   const totalSmiles = Object.values(globalSources).reduce((a, b) => a + b, 0);
+
+  // Sort and get top 3 favorite quotes
+  const topQuotes = Object.entries(globalFavoriteQuotes)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([index, count]) => ({
+      index: parseInt(index),
+      count,
+      quote: wisdomQuotes[parseInt(index)]
+    }))
+    .filter(item => item.quote); // Filter out any invalid indices
+
+  // Sort and get top 3 favorite exercises
+  const allExercises = [...exercises, nightExercise];
+  const topExercises = Object.entries(globalFavoriteExercises)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([index, count]) => ({
+      index: parseInt(index),
+      count,
+      exercise: allExercises[parseInt(index)]
+    }))
+    .filter(item => item.exercise); // Filter out any invalid indices
 
   // Calculate earned global milestones
   const earnedMilestones = globalMilestones.filter(m => totalSmiles >= m.threshold);
@@ -1348,6 +1435,52 @@ function TheWorldTab() {
           </div>
         )}
       </div>
+
+      {/* Top Favorite Quotes */}
+      {topQuotes.length > 0 && (
+        <div className="bg-white/5 backdrop-blur rounded-2xl p-4 mb-4 border border-white/10">
+          <h3 className="font-semibold mb-4 flex items-center gap-2">💝 Most Loved Wisdom</h3>
+          <div className="space-y-3">
+            {topQuotes.map((item, index) => (
+              <div key={item.index} className="border-l-4 border-purple-400/50 bg-white/5 p-3 rounded-r-xl">
+                <div className="flex items-start gap-2 mb-2">
+                  <span className="text-lg">{index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}</span>
+                  <div className="flex-1">
+                    <p className="text-sm italic leading-snug mb-1">"{item.quote.text}"</p>
+                    <p className="text-xs text-purple-400">— {item.quote.author}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-slate-400 ml-7">
+                  <span>❤️ {formatNumber(item.count)} {item.count === 1 ? 'favorite' : 'favorites'}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Top Favorite Exercises */}
+      {topExercises.length > 0 && (
+        <div className="bg-white/5 backdrop-blur rounded-2xl p-4 mb-4 border border-white/10">
+          <h3 className="font-semibold mb-4 flex items-center gap-2">🌟 Most Loved Practices</h3>
+          <div className="space-y-3">
+            {topExercises.map((item, index) => (
+              <div key={item.index} className="border-l-4 border-green-400/50 bg-white/5 p-3 rounded-r-xl">
+                <div className="flex items-start gap-2 mb-2">
+                  <span className="text-lg">{index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}</span>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-green-400">{item.exercise.title}</p>
+                    <p className="text-xs text-slate-400">{item.exercise.subtitle}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-slate-400 ml-7">
+                  <span>❤️ {formatNumber(item.count)} {item.count === 1 ? 'favorite' : 'favorites'}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Global Milestones */}
       <div className="bg-white/5 backdrop-blur rounded-2xl p-4 border border-white/10">
