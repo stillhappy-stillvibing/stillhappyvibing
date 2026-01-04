@@ -9,9 +9,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'pwa-512x512.svg'],
       manifest: {
-        name: 'Happiness Tracker 2026',
-        short_name: 'Happiness',
-        description: 'Track your happiness with gratitude journaling and mindfulness',
+        name: 'Still Happy - Happiness Tracker',
+        short_name: 'Still Happy',
+        description: 'Track what makes you smile with gratitude journaling and mindfulness',
         theme_color: '#0f172a',
         background_color: '#0f172a',
         display: 'standalone',
@@ -24,6 +24,22 @@ export default defineConfig({
             sizes: '512x512',
             type: 'image/svg+xml',
             purpose: 'any maskable'
+          }
+        ],
+        shortcuts: [
+          {
+            name: 'Quick Check-in',
+            short_name: 'Check In',
+            description: 'Record what makes you happy right now',
+            url: '/?action=checkin',
+            icons: [{ src: 'pwa-512x512.svg', sizes: '512x512' }]
+          },
+          {
+            name: 'Gratitude Journal',
+            short_name: 'Journal',
+            description: 'View your gratitude entries',
+            url: '/?action=journal',
+            icons: [{ src: 'pwa-512x512.svg', sizes: '512x512' }]
           }
         ]
       },

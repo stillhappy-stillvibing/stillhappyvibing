@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getDatabase, ref, onValue, runTransaction, increment, set, get } from 'firebase/database';
+import html2canvas from 'html2canvas';
 
 // App Version
-const APP_VERSION = '2.2.0';
-const BUILD_DATE = '2026-01-03 5:00 AM';
+const APP_VERSION = '2.3.0';
+const BUILD_DATE = '2026-01-03 5:45 AM';
 
 // Firebase Configuration
 const firebaseConfig = {
@@ -704,6 +705,103 @@ const globalMilestones = [
   { threshold: 1000000, icon: '🌟', label: '1M smiles' },
 ];
 
+// Share Card Modal - generates shareable image
+function ShareCardModal({ isOpen, onClose, streak, topSources, quote }) {
+  const cardRef = useRef(null);
+  const [generating, setGenerating] = useState(false);
+
+  const handleShare = async () => {
+    if (!cardRef.current) return;
+    setGenerating(true);
+    
+    try {
+      const canvas = await html2canvas(cardRef.current, {
+        backgroundColor: null,
+        scale: 2,
+      });
+      
+      canvas.toBlob(async (blob) => {
+        if (navigator.share && navigator.canShare?.({ files: [new File([blob], 'stillhappy.png', { type: 'image/png' })] })) {
+          try {
+            await navigator.share({
+              files: [new File([blob], 'stillhappy.png', { type: 'image/png' })],
+              title: 'My Happiness Journey',
+              text: `I'm on a ${streak} day happiness streak! 🔥 stillhappy.app`
+            });
+          } catch (e) {
+            // User cancelled or error
+          }
+        } else {
+          // Fallback: download
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `stillhappy-${streak}days.png`;
+          a.click();
+          URL.revokeObjectURL(url);
+        }
+        setGenerating(false);
+      }, 'image/png');
+    } catch {
+      setGenerating(false);
+      alert('Could not generate image');
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50 overflow-y-auto" onClick={onClose}>
+      <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-sm w-full p-6 border border-white/20" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold">📸 Share Your Journey</h2>
+          <button onClick={onClose} className="text-slate-400 hover:text-white">✕</button>
+        </div>
+
+        {/* The Card to be captured */}
+        <div 
+          ref={cardRef} 
+          className="bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 rounded-2xl p-5 mb-4"
+        >
+          <div className="text-center text-white">
+            <p className="text-xs uppercase tracking-wider opacity-80 mb-1">My Happiness Streak</p>
+            <p className="text-5xl font-bold mb-1">{streak} 🔥</p>
+            <p className="text-sm opacity-90 mb-4">{streak === 1 ? 'day' : 'days'} of joy</p>
+            
+            {topSources.length > 0 && (
+              <div className="bg-white/20 rounded-xl p-3 mb-3">
+                <p className="text-xs uppercase tracking-wider opacity-80 mb-2">What makes me smile</p>
+                <div className="flex flex-wrap justify-center gap-1">
+                  {topSources.slice(0, 3).map(([src]) => (
+                    <span key={src} className="text-sm bg-white/20 px-2 py-1 rounded-full">
+                      {sourceLabels[src] || src}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {quote && (
+              <p className="text-xs italic opacity-80 mb-2">"{quote.text.slice(0, 60)}..."</p>
+            )}
+            
+            <p className="text-xs font-bold opacity-90">stillhappy.app ✨</p>
+          </div>
+        </div>
+
+        <button
+          onClick={handleShare}
+          disabled={generating}
+          className="w-full py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold hover:scale-105 transition disabled:opacity-50"
+        >
+          {generating ? '⏳ Creating...' : '📤 Share Image'}
+        </button>
+        <p className="text-xs text-slate-400 text-center mt-2">Creates a beautiful image to share</p>
+      </div>
+    </div>
+  );
+}
+
 // The World Tab Component - Global happiness data only
 function TheWorldTab() {
   const [globalSources, setGlobalSources] = useState({});
@@ -1192,7 +1290,7 @@ function JournalModal({ isOpen, onClose, checkins, onDeleteEntry, onClearAll }) 
 }
 
 // Settings Modal
-function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats }) {
+function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats, checkins, onImportData }) {
   const [confirmAction, setConfirmAction] = useState(null);
   const [notificationEnabled, setNotificationEnabled] = useState(() => {
     return localStorage.getItem(`happinessNotification${CURRENT_YEAR}`) === 'true';
@@ -1242,6 +1340,43 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats }) 
   const handleTimeChange = (e) => {
     setNotificationTime(e.target.value);
     scheduleNotification(e.target.value);
+  };
+
+  const handleExportData = () => {
+    const data = {
+      version: APP_VERSION,
+      exportDate: new Date().toISOString(),
+      checkins: checkins
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `stillhappy-backup-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportData = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const data = JSON.parse(event.target.result);
+        if (data.checkins && Array.isArray(data.checkins)) {
+          onImportData(data.checkins);
+          alert(`✅ Imported ${data.checkins.length} entries!`);
+        } else {
+          alert('❌ Invalid backup file format');
+        }
+      } catch {
+        alert('❌ Could not read backup file');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = ''; // Reset input
   };
   
   if (!isOpen) return null;
@@ -1324,6 +1459,26 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats }) 
         </div>
 
         <h3 className="font-semibold mb-3 text-slate-400 text-sm uppercase tracking-wider">Data Management</h3>
+        
+        {/* Backup & Restore */}
+        <div className="bg-blue-400/10 border border-blue-400/30 rounded-xl p-4 mb-4">
+          <h4 className="font-semibold text-blue-400 mb-3 flex items-center gap-2">💾 Backup & Restore</h4>
+          <div className="flex gap-2">
+            <button
+              onClick={handleExportData}
+              className="flex-1 py-2 rounded-lg bg-blue-500/20 border border-blue-500/30 text-blue-400 text-sm hover:bg-blue-500/30 transition"
+            >
+              📥 Export Data
+            </button>
+            <label className="flex-1 py-2 rounded-lg bg-green-500/20 border border-green-500/30 text-green-400 text-sm hover:bg-green-500/30 transition text-center cursor-pointer">
+              📤 Import
+              <input type="file" accept=".json" onChange={handleImportData} className="hidden" />
+            </label>
+          </div>
+          <p className="text-xs text-slate-400 mt-2">Download your data or restore from a backup</p>
+        </div>
+
+        {/* Danger Zone */}
         <div className="space-y-2">
           {actions.map(action => (
             <button
@@ -1374,6 +1529,7 @@ export default function App() {
   const [showMilestone, setShowMilestone] = useState(false);
   const [milestoneData, setMilestoneData] = useState(null);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [showShareCard, setShowShareCard] = useState(false);
   const [activeTab, setActiveTab] = useState('timer');
   const [showReminder, setShowReminder] = useState(false);
 
@@ -1404,6 +1560,21 @@ export default function App() {
     
     window.addEventListener('beforeunload', handleUnload);
     return () => window.removeEventListener('beforeunload', handleUnload);
+  }, []);
+
+  // Handle app shortcuts (URL params)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const action = params.get('action');
+    
+    if (action === 'checkin') {
+      setShowCheckinModal(true);
+      // Clean up URL
+      window.history.replaceState({}, '', window.location.pathname);
+    } else if (action === 'journal') {
+      setShowJournalModal(true);
+      window.history.replaceState({}, '', window.location.pathname);
+    }
   }, []);
 
   // Check for notification reminder
@@ -1504,6 +1675,13 @@ export default function App() {
   const handleClearAll = () => {
     setCheckins([]);
     localStorage.removeItem(`happinessCheckins${CURRENT_YEAR}`);
+  };
+
+  const handleImportData = (importedCheckins) => {
+    // Merge imported data with existing, avoiding duplicates by id
+    const existingIds = new Set(checkins.map(c => c.id));
+    const newCheckins = importedCheckins.filter(c => !existingIds.has(c.id));
+    setCheckins(prev => [...prev, ...newCheckins]);
   };
 
   // Calculate check-in streak (days in a row)
@@ -1680,20 +1858,27 @@ export default function App() {
             </button>
 
             {/* Weekly Reflection & Challenge Buttons */}
-            <div className="mt-3 grid grid-cols-2 gap-3">
+            <div className="mt-3 grid grid-cols-3 gap-2">
               <button 
                 onClick={() => setShowWeeklyReflection(true)}
-                className="bg-white/5 border border-white/10 rounded-xl p-3 flex items-center gap-2 hover:bg-white/10 transition"
+                className="bg-white/5 border border-white/10 rounded-xl p-3 flex flex-col items-center gap-1 hover:bg-white/10 transition"
               >
                 <span className="text-xl">📊</span>
-                <span className="text-sm font-medium">Week Review</span>
+                <span className="text-xs font-medium">Week</span>
               </button>
               <button 
                 onClick={() => setShowChallengeModal(true)}
-                className="bg-gradient-to-r from-pink-500/20 to-purple-500/20 border border-pink-500/30 rounded-xl p-3 flex items-center gap-2 hover:from-pink-500/30 hover:to-purple-500/30 transition"
+                className="bg-gradient-to-r from-pink-500/20 to-purple-500/20 border border-pink-500/30 rounded-xl p-3 flex flex-col items-center gap-1 hover:from-pink-500/30 hover:to-purple-500/30 transition"
               >
                 <span className="text-xl">🎯</span>
-                <span className="text-sm font-medium">Challenge</span>
+                <span className="text-xs font-medium">Challenge</span>
+              </button>
+              <button 
+                onClick={() => setShowShareCard(true)}
+                className="bg-gradient-to-r from-purple-500/20 to-blue-500/20 border border-purple-500/30 rounded-xl p-3 flex flex-col items-center gap-1 hover:from-purple-500/30 hover:to-blue-500/30 transition"
+              >
+                <span className="text-xl">📸</span>
+                <span className="text-xs font-medium">Share</span>
               </button>
             </div>
 
@@ -1748,6 +1933,8 @@ export default function App() {
         onClearCheckins={handleClearCheckins}
         onClearAll={handleClearAll}
         stats={{ checkins: checkins.length }}
+        checkins={checkins}
+        onImportData={handleImportData}
       />
       <ChallengeModal
         isOpen={showChallengeModal}
@@ -1764,6 +1951,22 @@ export default function App() {
         streak={milestoneData?.streak}
         badge={milestoneData?.badge}
         onChallenge={() => { setShowMilestone(false); setShowChallengeModal(true); }}
+      />
+      <ShareCardModal
+        isOpen={showShareCard}
+        onClose={() => setShowShareCard(false)}
+        streak={checkinStreak}
+        topSources={(() => {
+          const counts = checkins.reduce((acc, c) => {
+            const sourcesArray = c.sources || (c.source ? [c.source] : []);
+            sourcesArray.forEach(src => {
+              if (src) acc[src] = (acc[src] || 0) + 1;
+            });
+            return acc;
+          }, {});
+          return Object.entries(counts).sort((a, b) => b[1] - a[1]);
+        })()}
+        quote={wisdomQuotes[0]}
       />
       <Confetti active={showConfetti} />
 
