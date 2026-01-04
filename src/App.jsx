@@ -3,8 +3,8 @@ import { initializeApp } from 'firebase/app';
 import { getDatabase, ref, onValue, runTransaction, increment, set, get } from 'firebase/database';
 
 // App Version
-const APP_VERSION = '2.1.0';
-const BUILD_DATE = '2026-01-03 4:30 AM';
+const APP_VERSION = '2.2.0';
+const BUILD_DATE = '2026-01-03 5:00 AM';
 
 // Firebase Configuration
 const firebaseConfig = {
@@ -384,6 +384,208 @@ const streakBadges = [
   { id: 'streak-60', name: 'Unstoppable', threshold: 60, icon: '✨' },
   { id: 'streak-100', name: 'Legendary', threshold: 100, icon: '👑' },
 ];
+
+// Milestone thresholds for celebrations
+const milestoneThresholds = [3, 7, 14, 21, 30, 60, 100, 365];
+
+// Confetti Component
+function Confetti({ active }) {
+  if (!active) return null;
+  
+  const colors = ['#fbbf24', '#f472b6', '#34d399', '#60a5fa', '#a78bfa', '#f87171'];
+  const confetti = Array.from({ length: 50 }, (_, i) => ({
+    id: i,
+    left: Math.random() * 100,
+    delay: Math.random() * 0.5,
+    duration: 2 + Math.random() * 2,
+    color: colors[Math.floor(Math.random() * colors.length)],
+    size: 8 + Math.random() * 8,
+  }));
+
+  return (
+    <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
+      {confetti.map(c => (
+        <div
+          key={c.id}
+          className="absolute animate-bounce"
+          style={{
+            left: `${c.left}%`,
+            top: '-20px',
+            width: c.size,
+            height: c.size,
+            backgroundColor: c.color,
+            borderRadius: Math.random() > 0.5 ? '50%' : '2px',
+            animation: `confetti-fall ${c.duration}s ease-out ${c.delay}s forwards`,
+          }}
+        />
+      ))}
+      <style>{`
+        @keyframes confetti-fall {
+          0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+          100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+// Milestone Celebration Modal
+function MilestoneCelebration({ isOpen, onClose, streak, badge, onShare, onChallenge }) {
+  if (!isOpen) return null;
+
+  const shareText = `🎉 I just hit a ${streak}-day happiness streak!\n\n${badge?.icon} ${badge?.name}\n\nTrack what makes you smile 😊\n\n${APP_URL}`;
+
+  return (
+    <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50" onClick={onClose}>
+      <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-sm w-full p-6 border border-yellow-400/30 text-center" onClick={e => e.stopPropagation()}>
+        <div className="text-6xl mb-4">{badge?.icon || '🎉'}</div>
+        <h2 className="text-2xl font-bold mb-2">Amazing!</h2>
+        <p className="text-yellow-400 text-lg font-semibold mb-1">{streak} Day Streak!</p>
+        <p className="text-slate-400 mb-6">{badge?.name || 'Keep it going!'}</p>
+        
+        <div className="space-y-3">
+          <button
+            onClick={() => { shareContent(shareText); onShare?.(); }}
+            className="w-full bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-900 font-bold py-3 rounded-xl hover:scale-105 transition"
+          >
+            📤 Share Achievement
+          </button>
+          <button
+            onClick={onChallenge}
+            className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold py-3 rounded-xl hover:scale-105 transition"
+          >
+            🎯 Challenge a Friend
+          </button>
+          <button onClick={onClose} className="w-full text-slate-400 py-2">
+            Continue
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Challenge a Friend Modal
+function ChallengeModal({ isOpen, onClose }) {
+  const [days, setDays] = useState(7);
+  
+  if (!isOpen) return null;
+
+  const challengeText = `🎯 I'm challenging you to ${days} days of happiness!\n\nCan you track what makes you smile for ${days} days straight?\n\nAccept the challenge: ${APP_URL}`;
+
+  const sendChallenge = () => {
+    shareContent(challengeText, 'Challenge copied! Send it to a friend 💪');
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50" onClick={onClose}>
+      <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-sm w-full p-6 border border-pink-400/30" onClick={e => e.stopPropagation()}>
+        <div className="text-center mb-5">
+          <div className="text-5xl mb-2">🎯</div>
+          <h2 className="text-xl font-bold">Challenge a Friend</h2>
+          <p className="text-slate-400 text-sm">Spread happiness together</p>
+        </div>
+
+        <p className="text-slate-300 text-sm mb-3 text-center">Challenge them to a streak of:</p>
+        <div className="flex gap-2 justify-center mb-6">
+          {[7, 14, 21, 30].map(d => (
+            <button
+              key={d}
+              onClick={() => setDays(d)}
+              className={`px-4 py-2 rounded-xl font-semibold transition ${days === d ? 'bg-pink-500 text-white' : 'bg-white/10 text-slate-300'}`}
+            >
+              {d} days
+            </button>
+          ))}
+        </div>
+
+        <button
+          onClick={sendChallenge}
+          className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold py-3 rounded-xl hover:scale-105 transition mb-3"
+        >
+          💌 Send Challenge
+        </button>
+        <button onClick={onClose} className="w-full text-slate-400 text-sm">
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// Weekly Reflection Modal
+function WeeklyReflection({ isOpen, onClose, checkins, onShare }) {
+  if (!isOpen) return null;
+
+  // Get checkins from last 7 days
+  const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const weekCheckins = checkins.filter(c => new Date(c.timestamp).getTime() > weekAgo);
+  
+  // Count sources
+  const sourceCounts = weekCheckins.reduce((acc, c) => {
+    const sources = c.sources || (c.source ? [c.source] : []);
+    sources.forEach(s => { acc[s] = (acc[s] || 0) + 1; });
+    return acc;
+  }, {});
+  
+  const topSources = Object.entries(sourceCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3);
+
+  const totalCheckins = weekCheckins.length;
+  const daysActive = new Set(weekCheckins.map(c => new Date(c.timestamp).toDateString())).size;
+
+  const shareText = `📊 My Happiness Week in Review\n\n✅ ${totalCheckins} check-ins\n📅 ${daysActive} days active\n\nTop sources:\n${topSources.map(([s, c], i) => `${['🥇', '🥈', '🥉'][i]} ${sourceLabels[s] || s}`).join('\n')}\n\nTrack your happiness: ${APP_URL}`;
+
+  return (
+    <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50" onClick={onClose}>
+      <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-sm w-full p-6 border border-blue-400/30" onClick={e => e.stopPropagation()}>
+        <div className="text-center mb-5">
+          <div className="text-5xl mb-2">📊</div>
+          <h2 className="text-xl font-bold">Your Week in Review</h2>
+          <p className="text-slate-400 text-sm">Last 7 days of happiness</p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 mb-5">
+          <div className="bg-white/5 rounded-xl p-3 text-center">
+            <div className="text-2xl font-bold text-green-400">{totalCheckins}</div>
+            <div className="text-xs text-slate-400">Check-ins</div>
+          </div>
+          <div className="bg-white/5 rounded-xl p-3 text-center">
+            <div className="text-2xl font-bold text-blue-400">{daysActive}</div>
+            <div className="text-xs text-slate-400">Days Active</div>
+          </div>
+        </div>
+
+        {topSources.length > 0 && (
+          <div className="mb-5">
+            <p className="text-xs text-slate-400 uppercase tracking-wider mb-2 text-center">Top Happiness Sources</p>
+            <div className="space-y-2">
+              {topSources.map(([source, count], i) => (
+                <div key={source} className="flex items-center gap-2 bg-white/5 rounded-lg p-2">
+                  <span className="text-lg">{['🥇', '🥈', '🥉'][i]}</span>
+                  <span className="flex-1 text-sm">{sourceLabels[source] || source}</span>
+                  <span className="text-xs text-slate-400">{count}x</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <button
+          onClick={() => { shareContent(shareText); onShare?.(); }}
+          className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold py-3 rounded-xl hover:scale-105 transition mb-3"
+        >
+          📤 Share My Week
+        </button>
+        <button onClick={onClose} className="w-full text-slate-400 text-sm">
+          Close
+        </button>
+      </div>
+    </div>
+  );
+}
 
 // Dynamic - always uses current year
 const CURRENT_YEAR = new Date().getFullYear();
@@ -1167,8 +1369,23 @@ export default function App() {
   const [showCheckinModal, setShowCheckinModal] = useState(false);
   const [showJournalModal, setShowJournalModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [showChallengeModal, setShowChallengeModal] = useState(false);
+  const [showWeeklyReflection, setShowWeeklyReflection] = useState(false);
+  const [showMilestone, setShowMilestone] = useState(false);
+  const [milestoneData, setMilestoneData] = useState(null);
+  const [showConfetti, setShowConfetti] = useState(false);
   const [activeTab, setActiveTab] = useState('timer');
   const [showReminder, setShowReminder] = useState(false);
+
+  // Track which milestones have been celebrated
+  const [celebratedMilestones, setCelebratedMilestones] = useState(() => {
+    try { return JSON.parse(localStorage.getItem(`happinessCelebratedMilestones${CURRENT_YEAR}`) || '[]'); } catch { return []; }
+  });
+
+  // Save celebrated milestones
+  useEffect(() => {
+    localStorage.setItem(`happinessCelebratedMilestones${CURRENT_YEAR}`, JSON.stringify(celebratedMilestones));
+  }, [celebratedMilestones]);
 
   // Track active users globally (only once per session)
   useEffect(() => {
@@ -1242,8 +1459,30 @@ export default function App() {
       quote, 
       timestamp: new Date().toISOString() 
     };
-    setCheckins(prev => [...prev, checkin]);
+    
+    // Calculate what streak will be after this check-in
+    const newCheckins = [...checkins, checkin];
+    const days = [...new Set(newCheckins.map(c => getDayKey(c.timestamp)))].sort().reverse();
+    let newStreak = 0;
+    for (let i = 0; i < days.length; i++) {
+      const expected = getDayKey(new Date(Date.now() - i * 86400000));
+      if (days.includes(expected) || (i === 0 && days[0] === getDayKey(new Date(Date.now() - 86400000)))) {
+        newStreak++;
+      } else if (i > 0) break;
+    }
+    
+    setCheckins(newCheckins);
     setShowCheckinModal(false);
+    
+    // Check for milestone celebration
+    if (milestoneThresholds.includes(newStreak) && !celebratedMilestones.includes(newStreak)) {
+      const badge = streakBadges.find(b => b.threshold === newStreak);
+      setMilestoneData({ streak: newStreak, badge });
+      setShowConfetti(true);
+      setTimeout(() => setShowMilestone(true), 500);
+      setTimeout(() => setShowConfetti(false), 4000);
+      setCelebratedMilestones(prev => [...prev, newStreak]);
+    }
     
     // Increment global counters
     incrementCheckins();
@@ -1440,6 +1679,24 @@ export default function App() {
               <span className="text-slate-400">→</span>
             </button>
 
+            {/* Weekly Reflection & Challenge Buttons */}
+            <div className="mt-3 grid grid-cols-2 gap-3">
+              <button 
+                onClick={() => setShowWeeklyReflection(true)}
+                className="bg-white/5 border border-white/10 rounded-xl p-3 flex items-center gap-2 hover:bg-white/10 transition"
+              >
+                <span className="text-xl">📊</span>
+                <span className="text-sm font-medium">Week Review</span>
+              </button>
+              <button 
+                onClick={() => setShowChallengeModal(true)}
+                className="bg-gradient-to-r from-pink-500/20 to-purple-500/20 border border-pink-500/30 rounded-xl p-3 flex items-center gap-2 hover:from-pink-500/30 hover:to-purple-500/30 transition"
+              >
+                <span className="text-xl">🎯</span>
+                <span className="text-sm font-medium">Challenge</span>
+              </button>
+            </div>
+
             {/* Your Badges */}
             <div className="mt-4 bg-white/5 rounded-xl p-4 border border-white/10">
               <h3 className="text-sm font-semibold mb-3 flex items-center justify-center gap-2">
@@ -1492,6 +1749,23 @@ export default function App() {
         onClearAll={handleClearAll}
         stats={{ checkins: checkins.length }}
       />
+      <ChallengeModal
+        isOpen={showChallengeModal}
+        onClose={() => setShowChallengeModal(false)}
+      />
+      <WeeklyReflection
+        isOpen={showWeeklyReflection}
+        onClose={() => setShowWeeklyReflection(false)}
+        checkins={checkins}
+      />
+      <MilestoneCelebration
+        isOpen={showMilestone}
+        onClose={() => setShowMilestone(false)}
+        streak={milestoneData?.streak}
+        badge={milestoneData?.badge}
+        onChallenge={() => { setShowMilestone(false); setShowChallengeModal(true); }}
+      />
+      <Confetti active={showConfetti} />
 
       {/* Floating Action Button - Check In */}
       <button
