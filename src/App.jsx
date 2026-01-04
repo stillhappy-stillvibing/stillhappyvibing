@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getDatabase, ref, onValue, runTransaction, increment, set, get } from 'firebase/database';
 import html2canvas from 'html2canvas';
+import { useVersionCheck } from './useVersionCheck';
+import UpdateNotification from './UpdateNotification';
 
 // App Version
 const APP_VERSION = '2.3.0';
@@ -1533,6 +1535,10 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('timer');
   const [showReminder, setShowReminder] = useState(false);
 
+  // Version update notification
+  const { updateAvailable, newVersion } = useVersionCheck(APP_VERSION);
+  const [showUpdateNotification, setShowUpdateNotification] = useState(true);
+
   // Track which milestones have been celebrated
   const [celebratedMilestones, setCelebratedMilestones] = useState(() => {
     try { return JSON.parse(localStorage.getItem(`happinessCelebratedMilestones${CURRENT_YEAR}`) || '[]'); } catch { return []; }
@@ -1703,6 +1709,13 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white p-4">
+      {/* Version Update Notification */}
+      <UpdateNotification
+        isVisible={updateAvailable && showUpdateNotification}
+        newVersion={newVersion}
+        onDismiss={() => setShowUpdateNotification(false)}
+      />
+
       <div className="max-w-xl mx-auto">
         {/* Header */}
         <header className="text-center py-3">
