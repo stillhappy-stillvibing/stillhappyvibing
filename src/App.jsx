@@ -1586,16 +1586,40 @@ function CheckinModal({ isOpen, onClose, onSave }) {
   const [sources, setSources] = useState([]);
   const [gratitude, setGratitude] = useState('');
   const [intention, setIntention] = useState('');
-  const [quote] = useState(() => getRandomItem(wisdomQuotes));
-  
+
   // Get config based on time and whether ritual was done
   const [checkinConfig] = useState(() => getCheckinConfig());
   const { ritual, isRitual, timeOfDay } = checkinConfig;
-  
-  // Night ritual gets Dream Insight, others get random exercise
-  const [exercise] = useState(() =>
-    isRitual && timeOfDay === 'night' ? nightExercise : getRandomItem(exercises)
-  );
+
+  // Carousel for quotes
+  const [quoteIndex, setQuoteIndex] = useState(() => Math.floor(Math.random() * wisdomQuotes.length));
+  const quote = wisdomQuotes[quoteIndex];
+
+  const nextQuote = () => {
+    setQuoteIndex((quoteIndex + 1) % wisdomQuotes.length);
+  };
+
+  const prevQuote = () => {
+    setQuoteIndex((quoteIndex - 1 + wisdomQuotes.length) % wisdomQuotes.length);
+  };
+
+  // Carousel for exercises
+  const allExercises = [...exercises, nightExercise];
+  const [exerciseIndex, setExerciseIndex] = useState(() => {
+    if (isRitual && timeOfDay === 'night') {
+      return exercises.length; // nightExercise is last in allExercises
+    }
+    return Math.floor(Math.random() * exercises.length); // Random from regular exercises
+  });
+  const exercise = allExercises[exerciseIndex];
+
+  const nextExercise = () => {
+    setExerciseIndex((exerciseIndex + 1) % allExercises.length);
+  };
+
+  const prevExercise = () => {
+    setExerciseIndex((exerciseIndex - 1 + allExercises.length) % allExercises.length);
+  };
 
   // Share modal states
   const [showQuoteShare, setShowQuoteShare] = useState(false);
@@ -1686,10 +1710,25 @@ function CheckinModal({ isOpen, onClose, onSave }) {
 
         {step === 'wisdom' && (
           <>
+            <p className="text-center text-xs text-slate-400 mb-3">{quoteIndex + 1} of {wisdomQuotes.length}</p>
             <div className="border-l-4 border-green-400 bg-white/5 p-4 rounded-r-xl mb-3">
               <p className="text-lg italic mb-2">"{quote.text}"</p>
               <p className="text-green-400 font-medium">— {quote.author}</p>
               <p className="text-slate-400 text-sm">{quote.tradition}</p>
+            </div>
+            <div className="flex items-center gap-2 mb-3">
+              <button
+                onClick={prevQuote}
+                className="flex-1 py-2 bg-white/10 hover:bg-white/20 rounded-xl font-semibold transition text-sm"
+              >
+                ← Previous
+              </button>
+              <button
+                onClick={nextQuote}
+                className="flex-1 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-xl font-semibold transition text-sm"
+              >
+                Next →
+              </button>
             </div>
             <div className="flex gap-2 mb-5">
               <button
@@ -1714,6 +1753,7 @@ function CheckinModal({ isOpen, onClose, onSave }) {
 
         {step === 'exercise' && (
           <>
+            <p className="text-center text-xs text-slate-400 mb-3">{exerciseIndex + 1} of {allExercises.length}</p>
             <div className={`${exercise.isNightOnly ? 'bg-indigo-400/10 border-indigo-400/30' : 'bg-green-400/10 border-green-400/30'} border rounded-xl p-4 mb-3`}>
               <h3 className={`${exercise.isNightOnly ? 'text-indigo-400' : 'text-green-400'} font-semibold mb-1`}>
                 {exercise.isNightOnly ? '🌙' : '🧘'} {exercise.title}
@@ -1731,6 +1771,20 @@ function CheckinModal({ isOpen, onClose, onSave }) {
                   </li>
                 ))}
               </ul>
+            </div>
+            <div className="flex items-center gap-2 mb-3">
+              <button
+                onClick={prevExercise}
+                className="flex-1 py-2 bg-white/10 hover:bg-white/20 rounded-xl font-semibold transition text-sm"
+              >
+                ← Previous
+              </button>
+              <button
+                onClick={nextExercise}
+                className="flex-1 py-2 bg-gradient-to-r from-teal-500 to-green-500 hover:from-teal-600 hover:to-green-600 rounded-xl font-semibold transition text-sm"
+              >
+                Next →
+              </button>
             </div>
             <div className="flex gap-2 mb-5">
               <button
@@ -2456,37 +2510,6 @@ export default function App() {
 
             {/* Micro-Moment */}
             <MicroMoment />
-
-            {/* Quick Stats */}
-            <div className="grid grid-cols-3 gap-3 mb-4">
-              <div className="bg-white/5 rounded-xl p-3 text-center border border-white/10">
-                <div className="text-2xl font-bold text-orange-400">{checkinStreak}</div>
-                <div className="text-[10px] text-slate-400 uppercase">Day Streak 🔥</div>
-              </div>
-              <div className="bg-white/5 rounded-xl p-3 text-center border border-white/10">
-                <div className="text-2xl font-bold text-blue-400">{todayCheckins}</div>
-                <div className="text-[10px] text-slate-400 uppercase">Check-ins Today</div>
-              </div>
-              <div className="bg-white/5 rounded-xl p-3 text-center border border-white/10">
-                <div className="text-2xl font-bold text-purple-400">{checkins.length}</div>
-                <div className="text-[10px] text-slate-400 uppercase">Total Check-ins</div>
-              </div>
-            </div>
-
-            {/* Journal Button */}
-            <button 
-              onClick={() => setShowJournalModal(true)}
-              className="w-full bg-white/5 border border-white/10 rounded-xl p-4 flex items-center justify-between hover:bg-white/10 transition"
-            >
-              <span className="flex items-center gap-3">
-                <span className="text-2xl">🙏</span>
-                <span>
-                  <span className="font-medium block text-left">Gratitude Journal</span>
-                  <span className="text-xs text-slate-400">{checkins.length} check-ins</span>
-                </span>
-              </span>
-              <span className="text-slate-400">→</span>
-            </button>
 
             {/* Quick Actions */}
             <div className="mt-3 grid grid-cols-3 gap-2">
