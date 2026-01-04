@@ -1312,14 +1312,13 @@ function MicroMoment() {
   );
 }
 
-// World Quote Carousel - Shows top favorites with navigation
-function WorldQuoteCarousel({ topQuotes, formatNumber }) {
+// World Quote Carousel - Shows all quotes sorted by favorites
+function WorldQuoteCarousel({ topQuotes }) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   if (topQuotes.length === 0) return null;
 
   const currentItem = topQuotes[currentIndex];
-  const medalIcons = ['🥇', '🥈', '🥉'];
 
   const nextQuote = () => {
     setCurrentIndex((currentIndex + 1) % topQuotes.length);
@@ -1331,17 +1330,14 @@ function WorldQuoteCarousel({ topQuotes, formatNumber }) {
 
   return (
     <div className="bg-white/5 backdrop-blur rounded-2xl p-4 mb-4 border border-white/10">
-      <h3 className="font-semibold mb-4 flex items-center gap-2">💝 Most Loved Wisdom</h3>
+      <h3 className="font-semibold mb-4 flex items-center gap-2">💝 World's Favorite Wisdom</h3>
       <p className="text-center text-xs text-slate-400 mb-3">
-        {medalIcons[currentIndex] || '⭐'} #{currentIndex + 1} of {topQuotes.length} most favorited
+        {currentIndex + 1} of {topQuotes.length}
       </p>
       <div className="border-l-4 border-purple-400/50 bg-white/5 p-4 rounded-r-xl mb-4">
         <p className="text-sm italic leading-snug mb-2">"{currentItem.quote.text}"</p>
         <p className="text-xs text-purple-400 mb-2">— {currentItem.quote.author}</p>
         <p className="text-xs text-slate-500">{currentItem.quote.tradition}</p>
-        <div className="flex items-center gap-2 text-xs text-slate-400 mt-3 pt-3 border-t border-white/10">
-          <span>❤️ {formatNumber(currentItem.count)} {currentItem.count === 1 ? 'favorite' : 'favorites'}</span>
-        </div>
       </div>
       <div className="flex items-center gap-2">
         <button
@@ -1363,14 +1359,13 @@ function WorldQuoteCarousel({ topQuotes, formatNumber }) {
   );
 }
 
-// World Exercise Carousel - Shows top favorites with navigation
-function WorldExerciseCarousel({ topExercises, formatNumber }) {
+// World Exercise Carousel - Shows all exercises sorted by favorites
+function WorldExerciseCarousel({ topExercises }) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   if (topExercises.length === 0) return null;
 
   const currentItem = topExercises[currentIndex];
-  const medalIcons = ['🥇', '🥈', '🥉'];
 
   const nextExercise = () => {
     setCurrentIndex((currentIndex + 1) % topExercises.length);
@@ -1382,30 +1377,24 @@ function WorldExerciseCarousel({ topExercises, formatNumber }) {
 
   return (
     <div className="bg-white/5 backdrop-blur rounded-2xl p-4 mb-4 border border-white/10">
-      <h3 className="font-semibold mb-4 flex items-center gap-2">🌟 Most Loved Practices</h3>
+      <h3 className="font-semibold mb-4 flex items-center gap-2">🌟 World's Favorite Practices</h3>
       <p className="text-center text-xs text-slate-400 mb-3">
-        {medalIcons[currentIndex] || '⭐'} #{currentIndex + 1} of {topExercises.length} most favorited
+        {currentIndex + 1} of {topExercises.length}
       </p>
-      <div className="border-l-4 border-green-400/50 bg-white/5 p-4 rounded-r-xl mb-4">
+      <div className="border-l-4 border-green-400/50 bg-white/5 p-4 rounded-r-xl mb-4 max-h-[400px] overflow-y-auto">
         <p className="text-sm font-semibold text-green-400 mb-1">{currentItem.exercise.title}</p>
         <p className="text-xs text-slate-400 mb-3">{currentItem.exercise.subtitle}</p>
         {currentItem.exercise.description && (
           <p className="text-xs text-slate-300 mb-2 italic">{currentItem.exercise.description}</p>
         )}
-        <ul className="space-y-1 text-xs mb-3">
-          {currentItem.exercise.steps.slice(0, 3).map((step, i) => (
+        <ul className="space-y-1.5 text-xs mb-3">
+          {currentItem.exercise.steps.map((step, i) => (
             <li key={i} className="flex gap-2">
-              <span className="text-green-400">{i + 1}.</span>
+              <span className="text-green-400 flex-shrink-0">{i + 1}.</span>
               <span className="text-slate-300">{step}</span>
             </li>
           ))}
-          {currentItem.exercise.steps.length > 3 && (
-            <li className="text-slate-500 text-xs">... {currentItem.exercise.steps.length - 3} more steps</li>
-          )}
         </ul>
-        <div className="flex items-center gap-2 text-xs text-slate-400 pt-3 border-t border-white/10">
-          <span>❤️ {formatNumber(currentItem.count)} {currentItem.count === 1 ? 'favorite' : 'favorites'}</span>
-        </div>
       </div>
       <div className="flex items-center gap-2">
         <button
@@ -1482,10 +1471,9 @@ function TheWorldTab() {
   const maxGlobal = sortedGlobal.length > 0 ? sortedGlobal[0][1] : 1;
   const totalSmiles = Object.values(globalSources).reduce((a, b) => a + b, 0);
 
-  // Sort and get top 3 favorite quotes
+  // Sort all favorite quotes by count (most favorited first)
   const topQuotes = Object.entries(globalFavoriteQuotes)
     .sort((a, b) => b[1] - a[1])
-    .slice(0, 3)
     .map(([index, count]) => ({
       index: parseInt(index),
       count,
@@ -1493,11 +1481,10 @@ function TheWorldTab() {
     }))
     .filter(item => item.quote); // Filter out any invalid indices
 
-  // Sort and get top 3 favorite exercises
+  // Sort all favorite exercises by count (most favorited first)
   const allExercises = [...exercises, nightExercise];
   const topExercises = Object.entries(globalFavoriteExercises)
     .sort((a, b) => b[1] - a[1])
-    .slice(0, 3)
     .map(([index, count]) => ({
       index: parseInt(index),
       count,
@@ -1574,14 +1561,14 @@ function TheWorldTab() {
         )}
       </div>
 
-      {/* Top Favorite Quotes - Carousel */}
+      {/* Favorite Quotes - Carousel */}
       {topQuotes.length > 0 && (
-        <WorldQuoteCarousel topQuotes={topQuotes} formatNumber={formatNumber} />
+        <WorldQuoteCarousel topQuotes={topQuotes} />
       )}
 
-      {/* Top Favorite Exercises - Carousel */}
+      {/* Favorite Exercises - Carousel */}
       {topExercises.length > 0 && (
-        <WorldExerciseCarousel topExercises={topExercises} formatNumber={formatNumber} />
+        <WorldExerciseCarousel topExercises={topExercises} />
       )}
 
       {/* Global Milestones */}
