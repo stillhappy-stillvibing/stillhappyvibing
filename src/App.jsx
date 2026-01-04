@@ -54,6 +54,25 @@ const incrementHappinessSource = (source) => {
 // Reference for global happiness sources
 const globalHappinessSourcesRef = ref(database, 'globalHappinessSources');
 
+// Micro-moments - gentle mindfulness prompts
+const microMoments = [
+  { icon: "🌬️", text: "Take a deep breath right now" },
+  { icon: "🌸", text: "Notice something beautiful around you" },
+  { icon: "💛", text: "Who could you thank today?" },
+  { icon: "😊", text: "Smile - even if you don't feel like it" },
+  { icon: "👂", text: "What can you hear? Really listen" },
+  { icon: "🌿", text: "Right now, you're alive and breathing" },
+  { icon: "✨", text: "What small joy is right in front of you?" },
+  { icon: "🎨", text: "Notice a color that brings you peace" },
+  { icon: "💫", text: "Place your hand on your heart. Breathe" },
+  { icon: "🙏", text: "What are you grateful for right now?" },
+  { icon: "🌅", text: "This moment will never come again" },
+  { icon: "💚", text: "You're doing better than you think" },
+  { icon: "🌊", text: "Let go of what you can't control" },
+  { icon: "🦋", text: "Change begins with this breath" },
+  { icon: "🌟", text: "You are exactly where you need to be" }
+];
+
 // Wisdom quotes from various traditions
 const wisdomQuotes = [
   { text: "Pain is inevitable, but suffering is optional. The present moment is filled with joy and happiness.", author: "Thich Nhat Hanh", tradition: "Buddhist Monk" },
@@ -994,6 +1013,31 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
           {generating ? '⏳ Creating...' : '📤 Share Image'}
         </button>
         <p className="text-xs text-slate-400 text-center mt-2">Creates a beautiful image to share</p>
+      </div>
+    </div>
+  );
+}
+
+// Micro-Moment Component - Gentle rotating mindfulness prompts
+function MicroMoment() {
+  const [currentMoment, setCurrentMoment] = useState(() =>
+    microMoments[Math.floor(Math.random() * microMoments.length)]
+  );
+
+  useEffect(() => {
+    // Rotate to a new micro-moment every 45 seconds
+    const interval = setInterval(() => {
+      setCurrentMoment(microMoments[Math.floor(Math.random() * microMoments.length)]);
+    }, 45000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 backdrop-blur rounded-2xl p-4 mb-4 border border-purple-500/20 text-center">
+      <div className="flex items-center justify-center gap-2">
+        <span className="text-2xl">{currentMoment.icon}</span>
+        <p className="text-sm text-slate-200 italic">{currentMoment.text}</p>
       </div>
     </div>
   );
@@ -2059,13 +2103,16 @@ export default function App() {
                 </div>
               )}
               
-              <button 
-                onClick={() => setShowCheckinModal(true)} 
+              <button
+                onClick={() => setShowCheckinModal(true)}
                 className="w-full bg-gradient-to-r from-green-400 to-emerald-500 text-slate-900 px-4 py-3 rounded-xl font-semibold hover:scale-105 transition shadow-lg shadow-green-500/20"
               >
                 ✓ Check In
               </button>
             </div>
+
+            {/* Micro-Moment */}
+            <MicroMoment />
 
             {/* Quick Stats */}
             <div className="grid grid-cols-3 gap-3 mb-4">
