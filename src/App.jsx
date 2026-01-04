@@ -1289,6 +1289,121 @@ function MicroMoment() {
   );
 }
 
+// World Quote Carousel - Shows top favorites with navigation
+function WorldQuoteCarousel({ topQuotes, formatNumber }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  if (topQuotes.length === 0) return null;
+
+  const currentItem = topQuotes[currentIndex];
+  const medalIcons = ['🥇', '🥈', '🥉'];
+
+  const nextQuote = () => {
+    setCurrentIndex((currentIndex + 1) % topQuotes.length);
+  };
+
+  const prevQuote = () => {
+    setCurrentIndex((currentIndex - 1 + topQuotes.length) % topQuotes.length);
+  };
+
+  return (
+    <div className="bg-white/5 backdrop-blur rounded-2xl p-4 mb-4 border border-white/10">
+      <h3 className="font-semibold mb-4 flex items-center gap-2">💝 Most Loved Wisdom</h3>
+      <p className="text-center text-xs text-slate-400 mb-3">
+        {medalIcons[currentIndex] || '⭐'} #{currentIndex + 1} of {topQuotes.length} most favorited
+      </p>
+      <div className="border-l-4 border-purple-400/50 bg-white/5 p-4 rounded-r-xl mb-4">
+        <p className="text-sm italic leading-snug mb-2">"{currentItem.quote.text}"</p>
+        <p className="text-xs text-purple-400 mb-2">— {currentItem.quote.author}</p>
+        <p className="text-xs text-slate-500">{currentItem.quote.tradition}</p>
+        <div className="flex items-center gap-2 text-xs text-slate-400 mt-3 pt-3 border-t border-white/10">
+          <span>❤️ {formatNumber(currentItem.count)} {currentItem.count === 1 ? 'favorite' : 'favorites'}</span>
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        <button
+          onClick={prevQuote}
+          disabled={topQuotes.length === 1}
+          className="flex-1 py-2 bg-white/10 hover:bg-white/20 rounded-xl font-semibold transition text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          ← Previous
+        </button>
+        <button
+          onClick={nextQuote}
+          disabled={topQuotes.length === 1}
+          className="flex-1 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-xl font-semibold transition text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          Next →
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// World Exercise Carousel - Shows top favorites with navigation
+function WorldExerciseCarousel({ topExercises, formatNumber }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  if (topExercises.length === 0) return null;
+
+  const currentItem = topExercises[currentIndex];
+  const medalIcons = ['🥇', '🥈', '🥉'];
+
+  const nextExercise = () => {
+    setCurrentIndex((currentIndex + 1) % topExercises.length);
+  };
+
+  const prevExercise = () => {
+    setCurrentIndex((currentIndex - 1 + topExercises.length) % topExercises.length);
+  };
+
+  return (
+    <div className="bg-white/5 backdrop-blur rounded-2xl p-4 mb-4 border border-white/10">
+      <h3 className="font-semibold mb-4 flex items-center gap-2">🌟 Most Loved Practices</h3>
+      <p className="text-center text-xs text-slate-400 mb-3">
+        {medalIcons[currentIndex] || '⭐'} #{currentIndex + 1} of {topExercises.length} most favorited
+      </p>
+      <div className="border-l-4 border-green-400/50 bg-white/5 p-4 rounded-r-xl mb-4">
+        <p className="text-sm font-semibold text-green-400 mb-1">{currentItem.exercise.title}</p>
+        <p className="text-xs text-slate-400 mb-3">{currentItem.exercise.subtitle}</p>
+        {currentItem.exercise.description && (
+          <p className="text-xs text-slate-300 mb-2 italic">{currentItem.exercise.description}</p>
+        )}
+        <ul className="space-y-1 text-xs mb-3">
+          {currentItem.exercise.steps.slice(0, 3).map((step, i) => (
+            <li key={i} className="flex gap-2">
+              <span className="text-green-400">{i + 1}.</span>
+              <span className="text-slate-300">{step}</span>
+            </li>
+          ))}
+          {currentItem.exercise.steps.length > 3 && (
+            <li className="text-slate-500 text-xs">... {currentItem.exercise.steps.length - 3} more steps</li>
+          )}
+        </ul>
+        <div className="flex items-center gap-2 text-xs text-slate-400 pt-3 border-t border-white/10">
+          <span>❤️ {formatNumber(currentItem.count)} {currentItem.count === 1 ? 'favorite' : 'favorites'}</span>
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        <button
+          onClick={prevExercise}
+          disabled={topExercises.length === 1}
+          className="flex-1 py-2 bg-white/10 hover:bg-white/20 rounded-xl font-semibold transition text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          ← Previous
+        </button>
+        <button
+          onClick={nextExercise}
+          disabled={topExercises.length === 1}
+          className="flex-1 py-2 bg-gradient-to-r from-teal-500 to-green-500 hover:from-teal-600 hover:to-green-600 rounded-xl font-semibold transition text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          Next →
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // The World Tab Component - Global happiness data only
 function TheWorldTab() {
   const [globalSources, setGlobalSources] = useState({});
@@ -1436,50 +1551,14 @@ function TheWorldTab() {
         )}
       </div>
 
-      {/* Top Favorite Quotes */}
+      {/* Top Favorite Quotes - Carousel */}
       {topQuotes.length > 0 && (
-        <div className="bg-white/5 backdrop-blur rounded-2xl p-4 mb-4 border border-white/10">
-          <h3 className="font-semibold mb-4 flex items-center gap-2">💝 Most Loved Wisdom</h3>
-          <div className="space-y-3">
-            {topQuotes.map((item, index) => (
-              <div key={item.index} className="border-l-4 border-purple-400/50 bg-white/5 p-3 rounded-r-xl">
-                <div className="flex items-start gap-2 mb-2">
-                  <span className="text-lg">{index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}</span>
-                  <div className="flex-1">
-                    <p className="text-sm italic leading-snug mb-1">"{item.quote.text}"</p>
-                    <p className="text-xs text-purple-400">— {item.quote.author}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 text-xs text-slate-400 ml-7">
-                  <span>❤️ {formatNumber(item.count)} {item.count === 1 ? 'favorite' : 'favorites'}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <WorldQuoteCarousel topQuotes={topQuotes} formatNumber={formatNumber} />
       )}
 
-      {/* Top Favorite Exercises */}
+      {/* Top Favorite Exercises - Carousel */}
       {topExercises.length > 0 && (
-        <div className="bg-white/5 backdrop-blur rounded-2xl p-4 mb-4 border border-white/10">
-          <h3 className="font-semibold mb-4 flex items-center gap-2">🌟 Most Loved Practices</h3>
-          <div className="space-y-3">
-            {topExercises.map((item, index) => (
-              <div key={item.index} className="border-l-4 border-green-400/50 bg-white/5 p-3 rounded-r-xl">
-                <div className="flex items-start gap-2 mb-2">
-                  <span className="text-lg">{index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}</span>
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold text-green-400">{item.exercise.title}</p>
-                    <p className="text-xs text-slate-400">{item.exercise.subtitle}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 text-xs text-slate-400 ml-7">
-                  <span>❤️ {formatNumber(item.count)} {item.count === 1 ? 'favorite' : 'favorites'}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <WorldExerciseCarousel topExercises={topExercises} formatNumber={formatNumber} />
       )}
 
       {/* Global Milestones */}
@@ -2508,25 +2587,8 @@ export default function App() {
               </button>
             </div>
 
-            {/* Micro-Moment */}
-            <MicroMoment />
-
             {/* Quick Actions */}
-            <div className="mt-3 grid grid-cols-3 gap-2">
-              <button
-                onClick={() => setShowQuoteBrowser(true)}
-                className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl p-3 flex flex-col items-center gap-1 hover:from-purple-500/30 hover:to-pink-500/30 transition"
-              >
-                <span className="text-xl">📖</span>
-                <span className="text-xs font-medium">Quotes</span>
-              </button>
-              <button
-                onClick={() => setShowExerciseBrowser(true)}
-                className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30 rounded-xl p-3 flex flex-col items-center gap-1 hover:from-green-500/30 hover:to-emerald-500/30 transition"
-              >
-                <span className="text-xl">🧘</span>
-                <span className="text-xs font-medium">Exercises</span>
-              </button>
+            <div className="mt-3 grid grid-cols-1 gap-2">
               <button
                 onClick={() => setShowChallengeModal(true)}
                 className="bg-gradient-to-r from-pink-500/20 to-purple-500/20 border border-pink-500/30 rounded-xl p-3 flex flex-col items-center gap-1 hover:from-pink-500/30 hover:to-purple-500/30 transition"
@@ -2585,7 +2647,12 @@ export default function App() {
           <TheWorldTab />
         )}
 
-        <footer className="text-center mt-6 text-slate-500 text-xs">Made with 💛 for a happier {CURRENT_YEAR}</footer>
+        {/* Micro-Moment Footer */}
+        <div className="mt-6">
+          <MicroMoment />
+        </div>
+
+        <footer className="text-center mt-4 text-slate-500 text-xs">Made with 💛 for a happier {CURRENT_YEAR}</footer>
       </div>
 
       {/* Modals */}
