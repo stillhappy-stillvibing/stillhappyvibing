@@ -2657,11 +2657,6 @@ export default function App() {
                 })}
               </div>
             </div>
-
-            <div className="mt-4 flex items-center justify-center gap-2 text-xs text-slate-500">
-              <span>🔒</span>
-              <span>All data stays on your device</span>
-            </div>
           </>
         )}
 
@@ -2673,6 +2668,11 @@ export default function App() {
         {/* Micro-Moment Footer */}
         <div className="mt-6">
           <MicroMoment />
+        </div>
+
+        <div className="flex items-center justify-center gap-2 text-xs text-slate-500 mt-3">
+          <span>🔒</span>
+          <span>All data stays on your device</span>
         </div>
 
         <footer className="text-center mt-4 text-slate-500 text-xs">Made with 💛 for a happier {CURRENT_YEAR}</footer>
