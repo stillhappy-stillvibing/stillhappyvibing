@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '2.6.1';
+const APP_VERSION = '2.6.2';
 const BUILD_DATE = '2026-01-04';
 
 // Firebase Configuration
@@ -886,16 +886,13 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
               <p className="text-sm opacity-90 mb-4">{data.subtitle}</p>
 
               <div className="bg-white/20 rounded-xl p-3 mb-3 text-left">
-                <ul className="text-sm space-y-2">
-                  {data.steps.slice(0, 4).map((step, i) => (
+                <ul className={`space-y-1.5 ${data.steps.length > 6 ? 'text-xs' : 'text-sm'}`}>
+                  {data.steps.map((step, i) => (
                     <li key={i} className="flex items-start gap-2">
-                      <span className="opacity-70">{i + 1}.</span>
-                      <span>{step}</span>
+                      <span className="opacity-70 flex-shrink-0">{i + 1}.</span>
+                      <span className="leading-snug">{step}</span>
                     </li>
                   ))}
-                  {data.steps.length > 4 && (
-                    <li className="opacity-70 text-xs">...and {data.steps.length - 4} more steps</li>
-                  )}
                 </ul>
               </div>
 
