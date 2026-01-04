@@ -3,8 +3,8 @@ import { initializeApp } from 'firebase/app';
 import { getDatabase, ref, onValue, runTransaction, increment, set, get } from 'firebase/database';
 
 // App Version
-const APP_VERSION = '1.9.0';
-const BUILD_DATE = '2026-01-03 3:00 AM';
+const APP_VERSION = '1.9.1';
+const BUILD_DATE = '2026-01-03 3:15 AM';
 
 // Firebase Configuration
 const firebaseConfig = {
@@ -592,29 +592,8 @@ function TheWorldTab() {
         )}
       </div>
 
-      {/* Global Milestones */}
-      <div className="bg-white/5 backdrop-blur rounded-2xl p-4 mb-4 border border-white/10">
-        <h3 className="font-semibold mb-3 flex items-center justify-center gap-2 text-sm">
-          🏆 Global Milestones
-          <span className="font-normal text-slate-400">
-            ({earnedMilestones.length}/{globalMilestones.length})
-          </span>
-        </h3>
-        <div className="flex flex-wrap gap-2 justify-center">
-          {globalMilestones.map(m => {
-            const earned = totalSmiles >= m.threshold;
-            return (
-              <div key={m.threshold} className={`flex flex-col items-center p-2 rounded-lg transition ${earned ? 'bg-purple-400/20' : 'bg-white/5 opacity-40'}`}>
-                <span className="text-xl">{m.icon}</span>
-                <span className="text-[8px] mt-1">{m.label}</span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
       {/* Global Happiness Sources */}
-      <div className="bg-white/5 backdrop-blur rounded-2xl p-4 border border-white/10">
+      <div className="bg-white/5 backdrop-blur rounded-2xl p-4 mb-4 border border-white/10">
         <h3 className="font-semibold mb-4 flex items-center gap-2">✨ What's Making the World Happy</h3>
         {loading ? (
           <div className="space-y-3 animate-pulse">
@@ -645,6 +624,27 @@ function TheWorldTab() {
             ))}
           </div>
         )}
+      </div>
+
+      {/* Global Milestones */}
+      <div className="bg-white/5 backdrop-blur rounded-2xl p-4 border border-white/10">
+        <h3 className="font-semibold mb-3 flex items-center justify-center gap-2 text-sm">
+          🏆 Global Milestones
+          <span className="font-normal text-slate-400">
+            ({earnedMilestones.length}/{globalMilestones.length})
+          </span>
+        </h3>
+        <div className="flex flex-wrap gap-2 justify-center">
+          {globalMilestones.map(m => {
+            const earned = totalSmiles >= m.threshold;
+            return (
+              <div key={m.threshold} className={`flex flex-col items-center p-2 rounded-lg transition ${earned ? 'bg-purple-400/20' : 'bg-white/5 opacity-40'}`}>
+                <span className="text-xl">{m.icon}</span>
+                <span className="text-[8px] mt-1">{m.label}</span>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </>
   );
