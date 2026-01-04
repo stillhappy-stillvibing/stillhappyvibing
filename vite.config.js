@@ -28,7 +28,18 @@ export default defineConfig({
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg}']
+        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        // Don't cache API calls
+        navigateFallbackDenylist: [/^\/api/],
+        // Clean up old caches
+        cleanupOutdatedCaches: true,
+        // Skip waiting - activate new SW immediately
+        skipWaiting: true,
+        clientsClaim: true
+      },
+      // Check for updates more frequently
+      devOptions: {
+        enabled: false
       }
     })
   ]

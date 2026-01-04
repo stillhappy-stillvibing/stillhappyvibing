@@ -3,8 +3,8 @@ import { initializeApp } from 'firebase/app';
 import { getDatabase, ref, onValue, runTransaction, increment, set, get } from 'firebase/database';
 
 // App Version
-const APP_VERSION = '1.7.0';
-const BUILD_DATE = '2026-01-03 2:00 AM';
+const APP_VERSION = '1.9.0';
+const BUILD_DATE = '2026-01-03 3:00 AM';
 
 // Firebase Configuration
 const firebaseConfig = {
@@ -524,8 +524,20 @@ const sourceLabels = {
   tomorrow: '✨ Tomorrow', 'letting-go': '🍃 Letting go'
 };
 
-// Smiles Shared Tab Component
-function SmilesSharedTab({ checkins, checkinStreak }) {
+// Global milestones for The World tab
+const globalMilestones = [
+  { threshold: 100, icon: '🌱', label: '100 smiles' },
+  { threshold: 500, icon: '🌿', label: '500 smiles' },
+  { threshold: 1000, icon: '🌳', label: '1K smiles' },
+  { threshold: 5000, icon: '🌲', label: '5K smiles' },
+  { threshold: 10000, icon: '🏔️', label: '10K smiles' },
+  { threshold: 50000, icon: '🌍', label: '50K smiles' },
+  { threshold: 100000, icon: '✨', label: '100K smiles' },
+  { threshold: 1000000, icon: '🌟', label: '1M smiles' },
+];
+
+// The World Tab Component - Global happiness data only
+function TheWorldTab() {
   const [globalSources, setGlobalSources] = useState({});
   const [loading, setLoading] = useState(true);
 
@@ -544,48 +556,57 @@ function SmilesSharedTab({ checkins, checkinStreak }) {
 
   const formatNumber = (num) => num.toLocaleString();
 
-  // Calculate local happiness sources
-  const localCounts = checkins.reduce((acc, c) => {
-    if (c.source) acc[c.source] = (acc[c.source] || 0) + 1;
-    return acc;
-  }, {});
-
   // Sort global sources by count
   const sortedGlobal = Object.entries(globalSources)
     .sort((a, b) => b[1] - a[1])
-    .slice(0, 8);
+    .slice(0, 10);
   
   const maxGlobal = sortedGlobal.length > 0 ? sortedGlobal[0][1] : 1;
+  const totalSmiles = Object.values(globalSources).reduce((a, b) => a + b, 0);
 
-  // Sort local sources by count
-  const sortedLocal = Object.entries(localCounts)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5);
-  
-  const maxLocal = sortedLocal.length > 0 ? sortedLocal[0][1] : 1;
+  // Calculate earned global milestones
+  const earnedMilestones = globalMilestones.filter(m => totalSmiles >= m.threshold);
+  const nextMilestone = globalMilestones.find(m => totalSmiles < m.threshold);
 
   return (
     <>
-      {/* Day Streak & Badges */}
-      <div className="bg-white/5 backdrop-blur rounded-2xl p-4 mb-4 border border-white/10">
-        <div className="text-center mb-4">
-          <div className="text-5xl font-bold text-orange-400 mb-1">{checkinStreak}</div>
-          <div className="text-slate-400">Day Streak 🔥</div>
-        </div>
+      {/* Global Stats Header */}
+      <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 backdrop-blur rounded-2xl p-5 mb-4 border border-purple-500/20 text-center">
+        <div className="text-4xl mb-2">🌍</div>
+        <h2 className="text-xl font-bold mb-1">The World is Smiling</h2>
+        <p className="text-3xl font-bold text-purple-300">{formatNumber(totalSmiles)}</p>
+        <p className="text-sm text-slate-400">smiles shared globally</p>
         
-        <h3 className="font-semibold mb-3 flex items-center justify-center gap-2">
-          🏅 Badges 
-          <span className="text-sm font-normal text-slate-400">
-            ({streakBadges.filter(b => checkinStreak >= b.threshold).length}/{streakBadges.length})
+        {nextMilestone && (
+          <div className="mt-3 pt-3 border-t border-white/10">
+            <p className="text-xs text-slate-400">
+              {formatNumber(nextMilestone.threshold - totalSmiles)} more to reach {nextMilestone.icon} {nextMilestone.label}!
+            </p>
+            <div className="mt-2 h-2 bg-white/10 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-purple-400 to-pink-500 rounded-full transition-all"
+                style={{ width: `${(totalSmiles / nextMilestone.threshold) * 100}%` }}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Global Milestones */}
+      <div className="bg-white/5 backdrop-blur rounded-2xl p-4 mb-4 border border-white/10">
+        <h3 className="font-semibold mb-3 flex items-center justify-center gap-2 text-sm">
+          🏆 Global Milestones
+          <span className="font-normal text-slate-400">
+            ({earnedMilestones.length}/{globalMilestones.length})
           </span>
         </h3>
         <div className="flex flex-wrap gap-2 justify-center">
-          {streakBadges.map(b => {
-            const earned = checkinStreak >= b.threshold;
+          {globalMilestones.map(m => {
+            const earned = totalSmiles >= m.threshold;
             return (
-              <div key={b.id} className={`flex flex-col items-center p-2 rounded-lg transition ${earned ? 'bg-orange-400/20' : 'bg-white/5 opacity-40'}`}>
-                <span className="text-2xl">{b.icon}</span>
-                <span className="text-[9px] mt-1">{b.name}</span>
+              <div key={m.threshold} className={`flex flex-col items-center p-2 rounded-lg transition ${earned ? 'bg-purple-400/20' : 'bg-white/5 opacity-40'}`}>
+                <span className="text-xl">{m.icon}</span>
+                <span className="text-[8px] mt-1">{m.label}</span>
               </div>
             );
           })}
@@ -593,20 +614,25 @@ function SmilesSharedTab({ checkins, checkinStreak }) {
       </div>
 
       {/* Global Happiness Sources */}
-      <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur rounded-2xl p-4 mb-4 border border-purple-500/20">
-        <h3 className="font-semibold mb-3 flex items-center gap-2">🌍 What's Making the World Happy</h3>
+      <div className="bg-white/5 backdrop-blur rounded-2xl p-4 border border-white/10">
+        <h3 className="font-semibold mb-4 flex items-center gap-2">✨ What's Making the World Happy</h3>
         {loading ? (
-          <div className="space-y-2 animate-pulse">
-            {[1,2,3,4].map(i => (
+          <div className="space-y-3 animate-pulse">
+            {[1,2,3,4,5].map(i => (
               <div key={i} className="h-6 bg-white/10 rounded"></div>
             ))}
           </div>
         ) : sortedGlobal.length === 0 ? (
-          <p className="text-center text-slate-400 py-4 text-sm">Be the first to share what makes you happy!</p>
+          <div className="text-center py-8 text-slate-400">
+            <p className="text-3xl mb-2">🌱</p>
+            <p>Be the first to share what makes you happy!</p>
+            <p className="text-sm">Your check-in will appear here</p>
+          </div>
         ) : (
-          <div className="space-y-2">
-            {sortedGlobal.map(([source, count]) => (
+          <div className="space-y-3">
+            {sortedGlobal.map(([source, count], index) => (
               <div key={source} className="flex items-center gap-2">
+                <span className="text-lg w-6">{index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : ''}</span>
                 <span className="text-sm w-28 truncate">{sourceLabels[source] || source}</span>
                 <div className="flex-1 h-5 bg-white/10 rounded-full overflow-hidden">
                   <div 
@@ -614,30 +640,7 @@ function SmilesSharedTab({ checkins, checkinStreak }) {
                     style={{ width: `${(count / maxGlobal) * 100}%` }}
                   />
                 </div>
-                <span className="text-xs text-purple-300 w-12 text-right">{formatNumber(count)}</span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Your Happiness Sources */}
-      <div className="bg-white/5 backdrop-blur rounded-2xl p-4 border border-white/10">
-        <h3 className="font-semibold mb-3 flex items-center gap-2">😊 What Makes YOU Happy</h3>
-        {sortedLocal.length === 0 ? (
-          <p className="text-center text-slate-400 py-4 text-sm">Check in to see your happiness sources</p>
-        ) : (
-          <div className="space-y-2">
-            {sortedLocal.map(([source, count]) => (
-              <div key={source} className="flex items-center gap-2">
-                <span className="text-sm w-28 truncate">{sourceLabels[source] || source}</span>
-                <div className="flex-1 h-5 bg-white/5 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full"
-                    style={{ width: `${(count / maxLocal) * 100}%` }}
-                  />
-                </div>
-                <span className="text-xs text-slate-400 w-6 text-right">{count}</span>
+                <span className="text-xs text-purple-300 w-14 text-right">{formatNumber(count)}</span>
               </div>
             ))}
           </div>
@@ -1589,8 +1592,8 @@ export default function App() {
         {/* Tab Navigation */}
         <div className="flex bg-white/5 rounded-xl p-1 mb-4">
           {[
-            { id: 'timer', label: '⏱️ Timer' },
-            { id: 'smiles', label: '😊 Smiles Shared' },
+            { id: 'timer', label: '😊 Home' },
+            { id: 'world', label: '🌍 The World' },
           ].map(tab => (
             <button
               key={tab.id}
@@ -1638,19 +1641,44 @@ export default function App() {
             )}
             
             <div className="bg-white/5 backdrop-blur rounded-2xl p-5 mb-4 border border-white/10">
-              {/* Year Timer */}
-              <div className="mb-4">
-                <TimerDisplay time={yearTime} label={`Time in ${CURRENT_YEAR}`} color="yellow" />
-              </div>
-              
               {/* Current Streak Timer */}
-              <div className="mb-5 pt-4 border-t border-white/10">
-                <TimerDisplay time={streakTime} label="Your Current Happiness Streak" color="green" />
+              <div className="mb-5">
+                <TimerDisplay time={streakTime} label="Your Happiness Streak" color="green" />
               </div>
               
               <p className="text-green-400 mb-4 flex items-center justify-center gap-2 text-sm">
                 <span className="animate-pulse">💚</span> Your happiness is thriving! <span className="animate-pulse">💚</span>
               </p>
+              
+              {/* What Makes YOU Happy - Visual Reminder */}
+              {checkins.length > 0 && (
+                <div className="mb-4 pt-4 border-t border-white/10">
+                  <p className="text-xs text-slate-400 uppercase tracking-wider text-center mb-3">What Makes You Happy</p>
+                  <div className="space-y-2">
+                    {(() => {
+                      const counts = checkins.reduce((acc, c) => {
+                        if (c.source) acc[c.source] = (acc[c.source] || 0) + 1;
+                        return acc;
+                      }, {});
+                      const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 4);
+                      const maxCount = sorted.length > 0 ? sorted[0][1] : 1;
+                      
+                      return sorted.map(([source, count]) => (
+                        <div key={source} className="flex items-center gap-2">
+                          <span className="text-sm w-28 truncate">{sourceLabels[source] || source}</span>
+                          <div className="flex-1 h-4 bg-white/5 rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full"
+                              style={{ width: `${(count / maxCount) * 100}%` }}
+                            />
+                          </div>
+                          <span className="text-xs text-slate-400 w-5 text-right">{count}</span>
+                        </div>
+                      ));
+                    })()}
+                  </div>
+                </div>
+              )}
               
               <div className="flex gap-3">
                 <button 
@@ -1702,6 +1730,27 @@ export default function App() {
               <span className="text-slate-400">→</span>
             </button>
 
+            {/* Your Badges */}
+            <div className="mt-4 bg-white/5 rounded-xl p-4 border border-white/10">
+              <h3 className="text-sm font-semibold mb-3 flex items-center justify-center gap-2">
+                🏅 Your Badges 
+                <span className="font-normal text-slate-400">
+                  ({streakBadges.filter(b => checkinStreak >= b.threshold).length}/{streakBadges.length})
+                </span>
+              </h3>
+              <div className="flex flex-wrap gap-2 justify-center">
+                {streakBadges.map(b => {
+                  const earned = checkinStreak >= b.threshold;
+                  return (
+                    <div key={b.id} className={`flex flex-col items-center p-2 rounded-lg transition ${earned ? 'bg-orange-400/20' : 'bg-white/5 opacity-40'}`}>
+                      <span className="text-xl">{b.icon}</span>
+                      <span className="text-[8px] mt-1">{b.name}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
             <div className="mt-4 flex items-center justify-center gap-2 text-xs text-slate-500">
               <span>🔒</span>
               <span>All data stays on your device</span>
@@ -1709,9 +1758,9 @@ export default function App() {
           </>
         )}
 
-        {/* Smiles Shared Tab */}
-        {activeTab === 'smiles' && (
-          <SmilesSharedTab checkins={checkins} checkinStreak={checkinStreak} />
+        {/* The World Tab */}
+        {activeTab === 'world' && (
+          <TheWorldTab />
         )}
 
         <footer className="text-center mt-6 text-slate-500 text-xs">Made with 💛 for a happier {CURRENT_YEAR}</footer>
@@ -1736,6 +1785,15 @@ export default function App() {
         onResetStreak={resetStreakToNow}
         stats={{ checkins: checkins.length, entries: entries.length }}
       />
+
+      {/* Floating Action Button - Check In */}
+      <button
+        onClick={() => setShowCheckinModal(true)}
+        className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full shadow-lg shadow-green-500/30 flex items-center justify-center text-2xl hover:scale-110 active:scale-95 transition-transform z-40"
+        aria-label="Check in"
+      >
+        ✓
+      </button>
     </div>
   );
 }
