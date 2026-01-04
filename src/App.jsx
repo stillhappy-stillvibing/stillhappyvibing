@@ -3,8 +3,8 @@ import { initializeApp } from 'firebase/app';
 import { getDatabase, ref, onValue, runTransaction, increment, set, get } from 'firebase/database';
 
 // App Version
-const APP_VERSION = '2.0.0';
-const BUILD_DATE = '2026-01-03 4:00 AM';
+const APP_VERSION = '2.0.2';
+const BUILD_DATE = '2026-01-03 4:20 AM';
 
 // Firebase Configuration
 const firebaseConfig = {
@@ -1097,7 +1097,7 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats }) 
           <p className="text-sm text-slate-300 mb-3">Help someone you love have a happier {CURRENT_YEAR}</p>
           <button
             onClick={() => {
-              const shareText = `✨ I'm tracking my happiness in ${CURRENT_YEAR} with Still Happy!\n\nJoin me and thousands of others building a happier year.\n\n🌍 See what's making the world happy\n🔥 Build your daily streak\n🙏 Practice gratitude daily\n\nTry it free: ${APP_URL}`;
+              const shareText = `✨ I'm tracking my happiness in ${CURRENT_YEAR} with Still Happy!\n\nTrack what makes you smile 😊\n\n🌍 See what's making the world happy\n🔥 Build your daily streak\n🙏 Practice gratitude daily\n\nTry it free: ${APP_URL}`;
               shareContent(shareText, 'Check out Still Happy - shared to clipboard!');
             }}
             className="w-full py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold hover:scale-105 transition"
@@ -1271,11 +1271,12 @@ export default function App() {
       <div className="max-w-xl mx-auto">
         {/* Header */}
         <header className="text-center py-3">
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between mb-1">
             <div className="w-8" />
             <h1 className="text-xl font-bold bg-gradient-to-r from-yellow-400 via-pink-400 to-yellow-400 bg-clip-text text-transparent">✨ Happiness Tracker ✨</h1>
             <button onClick={() => setShowSettingsModal(true)} className="text-slate-400 hover:text-white text-xl">⚙️</button>
           </div>
+          <p className="text-slate-400 text-xs mb-2">Track what makes you smile</p>
           <span className="inline-block px-4 py-1 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-900 font-bold rounded-full text-sm">🎉 {CURRENT_YEAR} 🎉</span>
         </header>
 
