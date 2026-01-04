@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '2.5.0';
+const APP_VERSION = '2.6.0';
 const BUILD_DATE = '2026-01-04';
 
 // Firebase Configuration
@@ -943,6 +943,52 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
           </div>
         )}
 
+        {/* World Stats Card */}
+        {type === 'world' && data && (
+          <div
+            ref={cardRef}
+            className="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-2xl p-6 mb-4"
+          >
+            <div className="text-center text-white">
+              <p className="text-5xl mb-3">🌍</p>
+              <p className="text-2xl font-bold mb-1">The World is Smiling</p>
+              <p className="text-4xl font-black mb-2">{data.totalSmiles.toLocaleString()}</p>
+              <p className="text-sm opacity-90 mb-4">smiles shared globally</p>
+
+              {data.topSources && data.topSources.length > 0 && (
+                <div className="bg-white/20 rounded-xl p-3 mb-3">
+                  <p className="text-xs uppercase tracking-wider opacity-80 mb-2">Top happiness sources</p>
+                  <div className="flex flex-col gap-1 text-sm">
+                    {data.topSources.map(([source, count], index) => {
+                      const labels = {
+                        work: '💼 Work', relationship: '💕 Loved ones', health: '🏃 Health',
+                        peace: '😌 Peace', nature: '🌿 Nature', achievement: '🎯 Achievement',
+                        fun: '🎉 Fun', rest: '😴 Rest'
+                      };
+                      return (
+                        <div key={source} className="flex items-center justify-between">
+                          <span>{index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'} {labels[source] || source}</span>
+                          <span className="font-semibold">{count.toLocaleString()}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              <p className="text-xs italic opacity-90 mb-3">
+                "Smile and the whole world smiles with you"
+              </p>
+
+              <div className="bg-white/20 rounded-lg px-3 py-2 inline-block">
+                <p className="text-xs font-semibold">🏆 {data.earnedMilestones}/{data.totalMilestones} milestones unlocked</p>
+              </div>
+
+              <p className="text-xs font-bold opacity-90 mt-4">Join us at stillhappy.app ✨</p>
+            </div>
+          </div>
+        )}
+
         <button
           onClick={handleShare}
           disabled={generating}
@@ -960,6 +1006,7 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
 function TheWorldTab() {
   const [globalSources, setGlobalSources] = useState({});
   const [loading, setLoading] = useState(true);
+  const [showWorldShare, setShowWorldShare] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onValue(globalHappinessSourcesRef, (snapshot) => {
@@ -995,8 +1042,15 @@ function TheWorldTab() {
         <div className="text-4xl mb-2">🌍</div>
         <h2 className="text-xl font-bold mb-1">The World is Smiling</h2>
         <p className="text-3xl font-bold text-purple-300">{formatNumber(totalSmiles)}</p>
-        <p className="text-sm text-slate-400">smiles shared globally</p>
-        
+        <p className="text-sm text-slate-400 mb-3">smiles shared globally</p>
+
+        <button
+          onClick={() => setShowWorldShare(true)}
+          className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30 text-purple-300 text-sm font-medium hover:from-purple-500/30 hover:to-pink-500/30 transition flex items-center justify-center gap-2 mx-auto"
+        >
+          📸 Share the joy
+        </button>
+
         {nextMilestone && (
           <div className="mt-3 pt-3 border-t border-white/10">
             <p className="text-xs text-slate-400">
@@ -1066,6 +1120,19 @@ function TheWorldTab() {
           })}
         </div>
       </div>
+
+      {/* Share World Stats Modal */}
+      <ShareImageCard
+        isOpen={showWorldShare}
+        onClose={() => setShowWorldShare(false)}
+        type="world"
+        data={{
+          totalSmiles,
+          topSources: sortedGlobal.slice(0, 3),
+          earnedMilestones: earnedMilestones.length,
+          totalMilestones: globalMilestones.length
+        }}
+      />
     </>
   );
 }
