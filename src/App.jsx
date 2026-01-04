@@ -1257,10 +1257,8 @@ function CheckinModal({ isOpen, onClose, onSave }) {
 
   if (!isOpen) return null;
 
-  // Determine which steps to show (rituals have intention, regular doesn't)
-  const steps = isRitual && ritual.intentionPrompt 
-    ? ['source', 'gratitude', 'wisdom', 'exercise']
-    : ['source', 'gratitude', 'wisdom', 'exercise'];
+  // Determine which steps to show (no gratitude step)
+  const steps = ['source', 'wisdom', 'exercise'];
 
   return (
     <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50 overflow-y-auto" onClick={onClose}>
@@ -1295,51 +1293,12 @@ function CheckinModal({ isOpen, onClose, onSave }) {
                 </button>
               ))}
             </div>
-            <button 
-              onClick={() => setStep('gratitude')} 
+            <button
+              onClick={() => setStep('wisdom')}
               className="w-full bg-gradient-to-r from-green-400 to-emerald-500 text-slate-900 font-bold py-3 rounded-xl"
             >
               Continue →
             </button>
-          </>
-        )}
-
-        {step === 'gratitude' && (
-          <>
-            <div className="mb-5">
-              <p className="text-green-400 text-sm mb-3 text-center">
-                🙏 {ritual.gratitudePrompt}
-              </p>
-              <textarea
-                value={gratitude}
-                onChange={e => setGratitude(e.target.value)}
-                placeholder={selectedSources.length > 0 ? `Grateful for ${selectedSources.map(s => s.prompt).join(', ')}...` : "Share your gratitude... (optional)"}
-                className={`w-full ${isRitual && ritual.intentionPrompt ? 'h-20' : 'h-28'} p-4 rounded-xl bg-white/5 border border-white/20 text-white placeholder-slate-500 resize-none focus:outline-none focus:border-green-400/50 mb-3`}
-              />
-              {isRitual && ritual.intentionPrompt && (
-                <>
-                  <p className="text-amber-400 text-sm mb-2 text-center">
-                    ✨ {ritual.intentionPrompt}
-                  </p>
-                  <textarea
-                    value={intention}
-                    onChange={e => setIntention(e.target.value)}
-                    placeholder="Set your intention... (optional)"
-                    className="w-full h-16 p-4 rounded-xl bg-white/5 border border-white/20 text-white placeholder-slate-500 resize-none focus:outline-none focus:border-amber-400/50 mb-3"
-                  />
-                </>
-              )}
-              <button
-                onClick={() => shareGratitude(gratitude || (selectedSources.length > 0 ? `Feeling grateful for ${selectedSources.map(s => s.prompt).join(', ')}` : 'this moment of happiness'))}
-                className="w-full py-2 rounded-lg bg-pink-500/20 border border-pink-500/30 text-pink-400 text-sm flex items-center justify-center gap-2 hover:bg-pink-500/30 transition"
-              >
-                💌 Send as Thank You Card
-              </button>
-            </div>
-            <div className="flex gap-3">
-              <button onClick={() => setStep('source')} className="flex-1 bg-white/10 py-3 rounded-xl">← Back</button>
-              <button onClick={() => setStep('wisdom')} className="flex-1 bg-gradient-to-r from-green-400 to-emerald-500 text-slate-900 font-bold py-3 rounded-xl">Continue →</button>
-            </div>
           </>
         )}
 
@@ -1365,7 +1324,7 @@ function CheckinModal({ isOpen, onClose, onSave }) {
               </button>
             </div>
             <div className="flex gap-3">
-              <button onClick={() => setStep('gratitude')} className="flex-1 bg-white/10 py-3 rounded-xl">← Back</button>
+              <button onClick={() => setStep('source')} className="flex-1 bg-white/10 py-3 rounded-xl">← Back</button>
               <button onClick={() => setStep('exercise')} className="flex-1 bg-gradient-to-r from-green-400 to-emerald-500 text-slate-900 font-bold py-3 rounded-xl">Continue →</button>
             </div>
           </>
