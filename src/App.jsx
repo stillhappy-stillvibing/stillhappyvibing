@@ -1714,6 +1714,56 @@ function CheckinModal({ isOpen, onClose, onSave }) {
   const [showQuoteShare, setShowQuoteShare] = useState(false);
   const [showExerciseShare, setShowExerciseShare] = useState(false);
 
+  // Favorite tracking
+  const [favoriteQuotes, setFavoriteQuotes] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('happinessFavoriteQuotes') || '[]');
+    } catch {
+      return [];
+    }
+  });
+
+  const [favoriteExercises, setFavoriteExercises] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('happinessFavoriteExercises') || '[]');
+    } catch {
+      return [];
+    }
+  });
+
+  const isQuoteFavorite = favoriteQuotes.includes(quoteIndex);
+  const isExerciseFavorite = favoriteExercises.includes(exerciseIndex);
+
+  const toggleQuoteFavorite = () => {
+    const newFavorites = isQuoteFavorite
+      ? favoriteQuotes.filter(i => i !== quoteIndex)
+      : [...favoriteQuotes, quoteIndex];
+    setFavoriteQuotes(newFavorites);
+    localStorage.setItem('happinessFavoriteQuotes', JSON.stringify(newFavorites));
+
+    // Update global favorites counter
+    if (isQuoteFavorite) {
+      decrementQuoteFavorite(quoteIndex);
+    } else {
+      incrementQuoteFavorite(quoteIndex);
+    }
+  };
+
+  const toggleExerciseFavorite = () => {
+    const newFavorites = isExerciseFavorite
+      ? favoriteExercises.filter(i => i !== exerciseIndex)
+      : [...favoriteExercises, exerciseIndex];
+    setFavoriteExercises(newFavorites);
+    localStorage.setItem('happinessFavoriteExercises', JSON.stringify(newFavorites));
+
+    // Update global favorites counter
+    if (isExerciseFavorite) {
+      decrementExerciseFavorite(exerciseIndex);
+    } else {
+      incrementExerciseFavorite(exerciseIndex);
+    }
+  };
+
   const selectedSources = ritual.sources.filter(s => sources.includes(s.id));
 
   const toggleSource = (id) => {
@@ -1813,6 +1863,13 @@ function CheckinModal({ isOpen, onClose, onSave }) {
                 ← Previous
               </button>
               <button
+                onClick={toggleQuoteFavorite}
+                className={`px-4 py-2 rounded-xl transition ${isQuoteFavorite ? 'bg-pink-500/20 text-pink-400' : 'bg-white/5 text-slate-400'}`}
+                title={isQuoteFavorite ? "Remove from favorites" : "Add to favorites"}
+              >
+                {isQuoteFavorite ? '❤️' : '🤍'}
+              </button>
+              <button
                 onClick={nextQuote}
                 className="flex-1 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-xl font-semibold transition text-sm"
               >
@@ -1867,6 +1924,13 @@ function CheckinModal({ isOpen, onClose, onSave }) {
                 className="flex-1 py-2 bg-white/10 hover:bg-white/20 rounded-xl font-semibold transition text-sm"
               >
                 ← Previous
+              </button>
+              <button
+                onClick={toggleExerciseFavorite}
+                className={`px-4 py-2 rounded-xl transition ${isExerciseFavorite ? 'bg-pink-500/20 text-pink-400' : 'bg-white/5 text-slate-400'}`}
+                title={isExerciseFavorite ? "Remove from favorites" : "Add to favorites"}
+              >
+                {isExerciseFavorite ? '❤️' : '🤍'}
               </button>
               <button
                 onClick={nextExercise}
