@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '2.4.0';
+const APP_VERSION = '2.5.0';
 const BUILD_DATE = '2026-01-04';
 
 // Firebase Configuration
@@ -804,6 +804,158 @@ function ShareCardModal({ isOpen, onClose, streak, topSources, quote }) {
   );
 }
 
+// Generic Share Image Card for quotes, exercises, and gratitude
+function ShareImageCard({ isOpen, onClose, type, data }) {
+  const cardRef = useRef(null);
+  const [generating, setGenerating] = useState(false);
+
+  const handleShare = async () => {
+    if (!cardRef.current) return;
+    setGenerating(true);
+
+    try {
+      const canvas = await html2canvas(cardRef.current, {
+        backgroundColor: null,
+        scale: 2,
+      });
+
+      canvas.toBlob(async (blob) => {
+        const filename = `stillhappy-${type}.png`;
+        if (navigator.share && navigator.canShare?.({ files: [new File([blob], filename, { type: 'image/png' })] })) {
+          try {
+            await navigator.share({
+              files: [new File([blob], filename, { type: 'image/png' })],
+              title: type === 'quote' ? 'Wisdom to Share' : type === 'exercise' ? 'Mindfulness Exercise' : 'Gratitude',
+              text: `Shared from stillhappy.app ✨`
+            });
+          } catch (e) {
+            // User cancelled or error
+          }
+        } else {
+          // Fallback: download
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = filename;
+          a.click();
+          URL.revokeObjectURL(url);
+        }
+        setGenerating(false);
+      }, 'image/png');
+    } catch {
+      setGenerating(false);
+      alert('Could not generate image');
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50 overflow-y-auto" onClick={onClose}>
+      <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-sm w-full p-6 border border-white/20" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold">📸 Share</h2>
+          <button onClick={onClose} className="text-slate-400 hover:text-white">✕</button>
+        </div>
+
+        {/* Quote Card */}
+        {type === 'quote' && data && (
+          <div
+            ref={cardRef}
+            className="bg-gradient-to-br from-indigo-600 via-purple-500 to-pink-500 rounded-2xl p-6 mb-4"
+          >
+            <div className="text-center text-white">
+              <p className="text-4xl mb-4">📖</p>
+              <p className="text-lg italic mb-4 leading-relaxed">"{data.text}"</p>
+              <p className="text-sm font-semibold mb-1">— {data.author}</p>
+              <p className="text-xs opacity-80 mb-4">{data.tradition}</p>
+              <p className="text-xs font-bold opacity-90">stillhappy.app ✨</p>
+            </div>
+          </div>
+        )}
+
+        {/* Exercise Card */}
+        {type === 'exercise' && data && (
+          <div
+            ref={cardRef}
+            className="bg-gradient-to-br from-teal-600 via-green-500 to-emerald-500 rounded-2xl p-6 mb-4"
+          >
+            <div className="text-center text-white">
+              <p className="text-4xl mb-3">{data.isNightOnly ? '🌙' : '🧘'}</p>
+              <p className="text-xl font-bold mb-1">{data.title}</p>
+              <p className="text-sm opacity-90 mb-4">{data.subtitle}</p>
+
+              <div className="bg-white/20 rounded-xl p-3 mb-3 text-left">
+                <ul className="text-sm space-y-2">
+                  {data.steps.slice(0, 4).map((step, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <span className="opacity-70">{i + 1}.</span>
+                      <span>{step}</span>
+                    </li>
+                  ))}
+                  {data.steps.length > 4 && (
+                    <li className="opacity-70 text-xs">...and {data.steps.length - 4} more steps</li>
+                  )}
+                </ul>
+              </div>
+
+              <p className="text-xs font-bold opacity-90">stillhappy.app ✨</p>
+            </div>
+          </div>
+        )}
+
+        {/* Gratitude Card */}
+        {type === 'gratitude' && data && (
+          <div
+            ref={cardRef}
+            className="bg-gradient-to-br from-amber-600 via-orange-500 to-pink-500 rounded-2xl p-6 mb-4"
+          >
+            <div className="text-center text-white">
+              <p className="text-4xl mb-3">🙏</p>
+              <p className="text-xs uppercase tracking-wider opacity-80 mb-3">Grateful for</p>
+
+              {data.sources && data.sources.length > 0 && (
+                <div className="flex flex-wrap justify-center gap-1 mb-4">
+                  {data.sources.map(src => {
+                    const labels = {
+                      work: '💼 Work', relationship: '💕 Loved ones', health: '🏃 Health',
+                      peace: '😌 Peace', nature: '🌿 Nature', achievement: '🎯 Achievement',
+                      fun: '🎉 Fun', rest: '😴 Rest'
+                    };
+                    return (
+                      <span key={src} className="text-xs bg-white/20 px-2 py-1 rounded-full">
+                        {labels[src] || src}
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
+
+              {data.gratitude && (
+                <div className="bg-white/20 rounded-xl p-3 mb-3">
+                  <p className="text-sm italic leading-relaxed">{data.gratitude}</p>
+                </div>
+              )}
+
+              <p className="text-xs opacity-80 mb-3">{new Date(data.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+              <p className="text-xs font-bold opacity-90">stillhappy.app ✨</p>
+            </div>
+          </div>
+        )}
+
+        <button
+          onClick={handleShare}
+          disabled={generating}
+          className="w-full py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold hover:scale-105 transition disabled:opacity-50"
+        >
+          {generating ? '⏳ Creating...' : '📤 Share Image'}
+        </button>
+        <p className="text-xs text-slate-400 text-center mt-2">Creates a beautiful image to share</p>
+      </div>
+    </div>
+  );
+}
+
 // The World Tab Component - Global happiness data only
 function TheWorldTab() {
   const [globalSources, setGlobalSources] = useState({});
@@ -992,9 +1144,13 @@ function CheckinModal({ isOpen, onClose, onSave }) {
   const { ritual, isRitual, timeOfDay } = checkinConfig;
   
   // Night ritual gets Dream Insight, others get random exercise
-  const [exercise] = useState(() => 
+  const [exercise] = useState(() =>
     isRitual && timeOfDay === 'night' ? nightExercise : getRandomItem(exercises)
   );
+
+  // Share modal states
+  const [showQuoteShare, setShowQuoteShare] = useState(false);
+  const [showExerciseShare, setShowExerciseShare] = useState(false);
 
   const selectedSources = ritual.sources.filter(s => sources.includes(s.id));
 
@@ -1127,12 +1283,20 @@ function CheckinModal({ isOpen, onClose, onSave }) {
               <p className="text-green-400 font-medium">— {quote.author}</p>
               <p className="text-slate-400 text-sm">{quote.tradition}</p>
             </div>
-            <button
-              onClick={() => shareQuote(quote)}
-              className="w-full py-2 rounded-lg bg-purple-500/20 border border-purple-500/30 text-purple-400 text-sm flex items-center justify-center gap-2 hover:bg-purple-500/30 transition mb-5"
-            >
-              📤 Share this wisdom
-            </button>
+            <div className="flex gap-2 mb-5">
+              <button
+                onClick={() => shareQuote(quote)}
+                className="flex-1 py-2 rounded-lg bg-purple-500/20 border border-purple-500/30 text-purple-400 text-sm flex items-center justify-center gap-2 hover:bg-purple-500/30 transition"
+              >
+                📤 Share Text
+              </button>
+              <button
+                onClick={() => setShowQuoteShare(true)}
+                className="flex-1 py-2 rounded-lg bg-pink-500/20 border border-pink-500/30 text-pink-400 text-sm flex items-center justify-center gap-2 hover:bg-pink-500/30 transition"
+              >
+                📸 Share Image
+              </button>
+            </div>
             <div className="flex gap-3">
               <button onClick={() => setStep('gratitude')} className="flex-1 bg-white/10 py-3 rounded-xl">← Back</button>
               <button onClick={() => setStep('exercise')} className="flex-1 bg-gradient-to-r from-green-400 to-emerald-500 text-slate-900 font-bold py-3 rounded-xl">Continue →</button>
@@ -1160,12 +1324,20 @@ function CheckinModal({ isOpen, onClose, onSave }) {
                 ))}
               </ul>
             </div>
-            <button
-              onClick={() => shareExercise(exercise)}
-              className="w-full py-2 rounded-lg bg-blue-500/20 border border-blue-500/30 text-blue-400 text-sm flex items-center justify-center gap-2 hover:bg-blue-500/30 transition mb-5"
-            >
-              😊 Smile and the world smiles with you — share a smile!
-            </button>
+            <div className="flex gap-2 mb-5">
+              <button
+                onClick={() => shareExercise(exercise)}
+                className="flex-1 py-2 rounded-lg bg-blue-500/20 border border-blue-500/30 text-blue-400 text-sm flex items-center justify-center gap-2 hover:bg-blue-500/30 transition"
+              >
+                📤 Share Text
+              </button>
+              <button
+                onClick={() => setShowExerciseShare(true)}
+                className="flex-1 py-2 rounded-lg bg-teal-500/20 border border-teal-500/30 text-teal-400 text-sm flex items-center justify-center gap-2 hover:bg-teal-500/30 transition"
+              >
+                📸 Share Image
+              </button>
+            </div>
             <div className="flex gap-3">
               <button onClick={handleSkip} className="flex-1 bg-white/10 py-3 rounded-xl">Skip & Save</button>
               <button onClick={handleSave} className="flex-1 bg-gradient-to-r from-green-400 to-emerald-500 text-slate-900 font-bold py-3 rounded-xl">✓ Complete</button>
@@ -1173,6 +1345,20 @@ function CheckinModal({ isOpen, onClose, onSave }) {
           </>
         )}
       </div>
+
+      {/* Share Image Modals */}
+      <ShareImageCard
+        isOpen={showQuoteShare}
+        onClose={() => setShowQuoteShare(false)}
+        type="quote"
+        data={quote}
+      />
+      <ShareImageCard
+        isOpen={showExerciseShare}
+        onClose={() => setShowExerciseShare(false)}
+        type="exercise"
+        data={exercise}
+      />
     </div>
   );
 }
@@ -1181,7 +1367,8 @@ function CheckinModal({ isOpen, onClose, onSave }) {
 function JournalModal({ isOpen, onClose, checkins, onDeleteEntry, onClearAll }) {
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [confirmClearAll, setConfirmClearAll] = useState(false);
-  
+  const [shareEntry, setShareEntry] = useState(null);
+
   const sorted = [...checkins].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
   const sourceLabels = {
@@ -1219,12 +1406,22 @@ function JournalModal({ isOpen, onClose, checkins, onDeleteEntry, onClearAll }) 
                 const sourcesArray = entry.sources || (entry.source ? [entry.source] : []);
                 return (
                   <div key={entry.id} className="bg-white/5 rounded-xl p-4 relative group">
-                    <button 
-                      onClick={() => setConfirmDelete(entry.id)}
-                      className="absolute top-2 right-2 text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity text-sm"
-                    >
-                      🗑️
-                    </button>
+                    <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={() => setShareEntry(entry)}
+                        className="text-slate-500 hover:text-pink-400 text-sm"
+                        title="Share as image"
+                      >
+                        📸
+                      </button>
+                      <button
+                        onClick={() => setConfirmDelete(entry.id)}
+                        className="text-slate-500 hover:text-red-400 text-sm"
+                        title="Delete entry"
+                      >
+                        🗑️
+                      </button>
+                    </div>
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2 flex-wrap">
                         {sourcesArray.length > 0 ? (
@@ -1286,6 +1483,14 @@ function JournalModal({ isOpen, onClose, checkins, onDeleteEntry, onClearAll }) 
         message="All your gratitude entries will be permanently deleted."
         confirmText="Clear All"
         danger={true}
+      />
+
+      {/* Share Entry Modal */}
+      <ShareImageCard
+        isOpen={shareEntry !== null}
+        onClose={() => setShareEntry(null)}
+        type="gratitude"
+        data={shareEntry}
       />
     </div>
   );
