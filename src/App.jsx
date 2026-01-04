@@ -3,8 +3,8 @@ import { initializeApp } from 'firebase/app';
 import { getDatabase, ref, onValue, runTransaction, increment, set, get } from 'firebase/database';
 
 // App Version
-const APP_VERSION = '1.9.1';
-const BUILD_DATE = '2026-01-03 3:15 AM';
+const APP_VERSION = '2.0.0';
+const BUILD_DATE = '2026-01-03 4:00 AM';
 
 // Firebase Configuration
 const firebaseConfig = {
@@ -387,40 +387,6 @@ const streakBadges = [
 
 // Dynamic - always uses current year
 const CURRENT_YEAR = new Date().getFullYear();
-const NEW_YEAR_START = new Date(`${CURRENT_YEAR}-01-01T00:00:00`).getTime();
-
-const formatDuration = (ms, style = 'short') => {
-  if (ms < 0) ms = 0;
-  const s = Math.floor(ms / 1000);
-  const d = Math.floor(s / 86400);
-  const h = Math.floor((s % 86400) / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  const sec = s % 60;
-  if (style === 'long') {
-    let parts = [];
-    if (d > 0) parts.push(`${d} day${d !== 1 ? 's' : ''}`);
-    if (h > 0) parts.push(`${h} hour${h !== 1 ? 's' : ''}`);
-    if (m > 0) parts.push(`${m} min${m !== 1 ? 's' : ''}`);
-    if (sec > 0 || parts.length === 0) parts.push(`${sec} sec`);
-    return parts.join(', ');
-  }
-  let parts = [];
-  if (d > 0) parts.push(`${d}d`);
-  if (h > 0) parts.push(`${h}h`);
-  if (m > 0) parts.push(`${m}m`);
-  if (sec > 0 || parts.length === 0) parts.push(`${sec}s`);
-  return parts.join(' ');
-};
-
-const msToTimeUnits = (ms) => {
-  if (ms < 0) ms = 0;
-  return {
-    days: Math.floor(ms / 86400000),
-    hours: Math.floor((ms % 86400000) / 3600000),
-    minutes: Math.floor((ms % 3600000) / 60000),
-    seconds: Math.floor((ms % 60000) / 1000)
-  };
-};
 
 const getRandomItem = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
@@ -711,35 +677,8 @@ function ConfirmDialog({ isOpen, onClose, onConfirm, title, message, confirmText
   );
 }
 
-// Timer Display Component
-function TimerDisplay({ time, label, color = "yellow" }) {
-  const colorClasses = {
-    yellow: "bg-yellow-400/10 border-yellow-400/30 text-yellow-400",
-    green: "bg-green-400/10 border-green-400/30 text-green-400",
-  };
-  
-  return (
-    <div>
-      <p className="text-slate-400 uppercase tracking-widest text-xs mb-2 text-center">{label}</p>
-      <div className="flex justify-center gap-2 flex-wrap">
-        {[
-          { v: time.days, l: 'Days' }, 
-          { v: time.hours, l: 'Hrs' }, 
-          { v: time.minutes, l: 'Min' }, 
-          { v: time.seconds, l: 'Sec' }
-        ].map((u, i) => (
-          <div key={i} className={`${colorClasses[color]} border rounded-xl px-2 py-2 min-w-[50px]`}>
-            <div className="text-xl font-bold tabular-nums">{String(u.v).padStart(2, '0')}</div>
-            <div className="text-[9px] text-slate-400 uppercase">{u.l}</div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 // Check-in Modal Component - Gratitude & Happiness Source Tracker
-function CheckinModal({ isOpen, onClose, onSave, streakMs }) {
+function CheckinModal({ isOpen, onClose, onSave }) {
   const [step, setStep] = useState('source');
   const [source, setSource] = useState('');
   const [gratitude, setGratitude] = useState('');
@@ -798,7 +737,7 @@ function CheckinModal({ isOpen, onClose, onSave, streakMs }) {
           <div className="text-4xl mb-2">{ritual.emoji}</div>
           <h2 className="text-xl font-bold">{ritual.greeting}</h2>
           <p className="text-slate-400 text-sm">
-            {isRitual ? ritual.title : 'Check-in'} • Streak: {formatDuration(streakMs)}
+            {isRitual ? ritual.title : 'Check-in'}
           </p>
         </div>
 
@@ -927,160 +866,6 @@ function CheckinModal({ isOpen, onClose, onSave, streakMs }) {
   );
 }
 
-// End Happiness Modal Component
-function EndModal({ isOpen, onClose, streakMs, onSave }) {
-  const [quote] = useState(() => getRandomItem(wisdomQuotes));
-  const [exercise] = useState(() => getRandomItem(exercises));
-  const [reason, setReason] = useState('');
-  const [journal, setJournal] = useState('');
-  const [step, setStep] = useState('wisdom');
-
-  const breakReasons = [
-    { id: 'work', label: '💼 Work stress' },
-    { id: 'relationship', label: '💔 Relationship' },
-    { id: 'health', label: '🏥 Health' },
-    { id: 'anxiety', label: '😰 Anxiety' },
-    { id: 'news', label: '📰 News/World' },
-    { id: 'money', label: '💸 Money' },
-    { id: 'tired', label: '😴 Exhaustion' },
-    { id: 'conflict', label: '⚡ Conflict' },
-  ];
-
-  // Get targeted CBT tool based on reason
-  const cbtTool = reason ? cbtTools[reason] : defaultCbtTool;
-
-  const handleSave = () => {
-    onSave({ reason, journal });
-    setReason(''); setJournal(''); setStep('wisdom');
-  };
-
-  const handleShare = async () => {
-    const text = `My happiness streak lasted ${formatDuration(streakMs, 'long')} in ${CURRENT_YEAR}! ✨\n\nHow long can YOU keep the joy alive?`;
-    if (navigator.share) {
-      try { await navigator.share({ title: `${CURRENT_YEAR} Happiness Tracker`, text }); } catch {}
-    } else {
-      await navigator.clipboard.writeText(text);
-      alert('Copied to clipboard! 📋');
-    }
-  };
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50 overflow-y-auto" onClick={onClose}>
-      <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-lg w-full p-6 border border-yellow-400/20 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-        <div className="text-center mb-5">
-          <div className="text-5xl mb-2">🌅</div>
-          <h2 className="text-2xl font-bold">A Moment to Reset</h2>
-        </div>
-
-        <div className="bg-yellow-400/10 border border-yellow-400/30 rounded-xl p-4 text-center mb-5">
-          <p className="text-slate-400 text-sm">This happiness streak lasted</p>
-          <p className="text-2xl font-bold text-yellow-400">{formatDuration(streakMs, 'long')}</p>
-        </div>
-
-        <div className="flex justify-center gap-2 mb-5">
-          {['wisdom', 'reason', 'reframe', 'exercise'].map(s => (
-            <button key={s} onClick={() => setStep(s)} className={`w-2.5 h-2.5 rounded-full transition ${step === s ? 'bg-yellow-400' : 'bg-white/20'}`} />
-          ))}
-        </div>
-
-        {step === 'wisdom' && (
-          <>
-            <div className="border-l-4 border-yellow-400 bg-white/5 p-4 rounded-r-xl mb-3">
-              <p className="text-lg italic mb-2">"{quote.text}"</p>
-              <p className="text-yellow-400 font-medium">— {quote.author}</p>
-              <p className="text-slate-400 text-sm">{quote.tradition}</p>
-            </div>
-            <button
-              onClick={() => shareQuote(quote)}
-              className="w-full py-2 rounded-lg bg-purple-500/20 border border-purple-500/30 text-purple-400 text-sm flex items-center justify-center gap-2 hover:bg-purple-500/30 transition mb-5"
-            >
-              📤 Share this wisdom
-            </button>
-            <button onClick={() => setStep('reason')} className="w-full bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-900 font-bold py-3 rounded-xl">Continue →</button>
-          </>
-        )}
-
-        {step === 'reason' && (
-          <>
-            <div className="mb-4">
-              <p className="text-yellow-400 text-sm mb-3">What broke your streak? (helps us personalize support)</p>
-              <div className="grid grid-cols-2 gap-2 mb-4">
-                {breakReasons.map(r => (
-                  <button
-                    key={r.id}
-                    onClick={() => setReason(reason === r.id ? '' : r.id)}
-                    className={`p-3 rounded-xl text-sm text-left transition ${reason === r.id ? 'bg-yellow-400/20 border border-yellow-400/50' : 'bg-white/5 hover:bg-white/10'}`}
-                  >
-                    {r.label}
-                  </button>
-                ))}
-              </div>
-              <p className="text-slate-400 text-sm mb-2">💭 Any reflections?</p>
-              <textarea
-                value={journal}
-                onChange={e => setJournal(e.target.value)}
-                placeholder="What happened? What did you learn? (optional)"
-                className="w-full h-24 p-4 rounded-xl bg-white/5 border border-white/20 text-white placeholder-slate-500 resize-none focus:outline-none focus:border-yellow-400/50"
-              />
-            </div>
-            <div className="flex gap-3">
-              <button onClick={() => setStep('wisdom')} className="flex-1 bg-white/10 py-3 rounded-xl">← Back</button>
-              <button onClick={() => setStep('reframe')} className="flex-1 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-900 font-bold py-3 rounded-xl">Continue →</button>
-            </div>
-          </>
-        )}
-
-        {step === 'reframe' && (
-          <>
-            <div className="bg-purple-400/10 border border-purple-400/30 rounded-xl p-4 mb-5">
-              <h3 className="text-purple-400 font-semibold mb-1 flex items-center gap-2">🧠 {cbtTool.title}</h3>
-              <p className="text-slate-400 text-sm mb-3">{cbtTool.subtitle}</p>
-              <ul className="space-y-2 text-sm">
-                {cbtTool.steps.map((s, i) => (
-                  <li key={i} className="flex gap-2">
-                    <span className="text-purple-400 font-bold">{i + 1}.</span>
-                    <span>{s}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="flex gap-3">
-              <button onClick={() => setStep('reason')} className="flex-1 bg-white/10 py-3 rounded-xl">← Back</button>
-              <button onClick={() => setStep('exercise')} className="flex-1 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-900 font-bold py-3 rounded-xl">Continue →</button>
-            </div>
-          </>
-        )}
-
-        {step === 'exercise' && (
-          <>
-            <div className="bg-green-400/10 border border-green-400/30 rounded-xl p-4 mb-3">
-              <h3 className="text-green-400 font-semibold mb-1">🧘 {exercise.title}</h3>
-              <p className="text-slate-400 text-sm mb-3">{exercise.subtitle}</p>
-              {exercise.pattern && <BreathingGuide pattern={exercise.pattern} />}
-              <ul className="space-y-1 text-sm mt-3">
-                {exercise.steps.map((s, i) => <li key={i} className="flex gap-2"><span className="text-green-400">•</span>{s}</li>)}
-              </ul>
-            </div>
-            <button
-              onClick={() => shareExercise(exercise)}
-              className="w-full py-2 rounded-lg bg-blue-500/20 border border-blue-500/30 text-blue-400 text-sm flex items-center justify-center gap-2 hover:bg-blue-500/30 transition mb-4"
-            >
-              😊 Smile and the world smiles with you — share a smile!
-            </button>
-            <div className="flex gap-3 mb-3">
-              <button onClick={handleSave} className="flex-1 bg-gradient-to-r from-green-400 to-emerald-500 text-slate-900 font-bold py-3 rounded-xl">🌟 Begin Again</button>
-              <button onClick={handleShare} className="flex-1 bg-white/10 border border-white/20 py-3 rounded-xl">📤 Share</button>
-            </div>
-            <button onClick={onClose} className="w-full text-slate-400 text-sm">Just close</button>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
-
 // Journal View Modal with delete functionality
 function JournalModal({ isOpen, onClose, checkins, onDeleteEntry, onClearAll }) {
   const [confirmDelete, setConfirmDelete] = useState(null);
@@ -1145,9 +930,6 @@ function JournalModal({ isOpen, onClose, checkins, onDeleteEntry, onClearAll }) 
                   {entry.journal && !entry.gratitude && (
                     <p className="text-sm text-slate-300 leading-relaxed">{entry.journal}</p>
                   )}
-                  {entry.streakDuration && (
-                    <p className="text-xs text-slate-500 mt-2">At {formatDuration(entry.streakDuration)} into streak</p>
-                  )}
                 </div>
               ))}
             </div>
@@ -1193,7 +975,7 @@ function JournalModal({ isOpen, onClose, checkins, onDeleteEntry, onClearAll }) 
 }
 
 // Settings Modal
-function SettingsModal({ isOpen, onClose, onClearCheckins, onClearLeaderboard, onClearAll, onResetStreak, stats }) {
+function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats }) {
   const [confirmAction, setConfirmAction] = useState(null);
   const [notificationEnabled, setNotificationEnabled] = useState(() => {
     return localStorage.getItem(`happinessNotification${CURRENT_YEAR}`) === 'true';
@@ -1229,8 +1011,6 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearLeaderboard, o
 
   const scheduleNotification = (time) => {
     localStorage.setItem(`happinessNotificationTime${CURRENT_YEAR}`, time);
-    // Note: For persistent notifications, we'd need a service worker
-    // This sets up the time for the service worker to use
   };
 
   const toggleNotification = () => {
@@ -1246,19 +1026,11 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearLeaderboard, o
     setNotificationTime(e.target.value);
     scheduleNotification(e.target.value);
   };
-
-  const handleResetToNewYear = () => {
-    localStorage.removeItem(`happinessStreakStart${CURRENT_YEAR}`);
-    window.location.reload();
-  };
   
   if (!isOpen) return null;
 
   const actions = [
-    { id: 'streak', label: 'Reset Current Streak', desc: 'Start fresh without saving', onConfirm: onResetStreak, danger: false },
-    { id: 'newyear', label: 'Reset Streak to New Year', desc: 'Fix if timer looks wrong', onConfirm: handleResetToNewYear, danger: false },
     { id: 'checkins', label: 'Clear Check-ins & Journal', desc: `${stats.checkins} entries`, onConfirm: onClearCheckins },
-    { id: 'leaderboard', label: 'Clear Leaderboard', desc: `${stats.entries} entries`, onConfirm: onClearLeaderboard },
     { id: 'all', label: 'Clear All Data', desc: 'Complete reset', onConfirm: onClearAll },
   ];
 
@@ -1346,9 +1118,7 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearLeaderboard, o
                 <p className="font-medium">{action.label}</p>
                 <p className="text-xs text-slate-400">{action.desc}</p>
               </div>
-              <span className={action.danger === false ? "text-yellow-400" : "text-red-400"}>
-                {action.danger === false ? "🔄" : "🗑️"}
-              </span>
+              <span className="text-red-400">🗑️</span>
             </button>
           ))}
         </div>
@@ -1365,11 +1135,9 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearLeaderboard, o
         onClose={() => setConfirmAction(null)}
         onConfirm={() => confirmAction?.onConfirm()}
         title={`${confirmAction?.label}?`}
-        message={confirmAction?.danger === false 
-          ? "Your streak timer will reset to zero. This won't affect your leaderboard or journal."
-          : "This action cannot be undone. Your data will be permanently deleted."}
-        confirmText={confirmAction?.danger === false ? "Reset" : "Delete"}
-        danger={confirmAction?.danger !== false}
+        message="This action cannot be undone. Your data will be permanently deleted."
+        confirmText="Delete"
+        danger={true}
       />
     </div>
   );
@@ -1377,34 +1145,17 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearLeaderboard, o
 
 // Main App
 export default function App() {
-  // Year timer (since Jan 1 of current year)
-  const [yearTime, setYearTime] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-  const [yearMs, setYearMs] = useState(0);
-  
-  // Streak timer (since last reset/end)
-  const [streakStartTime, setStreakStartTime] = useState(() => {
-    const saved = localStorage.getItem(`happinessStreakStart${CURRENT_YEAR}`);
-    return saved ? parseInt(saved) : NEW_YEAR_START; // Default to start of current year
-  });
-  const [streakTime, setStreakTime] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-  const [streakMs, setStreakMs] = useState(0);
-
-  const [entries, setEntries] = useState(() => {
-    try { return JSON.parse(localStorage.getItem(`happinessLeaderboard${CURRENT_YEAR}`) || '[]'); } catch { return []; }
-  });
   const [checkins, setCheckins] = useState(() => {
     try { return JSON.parse(localStorage.getItem(`happinessCheckins${CURRENT_YEAR}`) || '[]'); } catch { return []; }
   });
   
-  const [showEndModal, setShowEndModal] = useState(false);
-  const [frozenStreakMs, setFrozenStreakMs] = useState(0); // Captured at moment of ending
   const [showCheckinModal, setShowCheckinModal] = useState(false);
   const [showJournalModal, setShowJournalModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [activeTab, setActiveTab] = useState('timer');
   const [showReminder, setShowReminder] = useState(false);
 
-  // Track active streak globally (only once per session)
+  // Track active users globally (only once per session)
   useEffect(() => {
     const sessionKey = `happinessSessionTracked${CURRENT_YEAR}`;
     const alreadyTracked = sessionStorage.getItem(sessionKey);
@@ -1463,59 +1214,10 @@ export default function App() {
     return () => clearInterval(interval);
   }, [checkins]);
 
-  // Update timers every second
-  useEffect(() => {
-    const update = () => {
-      const now = Date.now();
-      
-      // Year timer
-      const yearDiff = Math.max(0, now - NEW_YEAR_START);
-      setYearMs(yearDiff);
-      setYearTime(msToTimeUnits(yearDiff));
-      
-      // Streak timer
-      const streakDiff = Math.max(0, now - streakStartTime);
-      setStreakMs(streakDiff);
-      setStreakTime(msToTimeUnits(streakDiff));
-    };
-    update();
-    const interval = setInterval(update, 1000);
-    return () => clearInterval(interval);
-  }, [streakStartTime]);
-
-  // Save streak start time
-  useEffect(() => {
-    localStorage.setItem(`happinessStreakStart${CURRENT_YEAR}`, streakStartTime.toString());
-  }, [streakStartTime]);
-
-  useEffect(() => {
-    localStorage.setItem(`happinessLeaderboard${CURRENT_YEAR}`, JSON.stringify(entries));
-  }, [entries]);
-
+  // Save checkins to localStorage
   useEffect(() => {
     localStorage.setItem(`happinessCheckins${CURRENT_YEAR}`, JSON.stringify(checkins));
   }, [checkins]);
-
-  const resetStreakToNow = () => {
-    setStreakStartTime(Date.now());
-  };
-
-  const resetStreakToNewYear = () => {
-    setStreakStartTime(NEW_YEAR_START);
-  };
-
-  const handleEndSave = ({ reason, journal }) => {
-    const entry = { 
-      id: Date.now(), 
-      reason: reason || '',
-      duration: frozenStreakMs, // Use frozen time, not live time
-      journal, 
-      timestamp: new Date().toISOString() 
-    };
-    setEntries(prev => [...prev, entry]);
-    setShowEndModal(false);
-    resetStreakToNow();
-  };
 
   const handleCheckinSave = ({ source, gratitude, quote }) => {
     const checkin = { 
@@ -1523,7 +1225,6 @@ export default function App() {
       source,
       gratitude,
       quote, 
-      streakDuration: streakMs,
       timestamp: new Date().toISOString() 
     };
     setCheckins(prev => [...prev, checkin]);
@@ -1541,22 +1242,11 @@ export default function App() {
   const handleClearCheckins = () => {
     setCheckins([]);
     localStorage.removeItem(`happinessCheckins${CURRENT_YEAR}`);
-    resetStreakToNewYear(); // Revert to start of year
-  };
-
-  const handleClearLeaderboard = () => {
-    setEntries([]);
-    localStorage.removeItem(`happinessLeaderboard${CURRENT_YEAR}`);
-    resetStreakToNewYear(); // Revert to start of year
   };
 
   const handleClearAll = () => {
     setCheckins([]);
-    setEntries([]);
-    resetStreakToNewYear();
     localStorage.removeItem(`happinessCheckins${CURRENT_YEAR}`);
-    localStorage.removeItem(`happinessLeaderboard${CURRENT_YEAR}`);
-    localStorage.removeItem(`happinessStreakStart${CURRENT_YEAR}`);
   };
 
   // Calculate check-in streak (days in a row)
@@ -1641,14 +1331,22 @@ export default function App() {
             )}
             
             <div className="bg-white/5 backdrop-blur rounded-2xl p-5 mb-4 border border-white/10">
-              {/* Current Streak Timer */}
-              <div className="mb-5">
-                <TimerDisplay time={streakTime} label="Your Happiness Streak" color="green" />
+              {/* Day Streak Display */}
+              <div className="text-center mb-4">
+                <p className="text-slate-400 uppercase tracking-widest text-xs mb-2">Your Streak</p>
+                <div className="text-5xl font-bold text-green-400 mb-1">{checkinStreak}</div>
+                <p className="text-slate-400 text-sm">{checkinStreak === 1 ? 'day' : 'days'} of happiness 🔥</p>
               </div>
               
-              <p className="text-green-400 mb-4 flex items-center justify-center gap-2 text-sm">
-                <span className="animate-pulse">💚</span> Your happiness is thriving! <span className="animate-pulse">💚</span>
-              </p>
+              {todayCheckins > 0 ? (
+                <p className="text-green-400 mb-4 flex items-center justify-center gap-2 text-sm">
+                  <span className="animate-pulse">💚</span> You checked in {todayCheckins} time{todayCheckins > 1 ? 's' : ''} today! <span className="animate-pulse">💚</span>
+                </p>
+              ) : (
+                <p className="text-yellow-400 mb-4 flex items-center justify-center gap-2 text-sm">
+                  <span>✨</span> Check in to keep your streak going! <span>✨</span>
+                </p>
+              )}
               
               {/* What Makes YOU Happy - Visual Reminder */}
               {checkins.length > 0 && (
@@ -1680,23 +1378,12 @@ export default function App() {
                 </div>
               )}
               
-              <div className="flex gap-3">
-                <button 
-                  onClick={() => setShowCheckinModal(true)} 
-                  className="flex-1 bg-gradient-to-r from-green-400 to-emerald-500 text-slate-900 px-4 py-3 rounded-xl font-semibold hover:scale-105 transition shadow-lg shadow-green-500/20"
-                >
-                  ✓ Check In
-                </button>
-                <button 
-                  onClick={() => {
-                    setFrozenStreakMs(streakMs); // Capture current streak
-                    setShowEndModal(true);
-                  }} 
-                  className="flex-1 bg-gradient-to-r from-red-500 to-rose-600 px-4 py-3 rounded-xl font-semibold hover:scale-105 transition shadow-lg shadow-red-500/20"
-                >
-                  😢 End Streak
-                </button>
-              </div>
+              <button 
+                onClick={() => setShowCheckinModal(true)} 
+                className="w-full bg-gradient-to-r from-green-400 to-emerald-500 text-slate-900 px-4 py-3 rounded-xl font-semibold hover:scale-105 transition shadow-lg shadow-green-500/20"
+              >
+                ✓ Check In
+              </button>
             </div>
 
             {/* Quick Stats */}
@@ -1767,8 +1454,7 @@ export default function App() {
       </div>
 
       {/* Modals */}
-      <CheckinModal isOpen={showCheckinModal} onClose={() => setShowCheckinModal(false)} onSave={handleCheckinSave} streakMs={streakMs} />
-      <EndModal isOpen={showEndModal} onClose={() => setShowEndModal(false)} streakMs={frozenStreakMs} onSave={handleEndSave} />
+      <CheckinModal isOpen={showCheckinModal} onClose={() => setShowCheckinModal(false)} onSave={handleCheckinSave} />
       <JournalModal 
         isOpen={showJournalModal} 
         onClose={() => setShowJournalModal(false)} 
@@ -1780,10 +1466,8 @@ export default function App() {
         isOpen={showSettingsModal} 
         onClose={() => setShowSettingsModal(false)} 
         onClearCheckins={handleClearCheckins}
-        onClearLeaderboard={handleClearLeaderboard}
         onClearAll={handleClearAll}
-        onResetStreak={resetStreakToNow}
-        stats={{ checkins: checkins.length, entries: entries.length }}
+        stats={{ checkins: checkins.length }}
       />
 
       {/* Floating Action Button - Check In */}
