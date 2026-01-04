@@ -1,11 +1,11 @@
 {
   "name": "happiness-tracker-2026",
-  "version": "1.0.0",
+  "version": "2.3.0",
   "description": "Track your happiness in 2026 with gratitude journaling and mindfulness exercises",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "node generate-version.js && vite build",
     "preview": "vite preview"
   },
   "dependencies": {

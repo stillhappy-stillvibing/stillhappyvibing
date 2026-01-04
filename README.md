@@ -18,6 +18,7 @@ A Progressive Web App (PWA) to track your happiness, practice gratitude, and bui
 - 📊 **Progress Tracking** - See patterns in what brings you joy
 - 🔒 **Privacy First** - All data stored locally on your device
 - 📱 **PWA** - Install on your phone like a native app
+- 🔔 **Auto-Update Notifications** - Get notified when new versions are available
 
 ## Quick Start
 
@@ -107,6 +108,30 @@ Place these files in `/public`:
 - **Tailwind CSS** - Styling
 - **vite-plugin-pwa** - PWA support
 - **localStorage** - Data persistence
+
+## Version Update Notifications
+
+The app automatically checks for new versions every 5 minutes. When a new version is deployed:
+
+1. A colorful notification banner appears at the top of the screen
+2. Users can click "Update Now" to refresh and get the latest version
+3. The notification can be dismissed if users want to update later
+4. All service workers and caches are cleared to ensure a clean update
+
+### How it works:
+
+- During build, `generate-version.js` creates a `version.json` file with the current version from `package.json`
+- The app periodically fetches this file to check for version changes
+- Cache-busting ensures the latest version info is always retrieved
+- When versions don't match, the update notification is shown
+
+### For developers:
+
+To trigger the update notification in production:
+1. Update the version in `package.json` (e.g., `2.3.0` → `2.4.0`)
+2. Run `npm run build` (this auto-generates the new `version.json`)
+3. Deploy the build
+4. Users will see the update notification within 10 seconds to 5 minutes
 
 ## Privacy
 
