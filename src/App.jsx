@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '2.6.2';
+const APP_VERSION = '2.7.0';
 const BUILD_DATE = '2026-01-04';
 
 // Firebase Configuration
