@@ -1986,6 +1986,8 @@ export default function App() {
   const [showShareCard, setShowShareCard] = useState(false);
   const [activeTab, setActiveTab] = useState('timer');
   const [showReminder, setShowReminder] = useState(false);
+  const [showQuoteBrowser, setShowQuoteBrowser] = useState(false);
+  const [showExerciseBrowser, setShowExerciseBrowser] = useState(false);
 
   // Version update notification
   const { updateAvailable, newVersion } = useVersionCheck(APP_VERSION);
@@ -2325,23 +2327,39 @@ export default function App() {
               <span className="text-slate-400">→</span>
             </button>
 
-            {/* Weekly Reflection & Challenge Buttons */}
+            {/* Quick Actions */}
             <div className="mt-3 grid grid-cols-3 gap-2">
-              <button 
-                onClick={() => setShowWeeklyReflection(true)}
-                className="bg-white/5 border border-white/10 rounded-xl p-3 flex flex-col items-center gap-1 hover:bg-white/10 transition"
+              <button
+                onClick={() => setShowQuoteBrowser(true)}
+                className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl p-3 flex flex-col items-center gap-1 hover:from-purple-500/30 hover:to-pink-500/30 transition"
               >
-                <span className="text-xl">📊</span>
-                <span className="text-xs font-medium">Week</span>
+                <span className="text-xl">📖</span>
+                <span className="text-xs font-medium">Quotes</span>
               </button>
-              <button 
+              <button
+                onClick={() => setShowExerciseBrowser(true)}
+                className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30 rounded-xl p-3 flex flex-col items-center gap-1 hover:from-green-500/30 hover:to-emerald-500/30 transition"
+              >
+                <span className="text-xl">🧘</span>
+                <span className="text-xs font-medium">Exercises</span>
+              </button>
+              <button
                 onClick={() => setShowChallengeModal(true)}
                 className="bg-gradient-to-r from-pink-500/20 to-purple-500/20 border border-pink-500/30 rounded-xl p-3 flex flex-col items-center gap-1 hover:from-pink-500/30 hover:to-purple-500/30 transition"
               >
                 <span className="text-xl">🎯</span>
                 <span className="text-xs font-medium">Challenge</span>
               </button>
-              <button 
+            </div>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              <button
+                onClick={() => setShowWeeklyReflection(true)}
+                className="bg-white/5 border border-white/10 rounded-xl p-3 flex flex-col items-center gap-1 hover:bg-white/10 transition"
+              >
+                <span className="text-xl">📊</span>
+                <span className="text-xs font-medium">Week</span>
+              </button>
+              <button
                 onClick={() => setShowShareCard(true)}
                 className="bg-gradient-to-r from-purple-500/20 to-blue-500/20 border border-purple-500/30 rounded-xl p-3 flex flex-col items-center gap-1 hover:from-purple-500/30 hover:to-blue-500/30 transition"
               >
@@ -2388,6 +2406,8 @@ export default function App() {
 
       {/* Modals */}
       <CheckinModal isOpen={showCheckinModal} onClose={() => setShowCheckinModal(false)} onSave={handleCheckinSave} />
+      <QuoteBrowser isOpen={showQuoteBrowser} onClose={() => setShowQuoteBrowser(false)} />
+      <ExerciseBrowser isOpen={showExerciseBrowser} onClose={() => setShowExerciseBrowser(false)} />
       <JournalModal 
         isOpen={showJournalModal} 
         onClose={() => setShowJournalModal(false)} 
