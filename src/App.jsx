@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '3.3.0';
+const APP_VERSION = '3.4.0';
 const BUILD_DATE = '2026-01-05';
 
 // Firebase Configuration
@@ -698,7 +698,7 @@ const CURRENT_YEAR = new Date().getFullYear();
 
 const getRandomItem = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
-const APP_URL = typeof window !== 'undefined' ? window.location.origin : 'https://stillhappyvibing.vercel.app';
+const APP_URL = typeof window !== 'undefined' ? window.location.origin : 'https://smileswithyou.com';
 
 const shareContent = async (text, fallbackMessage = 'Copied to clipboard! 📋') => {
   if (navigator.share) {
@@ -971,7 +971,7 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
             await navigator.share({
               files: [new File([blob], filename, { type: 'image/png' })],
               title: type === 'quote' ? 'Wisdom to Share' : type === 'exercise' ? 'Mindfulness Exercise' : 'Gratitude',
-              text: `Shared from stillhappy.app ✨`
+              text: `Smile, and the whole world smileswithyou.com ✨`
             });
           } catch (e) {
             // User cancelled or error
@@ -1014,7 +1014,7 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
               <p className="text-lg italic mb-4 leading-relaxed">"{data.text}"</p>
               <p className="text-sm font-semibold mb-1">— {data.author}</p>
               <p className="text-xs opacity-80 mb-4">{data.tradition}</p>
-              <p className="text-xs font-bold opacity-90">stillhappy.app ✨</p>
+              <p className="text-xs font-bold opacity-90">Smile, and the whole world smileswithyou.com</p>
             </div>
           </div>
         )}
@@ -1041,7 +1041,7 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
                 </ul>
               </div>
 
-              <p className="text-xs font-bold opacity-90">stillhappy.app ✨</p>
+              <p className="text-xs font-bold opacity-90">Smile, and the whole world smileswithyou.com</p>
             </div>
           </div>
         )}
@@ -1087,7 +1087,7 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
                 <p className="text-xs font-semibold">🏆 {data.earnedMilestones}/{data.totalMilestones} milestones unlocked</p>
               </div>
 
-              <p className="text-xs font-bold opacity-90 mt-4">Join us at stillhappy.app ✨</p>
+              <p className="text-xs font-bold opacity-90 mt-4">Smile, and the whole world smileswithyou.com</p>
             </div>
           </div>
         )}
@@ -1595,7 +1595,8 @@ function TheWorldTab() {
         <div className="text-4xl mb-2">🌍</div>
         <h2 className="text-xl font-bold mb-1">The World is Smiling</h2>
         <p className="text-3xl font-bold text-purple-300">{formatNumber(totalSmiles)}</p>
-        <p className="text-sm text-slate-400 mb-3">smiles shared globally</p>
+        <p className="text-sm text-slate-400 mb-1">smiles shared globally</p>
+        <p className="text-xs text-purple-300/80 italic mb-3">Smile, and the whole world smiles with you!</p>
 
         <button
           onClick={() => setShowWorldShare(true)}
@@ -2483,8 +2484,8 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats, ch
           <p className="text-sm text-slate-300 mb-3">Help someone you love have a happier {CURRENT_YEAR}</p>
           <button
             onClick={() => {
-              const shareText = `✨ I'm tracking my happiness in ${CURRENT_YEAR} with Still Happy!\n\nTrack what makes you smile 😊\n\n🌍 See what's making the world happy\n🔥 Build your daily streak\n🧘 Daily mindfulness exercises\n\nTry it free: ${APP_URL}`;
-              shareContent(shareText, 'Check out Still Happy - shared to clipboard!');
+              const shareText = `Happiness Tracker: Track what makes you smile.\n\n🌍 See what's making the world happy\n🔥 Build your daily streak\n🧘 Daily mindfulness exercises\n\nSmile, and the whole world smileswithyou.com`;
+              shareContent(shareText, 'Shared to clipboard!');
             }}
             className="w-full py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold hover:scale-105 transition"
           >

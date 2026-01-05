@@ -9,8 +9,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'pwa-512x512.svg'],
       manifest: {
-        name: 'Still Happy - Happiness Tracker',
-        short_name: 'Still Happy',
+        name: 'Happiness Tracker',
+        short_name: 'Happiness Tracker',
         description: 'Track what makes you smile with gratitude journaling and mindfulness',
         theme_color: '#0f172a',
         background_color: '#0f172a',
