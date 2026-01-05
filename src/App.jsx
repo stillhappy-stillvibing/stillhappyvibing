@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '2.9.0';
+const APP_VERSION = '2.9.1';
 const BUILD_DATE = '2026-01-04';
 
 // Firebase Configuration
@@ -332,8 +332,6 @@ const timeRituals = {
     greeting: 'Good morning!',
     title: 'Morning Ritual',
     sourcePrompt: "What's energizing you this morning?",
-    gratitudePrompt: "What are you grateful for as you start your day?",
-    intentionPrompt: "What's one intention for today?",
     color: 'amber',
     sources: [
       { id: 'rest', label: '😴 Good sleep', prompt: 'restful sleep' },
@@ -351,8 +349,6 @@ const timeRituals = {
     greeting: 'Good afternoon!',
     title: 'Midday Check-in',
     sourcePrompt: "What's going well today?",
-    gratitudePrompt: "What's been a bright spot so far?",
-    intentionPrompt: "What will make the rest of today great?",
     color: 'yellow',
     sources: [
       { id: 'work', label: '💼 Work going well', prompt: 'work' },
@@ -370,8 +366,6 @@ const timeRituals = {
     greeting: 'Good evening!',
     title: 'Evening Reflection',
     sourcePrompt: "What made today good?",
-    gratitudePrompt: "What are you thankful for from today?",
-    intentionPrompt: "What's one thing you're letting go of tonight?",
     color: 'orange',
     sources: [
       { id: 'accomplishment', label: '✅ What I accomplished', prompt: 'your accomplishments' },
@@ -389,8 +383,6 @@ const timeRituals = {
     greeting: 'Good night!',
     title: 'Night Wind-down',
     sourcePrompt: "What's bringing you peace tonight?",
-    gratitudePrompt: "What from today are you carrying into tomorrow?",
-    intentionPrompt: "What thought do you want to sleep on?",
     color: 'indigo',
     sources: [
       { id: 'rest', label: '😴 Ready for sleep', prompt: 'rest' },
@@ -411,8 +403,6 @@ const regularCheckin = {
   greeting: 'Happiness Check-in',
   title: 'Check-in',
   sourcePrompt: "What's bringing you happiness right now?",
-  gratitudePrompt: "What are you grateful for?",
-  intentionPrompt: null, // No intention for regular check-ins
   color: 'green',
   sources: [
     { id: 'work', label: '💼 Work going well', prompt: 'work' },
@@ -457,19 +447,6 @@ const getCheckinConfig = () => {
   // Ritual not done yet, show the special ritual
   return { ritual: timeRituals[timeOfDay], isRitual: true, timeOfDay };
 };
-
-const journalPrompts = [
-  "What made you smile today?",
-  "What are you grateful for right now?",
-  "What's one small win you had today?",
-  "How are you really feeling?",
-  "What would make today better?",
-  "What's weighing on your mind?",
-  "Describe your current mood in 3 words.",
-  "What's something you're looking forward to?",
-  "What do you need right now?",
-  "What would you tell your past self?",
-];
 
 // Simplified badges - Day Streak based
 const streakBadges = [
@@ -704,11 +681,6 @@ const shareContent = async (text, fallbackMessage = 'Copied to clipboard! 📋')
       return true;
     } catch { return false; }
   }
-};
-
-const shareGratitude = (gratitudeText) => {
-  const text = `💛 A thank you for you:\n\n"${gratitudeText}"\n\n— Sent with gratitude ✨\n${APP_URL}`;
-  return shareContent(text);
 };
 
 const shareQuote = (quote) => {
@@ -990,45 +962,6 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
                 </ul>
               </div>
 
-              <p className="text-xs font-bold opacity-90">stillhappy.app ✨</p>
-            </div>
-          </div>
-        )}
-
-        {/* Gratitude Card */}
-        {type === 'gratitude' && data && (
-          <div
-            ref={cardRef}
-            className="bg-gradient-to-br from-amber-600 via-orange-500 to-pink-500 rounded-2xl p-6 mb-4"
-          >
-            <div className="text-center text-white">
-              <p className="text-4xl mb-3">🙏</p>
-              <p className="text-xs uppercase tracking-wider opacity-80 mb-3">Grateful for</p>
-
-              {data.sources && data.sources.length > 0 && (
-                <div className="flex flex-wrap justify-center gap-1 mb-4">
-                  {data.sources.map(src => {
-                    const labels = {
-                      work: '💼 Work', relationship: '💕 Loved ones', health: '🏃 Health',
-                      peace: '😌 Peace', nature: '🌿 Nature', achievement: '🎯 Achievement',
-                      fun: '🎉 Fun', rest: '😴 Rest'
-                    };
-                    return (
-                      <span key={src} className="text-xs bg-white/20 px-2 py-1 rounded-full">
-                        {labels[src] || src}
-                      </span>
-                    );
-                  })}
-                </div>
-              )}
-
-              {data.gratitude && (
-                <div className="bg-white/20 rounded-xl p-3 mb-3">
-                  <p className="text-sm italic leading-relaxed">{data.gratitude}</p>
-                </div>
-              )}
-
-              <p className="text-xs opacity-80 mb-3">{new Date(data.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
               <p className="text-xs font-bold opacity-90">stillhappy.app ✨</p>
             </div>
           </div>
@@ -1673,8 +1606,6 @@ function ConfirmDialog({ isOpen, onClose, onConfirm, title, message, confirmText
 function CheckinModal({ isOpen, onClose, onSave }) {
   const [step, setStep] = useState('source');
   const [sources, setSources] = useState([]);
-  const [gratitude, setGratitude] = useState('');
-  const [intention, setIntention] = useState('');
 
   // Get config based on time and whether ritual was done
   const [checkinConfig] = useState(() => getCheckinConfig());
@@ -1779,11 +1710,9 @@ function CheckinModal({ isOpen, onClose, onSave }) {
     if (isRitual && timeOfDay !== 'afternoon') {
       markRitualDone(timeOfDay);
     }
-    
-    onSave({ sources, gratitude, intention, quote: quote.author, timeOfDay, isRitual });
+
+    onSave({ sources, quote: quote.author, timeOfDay, isRitual });
     setSources([]);
-    setGratitude('');
-    setIntention('');
     setStep('source');
   };
 
@@ -1792,11 +1721,9 @@ function CheckinModal({ isOpen, onClose, onSave }) {
     if (isRitual && timeOfDay !== 'afternoon') {
       markRitualDone(timeOfDay);
     }
-    
-    onSave({ sources: [], gratitude: '', intention: '', quote: quote.author, timeOfDay, isRitual });
+
+    onSave({ sources: [], quote: quote.author, timeOfDay, isRitual });
     setSources([]);
-    setGratitude('');
-    setIntention('');
     setStep('source');
   };
 
@@ -1978,139 +1905,6 @@ function CheckinModal({ isOpen, onClose, onSave }) {
   );
 }
 
-// Journal View Modal with delete functionality
-function JournalModal({ isOpen, onClose, checkins, onDeleteEntry, onClearAll }) {
-  const [confirmDelete, setConfirmDelete] = useState(null);
-  const [confirmClearAll, setConfirmClearAll] = useState(false);
-  const [shareEntry, setShareEntry] = useState(null);
-
-  const sorted = [...checkins].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-  const sourceLabels = {
-    work: '💼 Work',
-    relationship: '💕 Loved ones',
-    health: '🏃 Health',
-    peace: '😌 Inner peace',
-    nature: '🌿 Nature',
-    achievement: '🎯 Achievement',
-    fun: '🎉 Fun',
-    rest: '😴 Good rest',
-  };
-  
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50 overflow-y-auto" onClick={onClose}>
-      <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-lg w-full p-6 border border-purple-400/20 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-xl font-bold flex items-center gap-2">🙏 Gratitude Journal</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-white text-xl">✕</button>
-        </div>
-
-        {sorted.length === 0 ? (
-          <div className="text-center py-10 text-slate-400">
-            <p className="text-3xl mb-2">🙏</p>
-            <p>No entries yet</p>
-            <p className="text-sm">Check in to start your gratitude journal!</p>
-          </div>
-        ) : (
-          <>
-            <div className="space-y-3 mb-6">
-              {sorted.map((entry) => {
-                // Handle both old (source) and new (sources) format
-                const sourcesArray = entry.sources || (entry.source ? [entry.source] : []);
-                return (
-                  <div key={entry.id} className="bg-white/5 rounded-xl p-4 relative group">
-                    <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={() => setShareEntry(entry)}
-                        className="text-slate-500 hover:text-pink-400 text-sm"
-                        title="Share as image"
-                      >
-                        📸
-                      </button>
-                      <button
-                        onClick={() => setConfirmDelete(entry.id)}
-                        className="text-slate-500 hover:text-red-400 text-sm"
-                        title="Delete entry"
-                      >
-                        🗑️
-                      </button>
-                    </div>
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        {sourcesArray.length > 0 ? (
-                          sourcesArray.map(src => (
-                            <span key={src} className="text-sm bg-green-400/20 text-green-400 px-2 py-1 rounded-full">
-                              {sourceLabels[src] || src}
-                            </span>
-                          ))
-                        ) : (
-                          <span className="text-sm text-slate-500">😊 Happy moment</span>
-                        )}
-                      </div>
-                      <span className="text-xs text-slate-400">{formatDate(entry.timestamp)}</span>
-                    </div>
-                    {entry.gratitude && (
-                      <p className="text-sm text-slate-300 leading-relaxed">{entry.gratitude}</p>
-                    )}
-                    {/* Support old journal field too */}
-                    {entry.journal && !entry.gratitude && (
-                      <p className="text-sm text-slate-300 leading-relaxed">{entry.journal}</p>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-            
-            <button 
-              onClick={() => setConfirmClearAll(true)}
-              className="w-full py-3 rounded-xl border border-red-500/30 text-red-400 text-sm hover:bg-red-500/10 transition"
-            >
-              🗑️ Clear All Entries
-            </button>
-          </>
-        )}
-        
-        <div className="mt-6 p-3 bg-white/5 rounded-xl">
-          <p className="text-xs text-slate-400 flex items-start gap-2">
-            <span>🔒</span>
-            <span>Your journal is stored locally on your device only. No data is sent to any server.</span>
-          </p>
-        </div>
-      </div>
-
-      <ConfirmDialog
-        isOpen={confirmDelete !== null}
-        onClose={() => setConfirmDelete(null)}
-        onConfirm={() => onDeleteEntry(confirmDelete)}
-        title="Delete Entry?"
-        message="This entry will be permanently deleted."
-        confirmText="Delete"
-        danger={true}
-      />
-
-      <ConfirmDialog
-        isOpen={confirmClearAll}
-        onClose={() => setConfirmClearAll(false)}
-        onConfirm={onClearAll}
-        title="Clear All Entries?"
-        message="All your gratitude entries will be permanently deleted."
-        confirmText="Clear All"
-        danger={true}
-      />
-
-      {/* Share Entry Modal */}
-      <ShareImageCard
-        isOpen={shareEntry !== null}
-        onClose={() => setShareEntry(null)}
-        type="gratitude"
-        data={shareEntry}
-      />
-    </div>
-  );
-}
-
 // Settings Modal
 function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats, checkins, onImportData, notificationSettings, setNotificationSettings }) {
   const [confirmAction, setConfirmAction] = useState(null);
@@ -2198,7 +1992,7 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats, ch
   if (!isOpen) return null;
 
   const actions = [
-    { id: 'checkins', label: 'Clear Check-ins & Journal', desc: `${stats.checkins} entries`, onConfirm: onClearCheckins },
+    { id: 'checkins', label: 'Clear Check-ins', desc: `${stats.checkins} entries`, onConfirm: onClearCheckins },
     { id: 'all', label: 'Clear All Data', desc: 'Complete reset', onConfirm: onClearAll },
   ];
 
@@ -2274,7 +2068,7 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats, ch
         <div className="bg-green-400/10 border border-green-400/30 rounded-xl p-4 mb-6">
           <h3 className="font-semibold text-green-400 mb-2 flex items-center gap-2">🔒 Your Privacy</h3>
           <ul className="text-sm text-slate-300 space-y-1">
-            <li>• Journal & personal data stored locally only</li>
+            <li>• All personal data stored locally only</li>
             <li>• Only anonymous counts shared (global counter)</li>
             <li>• No personal info ever leaves your device</li>
             <li>• Clear your data anytime below</li>
@@ -2287,7 +2081,7 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats, ch
           <p className="text-sm text-slate-300 mb-3">Help someone you love have a happier {CURRENT_YEAR}</p>
           <button
             onClick={() => {
-              const shareText = `✨ I'm tracking my happiness in ${CURRENT_YEAR} with Still Happy!\n\nTrack what makes you smile 😊\n\n🌍 See what's making the world happy\n🔥 Build your daily streak\n🙏 Practice gratitude daily\n\nTry it free: ${APP_URL}`;
+              const shareText = `✨ I'm tracking my happiness in ${CURRENT_YEAR} with Still Happy!\n\nTrack what makes you smile 😊\n\n🌍 See what's making the world happy\n🔥 Build your daily streak\n🧘 Daily mindfulness exercises\n\nTry it free: ${APP_URL}`;
               shareContent(shareText, 'Check out Still Happy - shared to clipboard!');
             }}
             className="w-full py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold hover:scale-105 transition"
@@ -2360,7 +2154,6 @@ export default function App() {
   });
   
   const [showCheckinModal, setShowCheckinModal] = useState(false);
-  const [showJournalModal, setShowJournalModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showChallengeModal, setShowChallengeModal] = useState(false);
   const [showWeeklyReflection, setShowWeeklyReflection] = useState(false);
@@ -2414,9 +2207,6 @@ export default function App() {
     if (action === 'checkin') {
       setShowCheckinModal(true);
       // Clean up URL
-      window.history.replaceState({}, '', window.location.pathname);
-    } else if (action === 'journal') {
-      setShowJournalModal(true);
       window.history.replaceState({}, '', window.location.pathname);
     }
   }, []);
@@ -2515,13 +2305,12 @@ export default function App() {
     localStorage.setItem(`happinessCheckins${CURRENT_YEAR}`, JSON.stringify(checkins));
   }, [checkins]);
 
-  const handleCheckinSave = ({ sources, gratitude, quote }) => {
-    const checkin = { 
-      id: Date.now(), 
+  const handleCheckinSave = ({ sources, quote }) => {
+    const checkin = {
+      id: Date.now(),
       sources: sources || [],
-      gratitude,
-      quote, 
-      timestamp: new Date().toISOString() 
+      quote,
+      timestamp: new Date().toISOString()
     };
     
     // Calculate what streak will be after this check-in
@@ -2798,13 +2587,6 @@ export default function App() {
       <CheckinModal isOpen={showCheckinModal} onClose={() => setShowCheckinModal(false)} onSave={handleCheckinSave} />
       <QuoteBrowser isOpen={showQuoteBrowser} onClose={() => setShowQuoteBrowser(false)} />
       <ExerciseBrowser isOpen={showExerciseBrowser} onClose={() => setShowExerciseBrowser(false)} />
-      <JournalModal 
-        isOpen={showJournalModal} 
-        onClose={() => setShowJournalModal(false)} 
-        checkins={checkins} 
-        onDeleteEntry={handleDeleteCheckin}
-        onClearAll={handleClearCheckins}
-      />
       <SettingsModal
         isOpen={showSettingsModal}
         onClose={() => setShowSettingsModal(false)}
