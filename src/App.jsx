@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '2.9.6';
+const APP_VERSION = '2.9.7';
 const BUILD_DATE = '2026-01-04';
 
 // Firebase Configuration
@@ -807,6 +807,124 @@ const globalMilestones = [
   { threshold: 100000, icon: '✨', label: '100K smiles' },
   { threshold: 1000000, icon: '🌟', label: '1M smiles' },
 ];
+
+// Heartfelt messages for Share A Smile
+const heartfeltMessages = [
+  "I thought of you and it brought a smile to my face.",
+  "You make the world a brighter place.",
+  "Your kindness is a gift to everyone around you.",
+  "Thank you for being exactly who you are.",
+  "The world is better because you're in it.",
+  "You're one of my favorite people.",
+  "Your smile is contagious, and I'm grateful for it.",
+  "You have a beautiful heart.",
+  "Thinking of you and sending good vibes your way.",
+  "You matter more than you know.",
+  "Your presence makes ordinary moments special.",
+  "I'm so lucky to know you.",
+  "You bring out the best in people.",
+  "You deserve all the happiness in the world.",
+  "Just wanted you to know you're appreciated.",
+  "Your energy is a blessing.",
+  "You make difficult days easier.",
+  "The world needs more people like you.",
+  "You're a ray of sunshine on cloudy days.",
+  "Thank you for being a light in this world."
+];
+
+// Share A Smile Card Modal - generates shareable heartfelt message card
+function ShareSmileCard({ isOpen, onClose }) {
+  const cardRef = useRef(null);
+  const [generating, setGenerating] = useState(false);
+  const [message, setMessage] = useState(() =>
+    heartfeltMessages[Math.floor(Math.random() * heartfeltMessages.length)]
+  );
+
+  const handleShare = async () => {
+    if (!cardRef.current) return;
+    setGenerating(true);
+
+    try {
+      const canvas = await html2canvas(cardRef.current, {
+        backgroundColor: null,
+        scale: 2,
+      });
+
+      canvas.toBlob(async (blob) => {
+        if (navigator.share && navigator.canShare?.({ files: [new File([blob], 'smile.png', { type: 'image/png' })] })) {
+          try {
+            await navigator.share({
+              files: [new File([blob], 'smile.png', { type: 'image/png' })],
+              title: 'A Smile For You',
+              text: message
+            });
+          } catch (e) {
+            // User cancelled or error
+          }
+        } else {
+          // Fallback: download
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'smile.png';
+          a.click();
+          URL.revokeObjectURL(url);
+        }
+        setGenerating(false);
+      }, 'image/png');
+    } catch {
+      setGenerating(false);
+      alert('Could not generate image');
+    }
+  };
+
+  const refreshMessage = () => {
+    setMessage(heartfeltMessages[Math.floor(Math.random() * heartfeltMessages.length)]);
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50 overflow-y-auto" onClick={onClose}>
+      <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-sm w-full p-6 border border-white/20" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold">💛 Share A Smile</h2>
+          <button onClick={onClose} className="text-slate-400 hover:text-white">✕</button>
+        </div>
+
+        {/* The Card to be captured */}
+        <div
+          ref={cardRef}
+          className="bg-gradient-to-br from-amber-400 via-orange-400 to-pink-400 rounded-2xl p-8 mb-4 aspect-square flex items-center justify-center"
+        >
+          <div className="text-center text-white">
+            <p className="text-6xl mb-6">💛</p>
+            <p className="text-lg font-medium leading-relaxed italic px-2">
+              "{message}"
+            </p>
+          </div>
+        </div>
+
+        <div className="flex gap-2 mb-2">
+          <button
+            onClick={refreshMessage}
+            className="flex-1 py-3 rounded-xl border border-purple-500/30 text-purple-300 font-semibold hover:bg-purple-500/10 transition"
+          >
+            🔄 New Message
+          </button>
+          <button
+            onClick={handleShare}
+            disabled={generating}
+            className="flex-1 py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold hover:scale-105 transition disabled:opacity-50"
+          >
+            {generating ? '⏳ Creating...' : '📤 Share'}
+          </button>
+        </div>
+        <p className="text-xs text-slate-400 text-center">Spread kindness, one smile at a time</p>
+      </div>
+    </div>
+  );
+}
 
 // Generic Share Image Card for quotes, exercises, and gratitude
 function ShareImageCard({ isOpen, onClose, type, data }) {
@@ -2104,6 +2222,7 @@ export default function App() {
   const [showMilestone, setShowMilestone] = useState(false);
   const [milestoneData, setMilestoneData] = useState(null);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [showShareSmile, setShowShareSmile] = useState(false);
   const [activeTab, setActiveTab] = useState('timer');
   const [showReminder, setShowReminder] = useState(false);
   const [showQuoteBrowser, setShowQuoteBrowser] = useState(false);
@@ -2477,10 +2596,7 @@ export default function App() {
                 <span className="text-xs font-medium">Share Weekly Update</span>
               </button>
               <button
-                onClick={() => {
-                  const message = "I thought of you and it brought a smile to my face. 😊";
-                  shareContent(message, 'Beautiful message copied to clipboard! 💛');
-                }}
+                onClick={() => setShowShareSmile(true)}
                 className="bg-gradient-to-r from-purple-500/20 to-blue-500/20 border border-purple-500/30 rounded-xl p-3 flex flex-col items-center gap-1 hover:from-purple-500/30 hover:to-blue-500/30 transition"
               >
                 <span className="text-xl">💛</span>
@@ -2554,6 +2670,10 @@ export default function App() {
         streak={milestoneData?.streak}
         badge={milestoneData?.badge}
         onChallenge={() => { setShowMilestone(false); setShowChallengeModal(true); }}
+      />
+      <ShareSmileCard
+        isOpen={showShareSmile}
+        onClose={() => setShowShareSmile(false)}
       />
       <Confetti active={showConfetti} />
 
