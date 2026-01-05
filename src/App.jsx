@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '2.9.2';
+const APP_VERSION = '2.9.3';
 const BUILD_DATE = '2026-01-04';
 
 // Firebase Configuration
@@ -701,10 +701,13 @@ const shareExercise = (exercise) => {
   return shareContent(text);
 };
 
-// Global Counter Component
+// Global Counter Component - Shows worldwide users + micro-moment
 function GlobalCounter() {
   const [stats, setStats] = useState({ activeStreaks: 0, totalCheckins: 0, todayCheckins: 0 });
   const [loading, setLoading] = useState(true);
+  const [currentMoment, setCurrentMoment] = useState(() =>
+    microMoments[Math.floor(Math.random() * microMoments.length)]
+  );
 
   useEffect(() => {
     const unsubscribe = onValue(globalCounterRef, (snapshot) => {
@@ -724,6 +727,15 @@ function GlobalCounter() {
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+    // Rotate to a new micro-moment every 45 seconds
+    const interval = setInterval(() => {
+      setCurrentMoment(microMoments[Math.floor(Math.random() * microMoments.length)]);
+    }, 45000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   if (loading) {
     return (
       <div className="bg-white/5 border border-white/10 rounded-xl p-3 text-center animate-pulse">
@@ -734,22 +746,29 @@ function GlobalCounter() {
 
   // Hide counter when numbers are too low (app just starting)
   if (stats.totalCheckins < 10 && stats.todayCheckins === 0) {
-    return null;
+    return (
+      <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-2xl p-4 text-center">
+        <div className="flex items-center justify-center gap-2">
+          <span className="text-2xl">{currentMoment.icon}</span>
+          <p className="text-sm text-slate-200 italic">{currentMoment.text}</p>
+        </div>
+      </div>
+    );
   }
 
   const formatNumber = (num) => num.toLocaleString();
 
   return (
-    <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-xl p-4 text-center">
-      <div className="flex items-center justify-center gap-2 mb-2">
+    <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-2xl p-4 text-center">
+      <div className="flex items-center justify-center gap-2 mb-3">
         <span className="text-lg">🌍</span>
-        <span className="text-purple-300 font-medium">
-          <span className="text-white font-bold">{formatNumber(stats.activeStreaks)}</span> people on a happiness streak
+        <span className="text-purple-300 font-medium text-sm">
+          <span className="text-white font-bold">{formatNumber(stats.activeStreaks)}</span> tracking happiness worldwide
         </span>
       </div>
-      <div className="flex justify-center gap-4 text-sm text-slate-400">
-        <span>✨ {formatNumber(stats.todayCheckins)} check-ins today</span>
-        <span>💫 {formatNumber(stats.totalCheckins)} all-time</span>
+      <div className="flex items-center justify-center gap-2 pt-3 border-t border-white/10">
+        <span className="text-2xl">{currentMoment.icon}</span>
+        <p className="text-sm text-slate-200 italic">{currentMoment.text}</p>
       </div>
     </div>
   );
@@ -2575,12 +2594,7 @@ export default function App() {
           <TheWorldTab />
         )}
 
-        {/* Micro-Moment Footer */}
-        <div className="mt-6">
-          <MicroMoment />
-        </div>
-
-        <div className="flex items-center justify-center gap-2 text-xs text-slate-500 mt-3">
+        <div className="flex items-center justify-center gap-2 text-xs text-slate-500 mt-6">
           <span>🔒</span>
           <span>All data stays on your device</span>
         </div>
