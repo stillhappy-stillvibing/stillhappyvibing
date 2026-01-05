@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '2.9.4';
+const APP_VERSION = '2.9.5';
 const BUILD_DATE = '2026-01-04';
 
 // Firebase Configuration
@@ -39,7 +39,10 @@ const decrementActiveStreaks = () => {
 
 const incrementCheckins = () => {
   const totalRef = ref(database, 'globalStats/totalCheckins');
-  const todayRef = ref(database, `globalStats/todayCheckins/${new Date().toISOString().split('T')[0]}`);
+  // Use local date instead of UTC
+  const now = new Date();
+  const localDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const todayRef = ref(database, `globalStats/todayCheckins/${localDate}`);
   runTransaction(totalRef, (current) => (current || 0) + 1);
   runTransaction(todayRef, (current) => (current || 0) + 1);
 };
@@ -718,7 +721,9 @@ function GlobalCounter() {
   useEffect(() => {
     const unsubscribe = onValue(globalCounterRef, (snapshot) => {
       const data = snapshot.val() || {};
-      const today = new Date().toISOString().split('T')[0];
+      // Use local date instead of UTC
+      const now = new Date();
+      const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
       setStats({
         activeStreaks: data.activeStreaks || 0,
         totalCheckins: data.totalCheckins || 0,
