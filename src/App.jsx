@@ -6,8 +6,8 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '2.9.8';
-const BUILD_DATE = '2026-01-04';
+const APP_VERSION = '3.0.0';
+const BUILD_DATE = '2026-01-05';
 
 // Firebase Configuration
 const firebaseConfig = {
