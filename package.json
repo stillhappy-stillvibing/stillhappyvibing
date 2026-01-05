@@ -1,7 +1,7 @@
 {
   "name": "happiness-tracker-2026",
-  "version": "2.9.0",
-  "description": "Track your happiness in 2026 with gratitude journaling and mindfulness exercises",
+  "version": "2.9.2",
+  "description": "Track your happiness in 2026 with daily check-ins and mindfulness exercises",
   "type": "module",
   "scripts": {
     "dev": "vite",
