@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '2.9.3';
+const APP_VERSION = '2.9.4';
 const BUILD_DATE = '2026-01-04';
 
 // Firebase Configuration
@@ -417,7 +417,13 @@ const regularCheckin = {
 };
 
 // Helper to check if ritual was done today
-const getTodayKey = () => new Date().toISOString().split('T')[0];
+const getTodayKey = () => {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
 const isRitualDoneToday = (ritualType) => {
   const key = `ritualDone_${ritualType}_${getTodayKey()}`;
@@ -1569,7 +1575,13 @@ const formatDate = (date) => {
   return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 };
 
-const getDayKey = (date) => new Date(date).toISOString().split('T')[0];
+const getDayKey = (date) => {
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
 // Breathing Guide Component
 function BreathingGuide({ pattern }) {
@@ -2283,7 +2295,7 @@ export default function App() {
       if (!notificationSettings.enabled) return;
 
       const now = new Date();
-      const today = now.toISOString().split('T')[0];
+      const today = getDayKey(now);
       const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
       notificationSettings.times.forEach((reminderTime, index) => {
@@ -2298,7 +2310,7 @@ export default function App() {
         if (Math.abs(currentMinutes - reminderMinutes) <= 1 && lastReminder !== today) {
           // Check if user already checked in today
           const todayCheckins = checkins.filter(c =>
-            new Date(c.timestamp).toISOString().split('T')[0] === today
+            getDayKey(c.timestamp) === today
           ).length;
 
           if (todayCheckins === 0) {
