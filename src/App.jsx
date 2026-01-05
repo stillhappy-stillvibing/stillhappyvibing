@@ -2586,19 +2586,11 @@ export default function App() {
   useEffect(() => {
     const sessionKey = `happinessSessionTracked${CURRENT_YEAR}`;
     const alreadyTracked = sessionStorage.getItem(sessionKey);
-    
+
     if (!alreadyTracked) {
       incrementActiveStreaks();
       sessionStorage.setItem(sessionKey, 'true');
     }
-    
-    // Decrement when user leaves
-    const handleUnload = () => {
-      decrementActiveStreaks();
-    };
-    
-    window.addEventListener('beforeunload', handleUnload);
-    return () => window.removeEventListener('beforeunload', handleUnload);
   }, []);
 
   // Handle app shortcuts (URL params)
