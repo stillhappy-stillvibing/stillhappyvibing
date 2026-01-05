@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '3.4.0';
+const APP_VERSION = '3.4.1';
 const BUILD_DATE = '2026-01-05';
 
 // Firebase Configuration
@@ -852,7 +852,8 @@ const heartfeltMessages = [
   "You make difficult days easier.",
   "The world needs more people like you.",
   "You're a ray of sunshine on cloudy days.",
-  "Thank you for being a light in this world."
+  "Thank you for being a light in this world.",
+  "You are awesome!"
 ];
 
 // Share A Smile Card Modal - generates shareable heartfelt message card
