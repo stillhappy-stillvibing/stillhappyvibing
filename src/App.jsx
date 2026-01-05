@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '3.0.0';
+const APP_VERSION = '3.1.0';
 const BUILD_DATE = '2026-01-05';
 
 // Firebase Configuration
@@ -190,6 +190,18 @@ const exercises = [
   { title: "GLAD Technique", subtitle: "Find four daily wins", steps: ["G — One GOOD thing today", "L — One thing you LEARNED", "A — One small ACCOMPLISHMENT", "D — One thing that DELIGHTED you", "Reflect on each one with gratitude"], pattern: null },
   { title: "Three Good Things", subtitle: "Rewire your brain for positivity", steps: ["Think of three good things from today", "They can be tiny: a warm cup of tea, a kind word", "For each one, ask: Why did this happen?", "Write them down or just reflect", "Do this daily for two weeks", "Watch your brain start noticing more good"], pattern: null },
   { title: "Acts of Kindness Practice", subtitle: "Boost happiness through giving", steps: ["Think of one small kind act you can do today", "It can be tiny: hold a door, send a text, smile", "Do it without expecting anything back", "Notice how it feels in your body", "Kindness to others is kindness to yourself"], pattern: null },
+];
+
+// CBT exercises for when someone selects "Nothing" (not feeling happy)
+const cbtExercises = [
+  { title: "Name It to Tame It", subtitle: "Reduce emotional intensity", steps: ["Take a deep breath", "Name the emotion you're feeling out loud", "Say: 'I notice I'm feeling [emotion]'", "This simple act reduces the emotion's power", "Remember: feelings are visitors, not permanent residents"], pattern: null },
+  { title: "The 5-4-3-2-1 Grounding", subtitle: "Return to the present moment", steps: ["Name 5 things you can see", "Name 4 things you can touch", "Name 3 things you can hear", "Name 2 things you can smell", "Name 1 thing you can taste", "Notice how you feel more present"], pattern: null },
+  { title: "Thought Diffusion", subtitle: "Distance yourself from negative thoughts", steps: ["Notice a negative thought", "Add this phrase: 'I'm having the thought that...'", "Example: 'I'm having the thought that I'm not good enough'", "This creates space between you and the thought", "You are not your thoughts"], pattern: null },
+  { title: "Evidence Examination", subtitle: "Challenge negative beliefs", steps: ["Write down a negative thought", "Ask: What evidence supports this?", "Ask: What evidence contradicts this?", "Ask: What would I tell a friend thinking this?", "Replace with a more balanced thought"], pattern: null },
+  { title: "Opposite Action", subtitle: "Do the opposite of your mood urge", steps: ["Notice what your mood wants you to do", "If you want to isolate, reach out to someone", "If you want to stay in bed, get up and move", "If you want to avoid, face it gently", "Acting opposite to the mood often shifts it"], pattern: null },
+  { title: "Self-Compassion Break", subtitle: "Treat yourself with kindness", steps: ["Place your hand on your heart", "Say: 'This is a moment of suffering'", "Say: 'Suffering is part of being human'", "Say: 'May I be kind to myself'", "Feel the warmth of your own hand"], pattern: null },
+  { title: "Reframe the Narrative", subtitle: "Change the story you're telling", steps: ["Identify the story you're telling yourself", "Ask: Is this the only way to see this?", "Consider: What else could be true?", "Find a more helpful perspective", "You get to choose the lens you see through"], pattern: null },
+  { title: "Value-Based Action", subtitle: "One small step aligned with who you want to be", steps: ["Think of one value important to you", "Examples: kindness, courage, connection", "Do ONE tiny action aligned with that value", "Even when you don't feel like it", "Values create meaning when motivation is low"], pattern: null },
 ];
 
 // Night-only exercise for hypnagogia/dream problem-solving
@@ -1685,22 +1697,23 @@ function CheckinModal({ isOpen, onClose, onSave }) {
     setQuoteIndex((quoteIndex - 1 + wisdomQuotes.length) % wisdomQuotes.length);
   };
 
-  // Carousel for exercises
-  const allExercises = [...exercises, nightExercise];
+  // Carousel for exercises - use CBT exercises when "nothing" is selected
+  const isNothing = sources.includes('nothing');
+  const exercisesToShow = isNothing ? cbtExercises : [...exercises, nightExercise];
   const [exerciseIndex, setExerciseIndex] = useState(() => {
-    if (isRitual && timeOfDay === 'night') {
+    if (isRitual && timeOfDay === 'night' && !isNothing) {
       return exercises.length; // nightExercise is last in allExercises
     }
-    return Math.floor(Math.random() * exercises.length); // Random from regular exercises
+    return Math.floor(Math.random() * (isNothing ? cbtExercises.length : exercises.length));
   });
-  const exercise = allExercises[exerciseIndex];
+  const exercise = exercisesToShow[exerciseIndex % exercisesToShow.length];
 
   const nextExercise = () => {
-    setExerciseIndex((exerciseIndex + 1) % allExercises.length);
+    setExerciseIndex((exerciseIndex + 1) % exercisesToShow.length);
   };
 
   const prevExercise = () => {
-    setExerciseIndex((exerciseIndex - 1 + allExercises.length) % allExercises.length);
+    setExerciseIndex((exerciseIndex - 1 + exercisesToShow.length) % exercisesToShow.length);
   };
 
   // Share modal states
@@ -1760,11 +1773,24 @@ function CheckinModal({ isOpen, onClose, onSave }) {
   const selectedSources = ritual.sources.filter(s => sources.includes(s.id));
 
   const toggleSource = (id) => {
-    setSources(prev => 
-      prev.includes(id) 
-        ? prev.filter(s => s !== id) 
-        : [...prev, id]
-    );
+    setSources(prev => {
+      // If clicking "nothing" or "everything"
+      if (id === 'nothing' || id === 'everything') {
+        // If already selected, deselect it
+        if (prev.includes(id)) {
+          return prev.filter(s => s !== id);
+        }
+        // Otherwise, select only this one (clear all others)
+        return [id];
+      }
+
+      // If clicking a regular option, remove "nothing" and "everything"
+      const filtered = prev.filter(s => s !== 'nothing' && s !== 'everything');
+      // Then toggle this option
+      return filtered.includes(id)
+        ? filtered.filter(s => s !== id)
+        : [...filtered, id];
+    });
   };
 
   const handleSave = () => {
@@ -1816,6 +1842,24 @@ function CheckinModal({ isOpen, onClose, onSave }) {
           <>
             <p className="text-center text-slate-300 mb-2">{ritual.sourcePrompt}</p>
             <p className="text-center text-slate-500 text-xs mb-4">Select all that apply</p>
+
+            {/* Special options: Nothing and Everything */}
+            <div className="grid grid-cols-2 gap-2 mb-3">
+              <button
+                onClick={() => toggleSource('nothing')}
+                className={`p-3 rounded-xl text-sm text-left transition ${sources.includes('nothing') ? 'bg-blue-400/20 border border-blue-400/50' : 'bg-white/5 hover:bg-white/10'}`}
+              >
+                😔 Nothing right now
+              </button>
+              <button
+                onClick={() => toggleSource('everything')}
+                className={`p-3 rounded-xl text-sm text-left transition ${sources.includes('everything') ? 'bg-yellow-400/20 border border-yellow-400/50' : 'bg-white/5 hover:bg-white/10'}`}
+              >
+                ✨ Everything!
+              </button>
+            </div>
+
+            {/* Regular source options */}
             <div className="grid grid-cols-2 gap-2 mb-5">
               {ritual.sources.map(s => (
                 <button
@@ -1827,6 +1871,7 @@ function CheckinModal({ isOpen, onClose, onSave }) {
                 </button>
               ))}
             </div>
+
             <button
               onClick={() => setStep('wisdom')}
               className="w-full bg-gradient-to-r from-green-400 to-emerald-500 text-slate-900 font-bold py-3 rounded-xl"
@@ -1888,10 +1933,13 @@ function CheckinModal({ isOpen, onClose, onSave }) {
 
         {step === 'exercise' && (
           <>
-            <p className="text-center text-xs text-slate-400 mb-3">{exerciseIndex + 1} of {allExercises.length}</p>
-            <div className={`${exercise.isNightOnly ? 'bg-indigo-400/10 border-indigo-400/30' : 'bg-green-400/10 border-green-400/30'} border rounded-xl p-4 mb-3`}>
-              <h3 className={`${exercise.isNightOnly ? 'text-indigo-400' : 'text-green-400'} font-semibold mb-1`}>
-                {exercise.isNightOnly ? '🌙' : '🧘'} {exercise.title}
+            {isNothing && (
+              <p className="text-center text-blue-300 text-sm mb-3">💙 Let's help you feel better</p>
+            )}
+            <p className="text-center text-xs text-slate-400 mb-3">{exerciseIndex + 1} of {exercisesToShow.length}</p>
+            <div className={`${isNothing ? 'bg-blue-400/10 border-blue-400/30' : exercise.isNightOnly ? 'bg-indigo-400/10 border-indigo-400/30' : 'bg-green-400/10 border-green-400/30'} border rounded-xl p-4 mb-3`}>
+              <h3 className={`${isNothing ? 'text-blue-400' : exercise.isNightOnly ? 'text-indigo-400' : 'text-green-400'} font-semibold mb-1`}>
+                {isNothing ? '💙' : exercise.isNightOnly ? '🌙' : '🧘'} {exercise.title}
               </h3>
               <p className="text-slate-400 text-sm mb-2">{exercise.subtitle}</p>
               {exercise.description && (
@@ -1901,7 +1949,7 @@ function CheckinModal({ isOpen, onClose, onSave }) {
               <ul className="space-y-1 text-sm mt-3">
                 {exercise.steps.map((s, i) => (
                   <li key={i} className="flex gap-2">
-                    <span className={exercise.isNightOnly ? 'text-indigo-400' : 'text-green-400'}>{i + 1}.</span>
+                    <span className={isNothing ? 'text-blue-400' : exercise.isNightOnly ? 'text-indigo-400' : 'text-green-400'}>{i + 1}.</span>
                     {s}
                   </li>
                 ))}
