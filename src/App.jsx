@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '3.4.4';
+const APP_VERSION = '3.4.5';
 const BUILD_DATE = '2026-01-05';
 
 // Firebase Configuration
@@ -571,35 +571,35 @@ function MilestoneCelebration({ isOpen, onClose, streak, badge, onShare, onChall
   );
 }
 
-// Challenge a Friend Modal
+// Smile with a Friend Modal
 function ChallengeModal({ isOpen, onClose }) {
   const [days, setDays] = useState(7);
-  
+
   if (!isOpen) return null;
 
-  const challengeText = `🎯 I'm challenging you to ${days} days of happiness!\n\nCan you track what makes you smile for ${days} days straight?\n\nAccept the challenge: ${APP_URL}`;
+  const inviteText = `😊 Let's smile together for ${days} days!\n\nI'm tracking what makes me smile. Want to join me?\n\nLet's smile together: ${APP_URL}`;
 
-  const sendChallenge = () => {
-    shareContent(challengeText, 'Challenge copied! Send it to a friend 💪');
+  const sendInvite = () => {
+    shareContent(inviteText, 'Invitation copied! Send it to a friend 💛');
     onClose();
   };
 
   return (
     <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50" onClick={onClose}>
-      <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-sm w-full p-6 border border-pink-400/30" onClick={e => e.stopPropagation()}>
+      <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-sm w-full p-6 border border-amber-400/30" onClick={e => e.stopPropagation()}>
         <div className="text-center mb-5">
-          <div className="text-5xl mb-2">🎯</div>
-          <h2 className="text-xl font-bold">Challenge a Friend</h2>
-          <p className="text-slate-400 text-sm">Spread happiness together</p>
+          <div className="text-5xl mb-2">😊</div>
+          <h2 className="text-xl font-bold">Smile with a Friend</h2>
+          <p className="text-slate-400 text-sm">Share the happiness</p>
         </div>
 
-        <p className="text-slate-300 text-sm mb-3 text-center">Challenge them to a streak of:</p>
+        <p className="text-slate-300 text-sm mb-3 text-center">Invite them to smile together for:</p>
         <div className="flex gap-2 justify-center mb-6">
           {[7, 14, 21, 30].map(d => (
             <button
               key={d}
               onClick={() => setDays(d)}
-              className={`px-4 py-2 rounded-xl font-semibold transition ${days === d ? 'bg-pink-500 text-white' : 'bg-white/10 text-slate-300'}`}
+              className={`px-4 py-2 rounded-xl font-semibold transition ${days === d ? 'bg-amber-500 text-white' : 'bg-white/10 text-slate-300'}`}
             >
               {d} days
             </button>
@@ -607,10 +607,10 @@ function ChallengeModal({ isOpen, onClose }) {
         </div>
 
         <button
-          onClick={sendChallenge}
-          className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold py-3 rounded-xl hover:scale-105 transition mb-3"
+          onClick={sendInvite}
+          className="w-full bg-gradient-to-r from-amber-400 to-orange-500 text-white font-bold py-3 rounded-xl hover:scale-105 transition mb-3"
         >
-          💌 Send Challenge
+          💛 Send Invitation
         </button>
         <button onClick={onClose} className="w-full text-slate-400 text-sm">
           Cancel
@@ -880,7 +880,7 @@ function ShareSmileCard({ isOpen, onClose }) {
             await navigator.share({
               files: [new File([blob], 'smile.png', { type: 'image/png' })],
               title: 'A Smile For You',
-              text: `${message}\n\nSmile, and the whole world smileswithyou.com ✨`
+              text: message
             });
           } catch (e) {
             // User cancelled or error
@@ -919,15 +919,14 @@ function ShareSmileCard({ isOpen, onClose }) {
         {/* The Card to be captured */}
         <div
           ref={cardRef}
-          className="bg-gradient-to-br from-amber-400 via-orange-400 to-pink-400 rounded-2xl p-8 mb-4 aspect-square flex flex-col items-center justify-center"
+          className="bg-gradient-to-br from-amber-400 via-orange-400 to-pink-400 rounded-2xl p-8 mb-4 aspect-square flex items-center justify-center"
         >
-          <div className="text-center text-white flex-1 flex flex-col items-center justify-center">
+          <div className="text-center text-white">
             <p className="text-6xl mb-6">💛</p>
             <p className="text-lg font-medium leading-relaxed italic px-2">
               "{message}"
             </p>
           </div>
-          <p className="text-xs font-bold text-white/90 mt-4">Smile, and the whole world smileswithyou.com</p>
         </div>
 
         <div className="flex gap-2 mb-2">
@@ -2935,8 +2934,8 @@ export default function App() {
                 onClick={() => setShowChallengeModal(true)}
                 className="bg-white/5 border border-white/10 rounded-xl p-3 flex flex-col items-center gap-1 hover:bg-white/10 transition"
               >
-                <span className="text-xl">🎯</span>
-                <span className="text-xs font-medium">Challenge A Friend</span>
+                <span className="text-xl">😊</span>
+                <span className="text-xs font-medium">Smile with a Friend</span>
               </button>
               <button
                 onClick={() => setShowWeeklyReflection(true)}
