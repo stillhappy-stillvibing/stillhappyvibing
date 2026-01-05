@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '2.9.7';
+const APP_VERSION = '2.9.8';
 const BUILD_DATE = '2026-01-04';
 
 // Firebase Configuration
@@ -2580,27 +2580,28 @@ export default function App() {
             {/* Quick Actions */}
             <div className="mt-3 grid grid-cols-1 gap-2">
               <button
+                onClick={() => setShowShareSmile(true)}
+                className="bg-gradient-to-r from-amber-500/20 to-pink-500/20 border border-amber-500/30 rounded-xl p-4 flex flex-col items-center gap-2 hover:from-amber-500/30 hover:to-pink-500/30 transition"
+              >
+                <span className="text-2xl">💛</span>
+                <span className="text-sm font-medium">Share A Smile</span>
+                <span className="text-xs text-slate-400">Send someone a heartfelt message</span>
+              </button>
+            </div>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              <button
                 onClick={() => setShowChallengeModal(true)}
-                className="bg-gradient-to-r from-pink-500/20 to-purple-500/20 border border-pink-500/30 rounded-xl p-3 flex flex-col items-center gap-1 hover:from-pink-500/30 hover:to-purple-500/30 transition"
+                className="bg-white/5 border border-white/10 rounded-xl p-3 flex flex-col items-center gap-1 hover:bg-white/10 transition"
               >
                 <span className="text-xl">🎯</span>
                 <span className="text-xs font-medium">Challenge A Friend</span>
               </button>
-            </div>
-            <div className="mt-2 grid grid-cols-2 gap-2">
               <button
                 onClick={() => setShowWeeklyReflection(true)}
                 className="bg-white/5 border border-white/10 rounded-xl p-3 flex flex-col items-center gap-1 hover:bg-white/10 transition"
               >
                 <span className="text-xl">📊</span>
                 <span className="text-xs font-medium">Share Weekly Update</span>
-              </button>
-              <button
-                onClick={() => setShowShareSmile(true)}
-                className="bg-gradient-to-r from-purple-500/20 to-blue-500/20 border border-purple-500/30 rounded-xl p-3 flex flex-col items-center gap-1 hover:from-purple-500/30 hover:to-blue-500/30 transition"
-              >
-                <span className="text-xl">💛</span>
-                <span className="text-xs font-medium">Share A Smile</span>
               </button>
             </div>
 
