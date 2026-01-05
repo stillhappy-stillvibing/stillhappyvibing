@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '2.9.1';
+const APP_VERSION = '2.9.2';
 const BUILD_DATE = '2026-01-04';
 
 // Firebase Configuration
@@ -730,6 +730,11 @@ function GlobalCounter() {
         <div className="h-4 bg-white/10 rounded w-3/4 mx-auto"></div>
       </div>
     );
+  }
+
+  // Hide counter when numbers are too low (app just starting)
+  if (stats.totalCheckins < 10 && stats.todayCheckins === 0) {
+    return null;
   }
 
   const formatNumber = (num) => num.toLocaleString();
