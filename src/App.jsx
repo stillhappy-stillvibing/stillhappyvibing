@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '3.4.1';
+const APP_VERSION = '3.4.2';
 const BUILD_DATE = '2026-01-05';
 
 // Firebase Configuration
@@ -2490,7 +2490,7 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats, ch
             }}
             className="w-full py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold hover:scale-105 transition"
           >
-            💌 Share Still Happy
+            💌 Share Your Smile
           </button>
         </div>
 
