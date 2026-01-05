@@ -75,11 +75,22 @@ const decrementExerciseFavorite = (exerciseIndex) => {
   runTransaction(favoriteRef, (current) => Math.max((current || 0) - 1, 0));
 };
 
+const incrementCBTFavorite = (cbtIndex) => {
+  const favoriteRef = ref(database, `globalFavorites/cbtExercises/${cbtIndex}`);
+  runTransaction(favoriteRef, (current) => (current || 0) + 1);
+};
+
+const decrementCBTFavorite = (cbtIndex) => {
+  const favoriteRef = ref(database, `globalFavorites/cbtExercises/${cbtIndex}`);
+  runTransaction(favoriteRef, (current) => Math.max((current || 0) - 1, 0));
+};
+
 // Reference for global happiness sources
 const globalHappinessSourcesRef = ref(database, 'globalHappinessSources');
 // References for global favorites
 const globalFavoriteQuotesRef = ref(database, 'globalFavorites/quotes');
 const globalFavoriteExercisesRef = ref(database, 'globalFavorites/exercises');
+const globalFavoriteCBTRef = ref(database, 'globalFavorites/cbtExercises');
 
 // Micro-moments - gentle mindfulness prompts
 const microMoments = [
@@ -1360,6 +1371,63 @@ function WorldQuoteCarousel({ topQuotes }) {
   );
 }
 
+// World CBT Carousel - Shows CBT exercises used to get back on track
+function WorldCBTCarousel({ topCBTExercises }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  if (topCBTExercises.length === 0) return null;
+
+  const currentItem = topCBTExercises[currentIndex];
+
+  const nextExercise = () => {
+    setCurrentIndex((currentIndex + 1) % topCBTExercises.length);
+  };
+
+  const prevExercise = () => {
+    setCurrentIndex((currentIndex - 1 + topCBTExercises.length) % topCBTExercises.length);
+  };
+
+  return (
+    <div className="bg-white/5 backdrop-blur rounded-2xl p-4 mb-4 border border-white/10">
+      <h3 className="font-semibold mb-4 flex items-center gap-2">💙 Getting Back on Track</h3>
+      <p className="text-center text-xs text-slate-400 mb-3">
+        {currentIndex + 1} of {topCBTExercises.length}
+      </p>
+      <div className="border-l-4 border-blue-400/50 bg-white/5 p-4 rounded-r-xl mb-4 max-h-[400px] overflow-y-auto">
+        <p className="text-sm font-semibold text-blue-400 mb-1">💙 {currentItem.exercise.title}</p>
+        <p className="text-xs text-slate-400 mb-3">{currentItem.exercise.subtitle}</p>
+        {currentItem.exercise.description && (
+          <p className="text-xs text-slate-300 mb-2 italic">{currentItem.exercise.description}</p>
+        )}
+        <ul className="space-y-1.5 text-xs mb-3">
+          {currentItem.exercise.steps.map((step, i) => (
+            <li key={i} className="flex gap-2">
+              <span className="text-blue-400 flex-shrink-0">{i + 1}.</span>
+              <span className="text-slate-300">{step}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div className="flex items-center gap-2">
+        <button
+          onClick={prevExercise}
+          disabled={topCBTExercises.length === 1}
+          className="flex-1 py-2 bg-white/10 hover:bg-white/20 rounded-xl font-semibold transition text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          ← Previous
+        </button>
+        <button
+          onClick={nextExercise}
+          disabled={topCBTExercises.length === 1}
+          className="flex-1 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 rounded-xl font-semibold transition text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          Next →
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // World Exercise Carousel - Shows all exercises sorted by favorites
 function WorldExerciseCarousel({ topExercises }) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -1422,6 +1490,7 @@ function TheWorldTab() {
   const [globalSources, setGlobalSources] = useState({});
   const [globalFavoriteQuotes, setGlobalFavoriteQuotes] = useState({});
   const [globalFavoriteExercises, setGlobalFavoriteExercises] = useState({});
+  const [globalFavoriteCBT, setGlobalFavoriteCBT] = useState({});
   const [loading, setLoading] = useState(true);
   const [showWorldShare, setShowWorldShare] = useState(false);
 
@@ -1462,6 +1531,18 @@ function TheWorldTab() {
     return () => unsubscribe();
   }, []);
 
+  // Fetch global favorite CBT exercises
+  useEffect(() => {
+    const unsubscribe = onValue(globalFavoriteCBTRef, (snapshot) => {
+      const data = snapshot.val() || {};
+      setGlobalFavoriteCBT(data);
+    }, (error) => {
+      console.log('Firebase read error (CBT exercises):', error);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   const formatNumber = (num) => num.toLocaleString();
 
   // Sort global sources by count
@@ -1490,6 +1571,16 @@ function TheWorldTab() {
       index: parseInt(index),
       count,
       exercise: allExercises[parseInt(index)]
+    }))
+    .filter(item => item.exercise); // Filter out any invalid indices
+
+  // Sort all favorite CBT exercises by count (most favorited first)
+  const topCBTExercises = Object.entries(globalFavoriteCBT)
+    .sort((a, b) => b[1] - a[1])
+    .map(([index, count]) => ({
+      index: parseInt(index),
+      count,
+      exercise: cbtExercises[parseInt(index)]
     }))
     .filter(item => item.exercise); // Filter out any invalid indices
 
@@ -1565,6 +1656,11 @@ function TheWorldTab() {
       {/* Favorite Quotes - Carousel */}
       {topQuotes.length > 0 && (
         <WorldQuoteCarousel topQuotes={topQuotes} />
+      )}
+
+      {/* Favorite CBT Exercises - Carousel */}
+      {topCBTExercises.length > 0 && (
+        <WorldCBTCarousel topCBTExercises={topCBTExercises} />
       )}
 
       {/* Favorite Exercises - Carousel */}
@@ -1706,7 +1802,17 @@ function CheckinModal({ isOpen, onClose, onSave }) {
     }
     return Math.floor(Math.random() * (isNothing ? cbtExercises.length : exercises.length));
   });
+
+  // For "nothing" flow, we need separate index for regular exercises
+  const [regularExerciseIndex, setRegularExerciseIndex] = useState(() => {
+    if (isRitual && timeOfDay === 'night') {
+      return exercises.length; // nightExercise is last
+    }
+    return Math.floor(Math.random() * exercises.length);
+  });
+
   const exercise = exercisesToShow[exerciseIndex % exercisesToShow.length];
+  const regularExercise = [...exercises, nightExercise][regularExerciseIndex % (exercises.length + 1)];
 
   const nextExercise = () => {
     setExerciseIndex((exerciseIndex + 1) % exercisesToShow.length);
@@ -1716,9 +1822,18 @@ function CheckinModal({ isOpen, onClose, onSave }) {
     setExerciseIndex((exerciseIndex - 1 + exercisesToShow.length) % exercisesToShow.length);
   };
 
+  const nextRegularExercise = () => {
+    setRegularExerciseIndex((regularExerciseIndex + 1) % (exercises.length + 1));
+  };
+
+  const prevRegularExercise = () => {
+    setRegularExerciseIndex((regularExerciseIndex - 1 + exercises.length + 1) % (exercises.length + 1));
+  };
+
   // Share modal states
   const [showQuoteShare, setShowQuoteShare] = useState(false);
   const [showExerciseShare, setShowExerciseShare] = useState(false);
+  const [exerciseToShare, setExerciseToShare] = useState(null);
 
   // Favorite tracking
   const [favoriteQuotes, setFavoriteQuotes] = useState(() => {
@@ -1737,8 +1852,19 @@ function CheckinModal({ isOpen, onClose, onSave }) {
     }
   });
 
+  const [favoriteCBT, setFavoriteCBT] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('happinessFavoriteCBT') || '[]');
+    } catch {
+      return [];
+    }
+  });
+
   const isQuoteFavorite = favoriteQuotes.includes(quoteIndex);
-  const isExerciseFavorite = favoriteExercises.includes(exerciseIndex);
+  const isExerciseFavorite = isNothing
+    ? favoriteCBT.includes(exerciseIndex)
+    : favoriteExercises.includes(exerciseIndex);
+  const isRegularExerciseFavorite = favoriteExercises.includes(regularExerciseIndex);
 
   const toggleQuoteFavorite = () => {
     const newFavorites = isQuoteFavorite
@@ -1756,17 +1882,48 @@ function CheckinModal({ isOpen, onClose, onSave }) {
   };
 
   const toggleExerciseFavorite = () => {
-    const newFavorites = isExerciseFavorite
-      ? favoriteExercises.filter(i => i !== exerciseIndex)
-      : [...favoriteExercises, exerciseIndex];
+    if (isNothing) {
+      // Handle CBT exercise favorites separately
+      const newFavorites = isExerciseFavorite
+        ? favoriteCBT.filter(i => i !== exerciseIndex)
+        : [...favoriteCBT, exerciseIndex];
+      setFavoriteCBT(newFavorites);
+      localStorage.setItem('happinessFavoriteCBT', JSON.stringify(newFavorites));
+
+      // Update global CBT favorites counter
+      if (isExerciseFavorite) {
+        decrementCBTFavorite(exerciseIndex);
+      } else {
+        incrementCBTFavorite(exerciseIndex);
+      }
+    } else {
+      // Handle regular exercise favorites
+      const newFavorites = isExerciseFavorite
+        ? favoriteExercises.filter(i => i !== exerciseIndex)
+        : [...favoriteExercises, exerciseIndex];
+      setFavoriteExercises(newFavorites);
+      localStorage.setItem('happinessFavoriteExercises', JSON.stringify(newFavorites));
+
+      // Update global favorites counter
+      if (isExerciseFavorite) {
+        decrementExerciseFavorite(exerciseIndex);
+      } else {
+        incrementExerciseFavorite(exerciseIndex);
+      }
+    }
+  };
+
+  const toggleRegularExerciseFavorite = () => {
+    const newFavorites = isRegularExerciseFavorite
+      ? favoriteExercises.filter(i => i !== regularExerciseIndex)
+      : [...favoriteExercises, regularExerciseIndex];
     setFavoriteExercises(newFavorites);
     localStorage.setItem('happinessFavoriteExercises', JSON.stringify(newFavorites));
 
-    // Update global favorites counter
-    if (isExerciseFavorite) {
-      decrementExerciseFavorite(exerciseIndex);
+    if (isRegularExerciseFavorite) {
+      decrementExerciseFavorite(regularExerciseIndex);
     } else {
-      incrementExerciseFavorite(exerciseIndex);
+      incrementExerciseFavorite(regularExerciseIndex);
     }
   };
 
@@ -1817,8 +1974,12 @@ function CheckinModal({ isOpen, onClose, onSave }) {
 
   if (!isOpen) return null;
 
-  // Determine which steps to show (no gratitude step)
-  const steps = ['source', 'wisdom', 'exercise'];
+  // Determine which steps to show based on flow
+  // When "nothing" is selected: source → cbtExercise → wisdom → regularExercise
+  // When not "nothing": source → wisdom → exercise (original flow)
+  const steps = isNothing
+    ? ['source', 'cbtExercise', 'wisdom', 'regularExercise']
+    : ['source', 'wisdom', 'exercise'];
 
   return (
     <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50 overflow-y-auto" onClick={onClose}>
@@ -1873,7 +2034,7 @@ function CheckinModal({ isOpen, onClose, onSave }) {
             </div>
 
             <button
-              onClick={() => setStep('wisdom')}
+              onClick={() => setStep(isNothing ? 'cbtExercise' : 'wisdom')}
               className="w-full bg-gradient-to-r from-green-400 to-emerald-500 text-slate-900 font-bold py-3 rounded-xl"
             >
               Continue →
@@ -1925,31 +2086,26 @@ function CheckinModal({ isOpen, onClose, onSave }) {
               </button>
             </div>
             <div className="flex gap-3">
-              <button onClick={() => setStep('source')} className="flex-1 bg-white/10 py-3 rounded-xl">← Back</button>
-              <button onClick={() => setStep('exercise')} className="flex-1 bg-gradient-to-r from-green-400 to-emerald-500 text-slate-900 font-bold py-3 rounded-xl">Continue →</button>
+              <button onClick={() => setStep(isNothing ? 'cbtExercise' : 'source')} className="flex-1 bg-white/10 py-3 rounded-xl">← Back</button>
+              <button onClick={() => setStep(isNothing ? 'regularExercise' : 'exercise')} className="flex-1 bg-gradient-to-r from-green-400 to-emerald-500 text-slate-900 font-bold py-3 rounded-xl">Continue →</button>
             </div>
           </>
         )}
 
-        {step === 'exercise' && (
+        {step === 'cbtExercise' && (
           <>
-            {isNothing && (
-              <p className="text-center text-blue-300 text-sm mb-3">💙 Let's help you feel better</p>
-            )}
-            <p className="text-center text-xs text-slate-400 mb-3">{exerciseIndex + 1} of {exercisesToShow.length}</p>
-            <div className={`${isNothing ? 'bg-blue-400/10 border-blue-400/30' : exercise.isNightOnly ? 'bg-indigo-400/10 border-indigo-400/30' : 'bg-green-400/10 border-green-400/30'} border rounded-xl p-4 mb-3`}>
-              <h3 className={`${isNothing ? 'text-blue-400' : exercise.isNightOnly ? 'text-indigo-400' : 'text-green-400'} font-semibold mb-1`}>
-                {isNothing ? '💙' : exercise.isNightOnly ? '🌙' : '🧘'} {exercise.title}
-              </h3>
+            <p className="text-center text-blue-300 text-sm mb-3">💙 Let's help you feel better</p>
+            <p className="text-center text-xs text-slate-400 mb-3">{exerciseIndex + 1} of {cbtExercises.length}</p>
+            <div className="bg-blue-400/10 border-blue-400/30 border rounded-xl p-4 mb-3">
+              <h3 className="text-blue-400 font-semibold mb-1">💙 {exercise.title}</h3>
               <p className="text-slate-400 text-sm mb-2">{exercise.subtitle}</p>
               {exercise.description && (
                 <p className="text-slate-300 text-sm mb-3 italic">{exercise.description}</p>
               )}
-              {exercise.pattern && <BreathingGuide pattern={exercise.pattern} />}
               <ul className="space-y-1 text-sm mt-3">
                 {exercise.steps.map((s, i) => (
                   <li key={i} className="flex gap-2">
-                    <span className={isNothing ? 'text-blue-400' : exercise.isNightOnly ? 'text-indigo-400' : 'text-green-400'}>{i + 1}.</span>
+                    <span className="text-blue-400">{i + 1}.</span>
                     {s}
                   </li>
                 ))}
@@ -1984,7 +2140,143 @@ function CheckinModal({ isOpen, onClose, onSave }) {
                 📤 Share Text
               </button>
               <button
-                onClick={() => setShowExerciseShare(true)}
+                onClick={() => {
+                  setExerciseToShare(exercise);
+                  setShowExerciseShare(true);
+                }}
+                className="flex-1 py-2 rounded-lg bg-teal-500/20 border border-teal-500/30 text-teal-400 text-sm flex items-center justify-center gap-2 hover:bg-teal-500/30 transition"
+              >
+                📸 Share Image
+              </button>
+            </div>
+            <div className="flex gap-3">
+              <button onClick={() => setStep('source')} className="flex-1 bg-white/10 py-3 rounded-xl">← Back</button>
+              <button onClick={() => setStep('wisdom')} className="flex-1 bg-gradient-to-r from-green-400 to-emerald-500 text-slate-900 font-bold py-3 rounded-xl">Continue →</button>
+            </div>
+          </>
+        )}
+
+        {step === 'exercise' && (
+          <>
+            <p className="text-center text-xs text-slate-400 mb-3">{exerciseIndex + 1} of {exercisesToShow.length}</p>
+            <div className={`${exercise.isNightOnly ? 'bg-indigo-400/10 border-indigo-400/30' : 'bg-green-400/10 border-green-400/30'} border rounded-xl p-4 mb-3`}>
+              <h3 className={`${exercise.isNightOnly ? 'text-indigo-400' : 'text-green-400'} font-semibold mb-1`}>
+                {exercise.isNightOnly ? '🌙' : '🧘'} {exercise.title}
+              </h3>
+              <p className="text-slate-400 text-sm mb-2">{exercise.subtitle}</p>
+              {exercise.description && (
+                <p className="text-slate-300 text-sm mb-3 italic">{exercise.description}</p>
+              )}
+              {exercise.pattern && <BreathingGuide pattern={exercise.pattern} />}
+              <ul className="space-y-1 text-sm mt-3">
+                {exercise.steps.map((s, i) => (
+                  <li key={i} className="flex gap-2">
+                    <span className={exercise.isNightOnly ? 'text-indigo-400' : 'text-green-400'}>{i + 1}.</span>
+                    {s}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="flex items-center gap-2 mb-3">
+              <button
+                onClick={prevExercise}
+                className="flex-1 py-2 bg-white/10 hover:bg-white/20 rounded-xl font-semibold transition text-sm"
+              >
+                ← Previous
+              </button>
+              <button
+                onClick={toggleExerciseFavorite}
+                className={`px-4 py-2 rounded-xl transition ${isExerciseFavorite ? 'bg-pink-500/20 text-pink-400' : 'bg-white/5 text-slate-400'}`}
+                title={isExerciseFavorite ? "Remove from favorites" : "Add to favorites"}
+              >
+                {isExerciseFavorite ? '❤️' : '🤍'}
+              </button>
+              <button
+                onClick={nextExercise}
+                className="flex-1 py-2 bg-gradient-to-r from-teal-500 to-green-500 hover:from-teal-600 hover:to-green-600 rounded-xl font-semibold transition text-sm"
+              >
+                Next →
+              </button>
+            </div>
+            <div className="flex gap-2 mb-5">
+              <button
+                onClick={() => shareExercise(exercise)}
+                className="flex-1 py-2 rounded-lg bg-blue-500/20 border border-blue-500/30 text-blue-400 text-sm flex items-center justify-center gap-2 hover:bg-blue-500/30 transition"
+              >
+                📤 Share Text
+              </button>
+              <button
+                onClick={() => {
+                  setExerciseToShare(exercise);
+                  setShowExerciseShare(true);
+                }}
+                className="flex-1 py-2 rounded-lg bg-teal-500/20 border border-teal-500/30 text-teal-400 text-sm flex items-center justify-center gap-2 hover:bg-teal-500/30 transition"
+              >
+                📸 Share Image
+              </button>
+            </div>
+            <div className="flex gap-3">
+              <button onClick={handleSkip} className="flex-1 bg-white/10 py-3 rounded-xl">Skip & Save</button>
+              <button onClick={handleSave} className="flex-1 bg-gradient-to-r from-green-400 to-emerald-500 text-slate-900 font-bold py-3 rounded-xl">✓ Complete</button>
+            </div>
+          </>
+        )}
+
+        {step === 'regularExercise' && (
+          <>
+            <p className="text-center text-green-300 text-sm mb-3">✨ Now let's build on that momentum</p>
+            <p className="text-center text-xs text-slate-400 mb-3">{regularExerciseIndex + 1} of {exercises.length + 1}</p>
+            <div className={`${regularExercise.isNightOnly ? 'bg-indigo-400/10 border-indigo-400/30' : 'bg-green-400/10 border-green-400/30'} border rounded-xl p-4 mb-3`}>
+              <h3 className={`${regularExercise.isNightOnly ? 'text-indigo-400' : 'text-green-400'} font-semibold mb-1`}>
+                {regularExercise.isNightOnly ? '🌙' : '🧘'} {regularExercise.title}
+              </h3>
+              <p className="text-slate-400 text-sm mb-2">{regularExercise.subtitle}</p>
+              {regularExercise.description && (
+                <p className="text-slate-300 text-sm mb-3 italic">{regularExercise.description}</p>
+              )}
+              {regularExercise.pattern && <BreathingGuide pattern={regularExercise.pattern} />}
+              <ul className="space-y-1 text-sm mt-3">
+                {regularExercise.steps.map((s, i) => (
+                  <li key={i} className="flex gap-2">
+                    <span className={regularExercise.isNightOnly ? 'text-indigo-400' : 'text-green-400'}>{i + 1}.</span>
+                    {s}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="flex items-center gap-2 mb-3">
+              <button
+                onClick={prevRegularExercise}
+                className="flex-1 py-2 bg-white/10 hover:bg-white/20 rounded-xl font-semibold transition text-sm"
+              >
+                ← Previous
+              </button>
+              <button
+                onClick={toggleRegularExerciseFavorite}
+                className={`px-4 py-2 rounded-xl transition ${isRegularExerciseFavorite ? 'bg-pink-500/20 text-pink-400' : 'bg-white/5 text-slate-400'}`}
+                title={isRegularExerciseFavorite ? "Remove from favorites" : "Add to favorites"}
+              >
+                {isRegularExerciseFavorite ? '❤️' : '🤍'}
+              </button>
+              <button
+                onClick={nextRegularExercise}
+                className="flex-1 py-2 bg-gradient-to-r from-teal-500 to-green-500 hover:from-teal-600 hover:to-green-600 rounded-xl font-semibold transition text-sm"
+              >
+                Next →
+              </button>
+            </div>
+            <div className="flex gap-2 mb-5">
+              <button
+                onClick={() => shareExercise(regularExercise)}
+                className="flex-1 py-2 rounded-lg bg-blue-500/20 border border-blue-500/30 text-blue-400 text-sm flex items-center justify-center gap-2 hover:bg-blue-500/30 transition"
+              >
+                📤 Share Text
+              </button>
+              <button
+                onClick={() => {
+                  setExerciseToShare(regularExercise);
+                  setShowExerciseShare(true);
+                }}
                 className="flex-1 py-2 rounded-lg bg-teal-500/20 border border-teal-500/30 text-teal-400 text-sm flex items-center justify-center gap-2 hover:bg-teal-500/30 transition"
               >
                 📸 Share Image
@@ -2009,7 +2301,7 @@ function CheckinModal({ isOpen, onClose, onSave }) {
         isOpen={showExerciseShare}
         onClose={() => setShowExerciseShare(false)}
         type="exercise"
-        data={exercise}
+        data={exerciseToShare || exercise}
       />
     </div>
   );
