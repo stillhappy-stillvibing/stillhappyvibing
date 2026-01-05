@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '2.9.3';
+const APP_VERSION = '2.9.6';
 const BUILD_DATE = '2026-01-04';
 
 // Firebase Configuration
@@ -39,7 +39,10 @@ const decrementActiveStreaks = () => {
 
 const incrementCheckins = () => {
   const totalRef = ref(database, 'globalStats/totalCheckins');
-  const todayRef = ref(database, `globalStats/todayCheckins/${new Date().toISOString().split('T')[0]}`);
+  // Use local date instead of UTC
+  const now = new Date();
+  const localDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const todayRef = ref(database, `globalStats/todayCheckins/${localDate}`);
   runTransaction(totalRef, (current) => (current || 0) + 1);
   runTransaction(todayRef, (current) => (current || 0) + 1);
 };
@@ -417,7 +420,13 @@ const regularCheckin = {
 };
 
 // Helper to check if ritual was done today
-const getTodayKey = () => new Date().toISOString().split('T')[0];
+const getTodayKey = () => {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
 const isRitualDoneToday = (ritualType) => {
   const key = `ritualDone_${ritualType}_${getTodayKey()}`;
@@ -712,7 +721,9 @@ function GlobalCounter() {
   useEffect(() => {
     const unsubscribe = onValue(globalCounterRef, (snapshot) => {
       const data = snapshot.val() || {};
-      const today = new Date().toISOString().split('T')[0];
+      // Use local date instead of UTC
+      const now = new Date();
+      const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
       setStats({
         activeStreaks: data.activeStreaks || 0,
         totalCheckins: data.totalCheckins || 0,
@@ -796,103 +807,6 @@ const globalMilestones = [
   { threshold: 100000, icon: '✨', label: '100K smiles' },
   { threshold: 1000000, icon: '🌟', label: '1M smiles' },
 ];
-
-// Share Card Modal - generates shareable image
-function ShareCardModal({ isOpen, onClose, streak, topSources, quote }) {
-  const cardRef = useRef(null);
-  const [generating, setGenerating] = useState(false);
-
-  const handleShare = async () => {
-    if (!cardRef.current) return;
-    setGenerating(true);
-    
-    try {
-      const canvas = await html2canvas(cardRef.current, {
-        backgroundColor: null,
-        scale: 2,
-      });
-      
-      canvas.toBlob(async (blob) => {
-        if (navigator.share && navigator.canShare?.({ files: [new File([blob], 'stillhappy.png', { type: 'image/png' })] })) {
-          try {
-            await navigator.share({
-              files: [new File([blob], 'stillhappy.png', { type: 'image/png' })],
-              title: 'My Happiness Journey',
-              text: `I'm on a ${streak} day happiness streak! 🔥 stillhappy.app`
-            });
-          } catch (e) {
-            // User cancelled or error
-          }
-        } else {
-          // Fallback: download
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `stillhappy-${streak}days.png`;
-          a.click();
-          URL.revokeObjectURL(url);
-        }
-        setGenerating(false);
-      }, 'image/png');
-    } catch {
-      setGenerating(false);
-      alert('Could not generate image');
-    }
-  };
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50 overflow-y-auto" onClick={onClose}>
-      <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-sm w-full p-6 border border-white/20" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold">📸 Share Your Journey</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-white">✕</button>
-        </div>
-
-        {/* The Card to be captured */}
-        <div 
-          ref={cardRef} 
-          className="bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 rounded-2xl p-5 mb-4"
-        >
-          <div className="text-center text-white">
-            <p className="text-xs uppercase tracking-wider opacity-80 mb-1">My Happiness Streak</p>
-            <p className="text-5xl font-bold mb-1">{streak} 🔥</p>
-            <p className="text-sm opacity-90 mb-4">{streak === 1 ? 'day' : 'days'} of joy</p>
-            
-            {topSources.length > 0 && (
-              <div className="bg-white/20 rounded-xl p-3 mb-3">
-                <p className="text-xs uppercase tracking-wider opacity-80 mb-2">What makes me smile</p>
-                <div className="flex flex-wrap justify-center gap-1">
-                  {topSources.slice(0, 3).map(([src]) => (
-                    <span key={src} className="text-sm bg-white/20 px-2 py-1 rounded-full">
-                      {sourceLabels[src] || src}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {quote && (
-              <p className="text-xs italic opacity-80 mb-2">"{quote.text.slice(0, 60)}..."</p>
-            )}
-            
-            <p className="text-xs font-bold opacity-90">stillhappy.app ✨</p>
-          </div>
-        </div>
-
-        <button
-          onClick={handleShare}
-          disabled={generating}
-          className="w-full py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold hover:scale-105 transition disabled:opacity-50"
-        >
-          {generating ? '⏳ Creating...' : '📤 Share Image'}
-        </button>
-        <p className="text-xs text-slate-400 text-center mt-2">Creates a beautiful image to share</p>
-      </div>
-    </div>
-  );
-}
 
 // Generic Share Image Card for quotes, exercises, and gratitude
 function ShareImageCard({ isOpen, onClose, type, data }) {
@@ -1569,7 +1483,13 @@ const formatDate = (date) => {
   return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 };
 
-const getDayKey = (date) => new Date(date).toISOString().split('T')[0];
+const getDayKey = (date) => {
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
 // Breathing Guide Component
 function BreathingGuide({ pattern }) {
@@ -2184,7 +2104,6 @@ export default function App() {
   const [showMilestone, setShowMilestone] = useState(false);
   const [milestoneData, setMilestoneData] = useState(null);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [showShareCard, setShowShareCard] = useState(false);
   const [activeTab, setActiveTab] = useState('timer');
   const [showReminder, setShowReminder] = useState(false);
   const [showQuoteBrowser, setShowQuoteBrowser] = useState(false);
@@ -2283,7 +2202,7 @@ export default function App() {
       if (!notificationSettings.enabled) return;
 
       const now = new Date();
-      const today = now.toISOString().split('T')[0];
+      const today = getDayKey(now);
       const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
       notificationSettings.times.forEach((reminderTime, index) => {
@@ -2298,7 +2217,7 @@ export default function App() {
         if (Math.abs(currentMinutes - reminderMinutes) <= 1 && lastReminder !== today) {
           // Check if user already checked in today
           const todayCheckins = checkins.filter(c =>
-            new Date(c.timestamp).toISOString().split('T')[0] === today
+            getDayKey(c.timestamp) === today
           ).length;
 
           if (todayCheckins === 0) {
@@ -2558,10 +2477,13 @@ export default function App() {
                 <span className="text-xs font-medium">Share Weekly Update</span>
               </button>
               <button
-                onClick={() => setShowShareCard(true)}
+                onClick={() => {
+                  const message = "I thought of you and it brought a smile to my face. 😊";
+                  shareContent(message, 'Beautiful message copied to clipboard! 💛');
+                }}
                 className="bg-gradient-to-r from-purple-500/20 to-blue-500/20 border border-purple-500/30 rounded-xl p-3 flex flex-col items-center gap-1 hover:from-purple-500/30 hover:to-blue-500/30 transition"
               >
-                <span className="text-xl">📸</span>
+                <span className="text-xl">💛</span>
                 <span className="text-xs font-medium">Share A Smile</span>
               </button>
             </div>
@@ -2632,22 +2554,6 @@ export default function App() {
         streak={milestoneData?.streak}
         badge={milestoneData?.badge}
         onChallenge={() => { setShowMilestone(false); setShowChallengeModal(true); }}
-      />
-      <ShareCardModal
-        isOpen={showShareCard}
-        onClose={() => setShowShareCard(false)}
-        streak={checkinStreak}
-        topSources={(() => {
-          const counts = checkins.reduce((acc, c) => {
-            const sourcesArray = c.sources || (c.source ? [c.source] : []);
-            sourcesArray.forEach(src => {
-              if (src) acc[src] = (acc[src] || 0) + 1;
-            });
-            return acc;
-          }, {});
-          return Object.entries(counts).sort((a, b) => b[1] - a[1]);
-        })()}
-        quote={wisdomQuotes[0]}
       />
       <Confetti active={showConfetti} />
 
