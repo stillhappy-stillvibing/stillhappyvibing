@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '3.4.3';
+const APP_VERSION = '3.4.4';
 const BUILD_DATE = '2026-01-05';
 
 // Firebase Configuration
@@ -346,10 +346,10 @@ const defaultCbtTool = {
 // Time-of-day ritual configuration
 const getTimeOfDay = () => {
   const hour = new Date().getHours();
-  if (hour >= 5 && hour < 12) return 'morning';
-  if (hour >= 12 && hour < 17) return 'afternoon';
-  if (hour >= 17 && hour < 22) return 'evening';
-  return 'night';
+  if (hour >= 5 && hour < 10) return 'morning';  // Morning ritual: 5am-10am
+  if (hour >= 10 && hour < 17) return 'afternoon';  // Afternoon: 10am-5pm
+  if (hour >= 17 && hour < 22) return 'evening';  // Evening ritual: 5pm-10pm
+  return 'night';  // Night ritual: 10pm-5am
 };
 
 const timeRituals = {
@@ -1780,9 +1780,16 @@ function CheckinModal({ isOpen, onClose, onSave }) {
   const [step, setStep] = useState('source');
   const [sources, setSources] = useState([]);
 
-  // Get config based on time and whether ritual was done
-  const [checkinConfig] = useState(() => getCheckinConfig());
+  // Get config based on time and whether ritual was done - recalculate on every open
+  const [checkinConfig, setCheckinConfig] = useState(() => getCheckinConfig());
   const { ritual, isRitual, timeOfDay } = checkinConfig;
+
+  // Recalculate config when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setCheckinConfig(getCheckinConfig());
+    }
+  }, [isOpen]);
 
   // Carousel for quotes
   const [quoteIndex, setQuoteIndex] = useState(() => Math.floor(Math.random() * wisdomQuotes.length));
