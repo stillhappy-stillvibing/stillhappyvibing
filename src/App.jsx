@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '3.4.2';
+const APP_VERSION = '3.4.3';
 const BUILD_DATE = '2026-01-05';
 
 // Firebase Configuration
@@ -880,7 +880,7 @@ function ShareSmileCard({ isOpen, onClose }) {
             await navigator.share({
               files: [new File([blob], 'smile.png', { type: 'image/png' })],
               title: 'A Smile For You',
-              text: message
+              text: `${message}\n\nSmile, and the whole world smileswithyou.com ✨`
             });
           } catch (e) {
             // User cancelled or error
@@ -919,14 +919,15 @@ function ShareSmileCard({ isOpen, onClose }) {
         {/* The Card to be captured */}
         <div
           ref={cardRef}
-          className="bg-gradient-to-br from-amber-400 via-orange-400 to-pink-400 rounded-2xl p-8 mb-4 aspect-square flex items-center justify-center"
+          className="bg-gradient-to-br from-amber-400 via-orange-400 to-pink-400 rounded-2xl p-8 mb-4 aspect-square flex flex-col items-center justify-center"
         >
-          <div className="text-center text-white">
+          <div className="text-center text-white flex-1 flex flex-col items-center justify-center">
             <p className="text-6xl mb-6">💛</p>
             <p className="text-lg font-medium leading-relaxed italic px-2">
               "{message}"
             </p>
           </div>
+          <p className="text-xs font-bold text-white/90 mt-4">Smile, and the whole world smileswithyou.com</p>
         </div>
 
         <div className="flex gap-2 mb-2">
