@@ -1868,20 +1868,11 @@ function InlineCheckin({ onSave }) {
   const [checkinConfig, setCheckinConfig] = useState(() => getCheckinConfig());
   const { ritual, isRitual, timeOfDay } = checkinConfig;
 
-  // Check if this check-in was already completed in this session
-  const completionKey = `checkinComplete_${timeOfDay}_${isRitual}`;
-  const [isCompleted, setIsCompleted] = useState(() => {
-    return sessionStorage.getItem(completionKey) === 'true';
-  });
-
   // Recalculate config periodically (every minute) to detect ritual changes
   useEffect(() => {
     const interval = setInterval(() => {
       const newConfig = getCheckinConfig();
       setCheckinConfig(newConfig);
-      // Check if completion status changed with new ritual
-      const newCompletionKey = `checkinComplete_${newConfig.timeOfDay}_${newConfig.isRitual}`;
-      setIsCompleted(sessionStorage.getItem(newCompletionKey) === 'true');
     }, 60000); // Check every minute
     return () => clearInterval(interval);
   }, []);
@@ -2063,12 +2054,9 @@ function InlineCheckin({ onSave }) {
 
     onSave({ sources, quote: quote.author, timeOfDay, isRitual });
 
-    // Mark this check-in as complete (hide it for this session)
-    const completionKey = `checkinComplete_${timeOfDay}_${isRitual}`;
-    sessionStorage.setItem(completionKey, 'true');
-
-    // Show completion state and stay completed (don't auto-reset)
-    setIsCompleted(true);
+    // Reset form for next check-in
+    setSources([]);
+    setStep('source');
   };
 
   const handleSkip = () => {
@@ -2079,18 +2067,10 @@ function InlineCheckin({ onSave }) {
 
     onSave({ sources: [], quote: quote.author, timeOfDay, isRitual });
 
-    // Mark this check-in as complete (hide it for this session)
-    const completionKey = `checkinComplete_${timeOfDay}_${isRitual}`;
-    sessionStorage.setItem(completionKey, 'true');
-
-    // Show completion state and stay completed (don't auto-reset)
-    setIsCompleted(true);
+    // Reset form for next check-in
+    setSources([]);
+    setStep('source');
   };
-
-  // Hide check-in completely if already completed
-  if (isCompleted) {
-    return null;
-  }
 
   // Determine which steps to show based on flow
   // New simplified logic:
@@ -2683,6 +2663,12 @@ export default function App() {
     try { return parseInt(localStorage.getItem(`happinessPoints${CURRENT_YEAR}`) || '0'); } catch { return 0; }
   });
 
+  // Track daily points separately
+  const [dailyPoints, setDailyPoints] = useState(() => {
+    const today = getDayKey(new Date());
+    try { return parseInt(localStorage.getItem(`dailyPoints_${today}`) || '0'); } catch { return 0; }
+  });
+
   const [showPointsAnimation, setShowPointsAnimation] = useState(false);
   const [pointsGained, setPointsGained] = useState(0);
 
@@ -2692,6 +2678,12 @@ export default function App() {
     setTotalPoints(newTotal);
     localStorage.setItem(`happinessPoints${CURRENT_YEAR}`, newTotal.toString());
 
+    // Track daily points
+    const today = getDayKey(new Date());
+    const newDailyTotal = dailyPoints + points;
+    setDailyPoints(newDailyTotal);
+    localStorage.setItem(`dailyPoints_${today}`, newDailyTotal.toString());
+
     // Show animation
     setPointsGained(points);
     setShowPointsAnimation(true);
@@ -2700,6 +2692,24 @@ export default function App() {
     // Track globally
     incrementGlobalJoyPoints(points);
   };
+
+  // Reset daily points at midnight
+  useEffect(() => {
+    const checkMidnight = () => {
+      const today = getDayKey(new Date());
+      const storedDay = localStorage.getItem('currentDay');
+      if (storedDay && storedDay !== today) {
+        // New day! Reset daily points
+        setDailyPoints(0);
+        localStorage.setItem(`dailyPoints_${today}`, '0');
+      }
+      localStorage.setItem('currentDay', today);
+    };
+
+    checkMidnight(); // Check on mount
+    const interval = setInterval(checkMidnight, 60000); // Check every minute
+    return () => clearInterval(interval);
+  }, []);
 
   // Calculate current rank
   const getCurrentRank = () => {
@@ -2997,7 +3007,7 @@ export default function App() {
             <h1 className="text-xl font-bold bg-gradient-to-r from-yellow-400 via-pink-400 to-yellow-400 bg-clip-text text-transparent">✨ Happiness Tracker ✨</h1>
             <button onClick={() => setShowSettingsModal(true)} className="text-slate-400 hover:text-white text-xl">⚙️</button>
           </div>
-          <p className="text-slate-400 text-xs mb-2">Track what makes you smile</p>
+          <p className="text-slate-400 text-xs mb-2">Let's make happiness addictively fun!</p>
           <span className="inline-block px-4 py-1 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-900 font-bold rounded-full text-sm">🎉 {CURRENT_YEAR} 🎉</span>
         </header>
 
@@ -3070,7 +3080,7 @@ export default function App() {
                 <div className="text-5xl font-bold text-green-400 mb-1">{checkinStreak}</div>
                 <p className="text-slate-400 text-sm">{checkinStreak === 1 ? 'day' : 'days'} of happiness 🔥</p>
               </div>
-              
+
               {todayCheckins > 0 ? (
                 <p className="text-green-400 mb-4 flex items-center justify-center gap-2 text-sm">
                   <span className="animate-pulse">💚</span> You checked in {todayCheckins} time{todayCheckins > 1 ? 's' : ''} today! <span className="animate-pulse">💚</span>
@@ -3079,6 +3089,16 @@ export default function App() {
                 <p className="text-yellow-400 mb-4 flex items-center justify-center gap-2 text-sm">
                   <span>✨</span> Check in to keep your streak going! <span>✨</span>
                 </p>
+              )}
+
+              {/* Today's Joy Points */}
+              {dailyPoints > 0 && (
+                <div className="text-center mb-4 pt-3 border-t border-white/10">
+                  <p className="text-slate-400 uppercase tracking-widest text-xs mb-2">Today's Joy</p>
+                  <div className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                    {dailyPoints} <span className="text-lg">points</span>
+                  </div>
+                </div>
               )}
               
               {/* What Makes YOU Happy - Visual Reminder */}
