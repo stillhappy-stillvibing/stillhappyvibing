@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '3.7.0';
+const APP_VERSION = '4.0.0';
 const BUILD_DATE = '2026-01-07';
 
 // Gamification: Point Values
@@ -17,14 +17,10 @@ const POINTS = {
   EVERYTHING_BONUS: 30,
   NOTHING_CBT_COMPLETE: 40,
 
-  // Engagement points
-  VIEW_QUOTE: 3,
-  QUOTE_HELPED: 10,
-  VIEW_EXERCISE: 5,
-  COMPLETE_EXERCISE: 15,
-  EXERCISE_HELPED: 20,
-  COMPLETE_CBT: 25,
-  CBT_HELPED: 30,
+  // Engagement points (Boost feedback system!)
+  QUOTE_BOOST: 10,
+  EXERCISE_BOOST: 15,
+  CBT_BOOST: 20,
 
   // Daily bonuses
   FIRST_CHECKIN: 25,
@@ -1170,41 +1166,10 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
 }
 
 // Quote Browser/Carousel Component
-function QuoteBrowser({ isOpen, onClose }) {
+function QuoteBrowser({ isOpen, onClose, addPoints }) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [favorites, setFavorites] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem('happinessFavoriteQuotes') || '[]');
-    } catch {
-      return [];
-    }
-  });
 
   const currentQuote = wisdomQuotes[currentIndex];
-  const isFavorite = favorites.includes(currentIndex);
-
-  const toggleFavorite = () => {
-    const newFavorites = isFavorite
-      ? favorites.filter(i => i !== currentIndex)
-      : [...favorites, currentIndex];
-    setFavorites(newFavorites);
-    localStorage.setItem('happinessFavoriteQuotes', JSON.stringify(newFavorites));
-
-    // Update global favorites counter
-    if (isFavorite) {
-      decrementQuoteFavorite(currentIndex);
-    } else {
-      incrementQuoteFavorite(currentIndex);
-    }
-  };
-
-  const nextQuote = () => {
-    setCurrentIndex((currentIndex + 1) % wisdomQuotes.length);
-  };
-
-  const prevQuote = () => {
-    setCurrentIndex((currentIndex - 1 + wisdomQuotes.length) % wisdomQuotes.length);
-  };
 
   const randomQuote = () => {
     let newIndex;
@@ -1212,6 +1177,15 @@ function QuoteBrowser({ isOpen, onClose }) {
       newIndex = Math.floor(Math.random() * wisdomQuotes.length);
     } while (newIndex === currentIndex && wisdomQuotes.length > 1);
     setCurrentIndex(newIndex);
+  };
+
+  const handleBoost = () => {
+    addPoints(POINTS.QUOTE_BOOST);
+    randomQuote();
+  };
+
+  const handleSkip = () => {
+    randomQuote();
   };
 
   if (!isOpen) return null;
@@ -1225,50 +1199,35 @@ function QuoteBrowser({ isOpen, onClose }) {
         </div>
 
         <div className="mb-4 text-center">
-          <p className="text-xs text-slate-400 mb-4">{currentIndex + 1} of {wisdomQuotes.length}</p>
-
-          <div className="border-l-4 border-purple-400 bg-white/5 p-5 rounded-r-xl mb-4 min-h-[200px] flex flex-col justify-center">
+          <div className="border-l-4 border-purple-400 bg-white/5 p-5 rounded-r-xl mb-6 min-h-[200px] flex flex-col justify-center">
             <p className="text-lg italic mb-3 leading-relaxed">"{currentQuote.text}"</p>
             <p className="text-purple-400 font-medium">— {currentQuote.author}</p>
             <p className="text-slate-400 text-sm">{currentQuote.tradition}</p>
           </div>
 
-          <div className="flex items-center justify-between gap-4 mb-4">
+          <p className="text-slate-400 text-sm mb-3">Did this boost you?</p>
+
+          <div className="flex gap-3 mb-4">
             <button
-              onClick={prevQuote}
-              className="flex-1 py-3 bg-white/5 hover:bg-white/10 rounded-xl font-semibold transition"
+              onClick={handleBoost}
+              className="flex-1 py-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-xl font-bold text-lg transition hover:scale-105"
             >
-              ← Previous
+              💫 Boost! <span className="text-sm">(+{POINTS.QUOTE_BOOST} pts)</span>
             </button>
             <button
-              onClick={toggleFavorite}
-              className={`px-4 py-3 rounded-xl transition ${isFavorite ? 'bg-pink-500/20 text-pink-400' : 'bg-white/5 text-slate-400'}`}
-              title={isFavorite ? "Remove from favorites" : "Add to favorites"}
+              onClick={handleSkip}
+              className="px-6 py-4 bg-white/5 hover:bg-white/10 rounded-xl font-semibold transition"
             >
-              {isFavorite ? '❤️' : '🤍'}
-            </button>
-            <button
-              onClick={nextQuote}
-              className="flex-1 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-xl font-semibold transition"
-            >
-              Next →
+              → Skip
             </button>
           </div>
 
-          <div className="flex gap-2">
-            <button
-              onClick={() => shareQuote(currentQuote)}
-              className="flex-1 py-2 rounded-lg bg-purple-500/20 border border-purple-500/30 text-purple-400 text-sm hover:bg-purple-500/30 transition"
-            >
-              📤 Share
-            </button>
-            <button
-              onClick={randomQuote}
-              className="flex-1 py-2 rounded-lg bg-amber-500/20 border border-amber-500/30 text-amber-400 text-sm hover:bg-amber-500/30 transition"
-            >
-              🔀 Shuffle
-            </button>
-          </div>
+          <button
+            onClick={() => shareQuote(currentQuote)}
+            className="w-full py-2 rounded-lg bg-purple-500/20 border border-purple-500/30 text-purple-400 text-sm hover:bg-purple-500/30 transition"
+          >
+            📤 Share
+          </button>
         </div>
       </div>
     </div>
@@ -1276,42 +1235,11 @@ function QuoteBrowser({ isOpen, onClose }) {
 }
 
 // Exercise Browser/Carousel Component
-function ExerciseBrowser({ isOpen, onClose }) {
+function ExerciseBrowser({ isOpen, onClose, addPoints }) {
   const allExercises = [...exercises, nightExercise];
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [favorites, setFavorites] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem('happinessFavoriteExercises') || '[]');
-    } catch {
-      return [];
-    }
-  });
 
   const currentExercise = allExercises[currentIndex];
-  const isFavorite = favorites.includes(currentIndex);
-
-  const toggleFavorite = () => {
-    const newFavorites = isFavorite
-      ? favorites.filter(i => i !== currentIndex)
-      : [...favorites, currentIndex];
-    setFavorites(newFavorites);
-    localStorage.setItem('happinessFavoriteExercises', JSON.stringify(newFavorites));
-
-    // Update global favorites counter
-    if (isFavorite) {
-      decrementExerciseFavorite(currentIndex);
-    } else {
-      incrementExerciseFavorite(currentIndex);
-    }
-  };
-
-  const nextExercise = () => {
-    setCurrentIndex((currentIndex + 1) % allExercises.length);
-  };
-
-  const prevExercise = () => {
-    setCurrentIndex((currentIndex - 1 + allExercises.length) % allExercises.length);
-  };
 
   const randomExercise = () => {
     let newIndex;
@@ -1319,6 +1247,15 @@ function ExerciseBrowser({ isOpen, onClose }) {
       newIndex = Math.floor(Math.random() * allExercises.length);
     } while (newIndex === currentIndex && allExercises.length > 1);
     setCurrentIndex(newIndex);
+  };
+
+  const handleBoost = () => {
+    addPoints(POINTS.EXERCISE_BOOST);
+    randomExercise();
+  };
+
+  const handleSkip = () => {
+    randomExercise();
   };
 
   if (!isOpen) return null;
@@ -1332,9 +1269,7 @@ function ExerciseBrowser({ isOpen, onClose }) {
         </div>
 
         <div className="mb-4">
-          <p className="text-xs text-slate-400 mb-4 text-center">{currentIndex + 1} of {allExercises.length}</p>
-
-          <div className={`${currentExercise.isNightOnly ? 'bg-indigo-400/10 border-indigo-400/30' : 'bg-green-400/10 border-green-400/30'} border rounded-xl p-4 mb-4`}>
+          <div className={`${currentExercise.isNightOnly ? 'bg-indigo-400/10 border-indigo-400/30' : 'bg-green-400/10 border-green-400/30'} border rounded-xl p-4 mb-6`}>
             <h3 className={`${currentExercise.isNightOnly ? 'text-indigo-400' : 'text-green-400'} font-semibold text-lg mb-1`}>
               {currentExercise.isNightOnly ? '🌙' : '🧘'} {currentExercise.title}
             </h3>
@@ -1353,42 +1288,29 @@ function ExerciseBrowser({ isOpen, onClose }) {
             </ul>
           </div>
 
-          <div className="flex items-center justify-between gap-4 mb-4">
+          <p className="text-slate-400 text-sm mb-3 text-center">Did this boost you?</p>
+
+          <div className="flex gap-3 mb-4">
             <button
-              onClick={prevExercise}
-              className="flex-1 py-3 bg-white/5 hover:bg-white/10 rounded-xl font-semibold transition"
+              onClick={handleBoost}
+              className="flex-1 py-4 bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-slate-900 rounded-xl font-bold text-lg transition hover:scale-105"
             >
-              ← Previous
+              💫 Boost! <span className="text-sm">(+{POINTS.EXERCISE_BOOST} pts)</span>
             </button>
             <button
-              onClick={toggleFavorite}
-              className={`px-4 py-3 rounded-xl transition ${isFavorite ? 'bg-pink-500/20 text-pink-400' : 'bg-white/5 text-slate-400'}`}
-              title={isFavorite ? "Remove from favorites" : "Add to favorites"}
+              onClick={handleSkip}
+              className="px-6 py-4 bg-white/5 hover:bg-white/10 rounded-xl font-semibold transition"
             >
-              {isFavorite ? '❤️' : '🤍'}
-            </button>
-            <button
-              onClick={nextExercise}
-              className="flex-1 py-3 bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-slate-900 rounded-xl font-semibold transition"
-            >
-              Next →
+              → Skip
             </button>
           </div>
 
-          <div className="flex gap-2">
-            <button
-              onClick={() => shareExercise(currentExercise)}
-              className="flex-1 py-2 rounded-lg bg-blue-500/20 border border-blue-500/30 text-blue-400 text-sm hover:bg-blue-500/30 transition"
-            >
-              📤 Share
-            </button>
-            <button
-              onClick={randomExercise}
-              className="flex-1 py-2 rounded-lg bg-amber-500/20 border border-amber-500/30 text-amber-400 text-sm hover:bg-amber-500/30 transition"
-            >
-              🔀 Shuffle
-            </button>
-          </div>
+          <button
+            onClick={() => shareExercise(currentExercise)}
+            className="w-full py-2 rounded-lg bg-blue-500/20 border border-blue-500/30 text-blue-400 text-sm hover:bg-blue-500/30 transition"
+          >
+            📤 Share
+          </button>
         </div>
       </div>
     </div>
@@ -1396,41 +1318,10 @@ function ExerciseBrowser({ isOpen, onClose }) {
 }
 
 // CBT Exercise Browser/Carousel Component
-function CBTBrowser({ isOpen, onClose }) {
+function CBTBrowser({ isOpen, onClose, addPoints }) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [favorites, setFavorites] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem('happinessFavoriteCBT') || '[]');
-    } catch {
-      return [];
-    }
-  });
 
   const currentExercise = cbtExercises[currentIndex];
-  const isFavorite = favorites.includes(currentIndex);
-
-  const toggleFavorite = () => {
-    const newFavorites = isFavorite
-      ? favorites.filter(i => i !== currentIndex)
-      : [...favorites, currentIndex];
-    setFavorites(newFavorites);
-    localStorage.setItem('happinessFavoriteCBT', JSON.stringify(newFavorites));
-
-    // Update global favorites counter
-    if (isFavorite) {
-      decrementCBTFavorite(currentIndex);
-    } else {
-      incrementCBTFavorite(currentIndex);
-    }
-  };
-
-  const nextExercise = () => {
-    setCurrentIndex((currentIndex + 1) % cbtExercises.length);
-  };
-
-  const prevExercise = () => {
-    setCurrentIndex((currentIndex - 1 + cbtExercises.length) % cbtExercises.length);
-  };
 
   const randomExercise = () => {
     let newIndex;
@@ -1438,6 +1329,15 @@ function CBTBrowser({ isOpen, onClose }) {
       newIndex = Math.floor(Math.random() * cbtExercises.length);
     } while (newIndex === currentIndex && cbtExercises.length > 1);
     setCurrentIndex(newIndex);
+  };
+
+  const handleBoost = () => {
+    addPoints(POINTS.CBT_BOOST);
+    randomExercise();
+  };
+
+  const handleSkip = () => {
+    randomExercise();
   };
 
   if (!isOpen) return null;
@@ -1451,9 +1351,7 @@ function CBTBrowser({ isOpen, onClose }) {
         </div>
 
         <div className="mb-4">
-          <p className="text-xs text-slate-400 mb-4 text-center">{currentIndex + 1} of {cbtExercises.length}</p>
-
-          <div className="bg-blue-400/10 border-blue-400/30 border rounded-xl p-4 mb-4">
+          <div className="bg-blue-400/10 border-blue-400/30 border rounded-xl p-4 mb-6">
             <h3 className="text-blue-400 font-semibold text-lg mb-1">
               💙 {currentExercise.title}
             </h3>
@@ -1472,42 +1370,29 @@ function CBTBrowser({ isOpen, onClose }) {
             </ul>
           </div>
 
-          <div className="flex items-center justify-between gap-4 mb-4">
+          <p className="text-slate-400 text-sm mb-3 text-center">Did this boost you?</p>
+
+          <div className="flex gap-3 mb-4">
             <button
-              onClick={prevExercise}
-              className="flex-1 py-3 bg-white/5 hover:bg-white/10 rounded-xl font-semibold transition"
+              onClick={handleBoost}
+              className="flex-1 py-4 bg-gradient-to-r from-blue-400 to-teal-500 hover:from-blue-500 hover:to-teal-600 text-slate-900 rounded-xl font-bold text-lg transition hover:scale-105"
             >
-              ← Previous
+              💫 Boost! <span className="text-sm">(+{POINTS.CBT_BOOST} pts)</span>
             </button>
             <button
-              onClick={toggleFavorite}
-              className={`px-4 py-3 rounded-xl transition ${isFavorite ? 'bg-pink-500/20 text-pink-400' : 'bg-white/5 text-slate-400'}`}
-              title={isFavorite ? "Remove from favorites" : "Add to favorites"}
+              onClick={handleSkip}
+              className="px-6 py-4 bg-white/5 hover:bg-white/10 rounded-xl font-semibold transition"
             >
-              {isFavorite ? '❤️' : '🤍'}
-            </button>
-            <button
-              onClick={nextExercise}
-              className="flex-1 py-3 bg-gradient-to-r from-blue-400 to-teal-500 hover:from-blue-500 hover:to-teal-600 text-slate-900 rounded-xl font-semibold transition"
-            >
-              Next →
+              → Skip
             </button>
           </div>
 
-          <div className="flex gap-2">
-            <button
-              onClick={() => shareExercise(currentExercise)}
-              className="flex-1 py-2 rounded-lg bg-blue-500/20 border border-blue-500/30 text-blue-400 text-sm hover:bg-blue-500/30 transition"
-            >
-              📤 Share
-            </button>
-            <button
-              onClick={randomExercise}
-              className="flex-1 py-2 rounded-lg bg-amber-500/20 border border-amber-500/30 text-amber-400 text-sm hover:bg-amber-500/30 transition"
-            >
-              🔀 Shuffle
-            </button>
-          </div>
+          <button
+            onClick={() => shareExercise(currentExercise)}
+            className="w-full py-2 rounded-lg bg-blue-500/20 border border-blue-500/30 text-blue-400 text-sm hover:bg-blue-500/30 transition"
+          >
+            📤 Share
+          </button>
         </div>
       </div>
     </div>
@@ -3351,9 +3236,9 @@ export default function App() {
       </div>
 
       {/* Modals */}
-      <QuoteBrowser isOpen={showQuoteBrowser} onClose={() => setShowQuoteBrowser(false)} />
-      <ExerciseBrowser isOpen={showExerciseBrowser} onClose={() => setShowExerciseBrowser(false)} />
-      <CBTBrowser isOpen={showCBTBrowser} onClose={() => setShowCBTBrowser(false)} />
+      <QuoteBrowser isOpen={showQuoteBrowser} onClose={() => setShowQuoteBrowser(false)} addPoints={addPoints} />
+      <ExerciseBrowser isOpen={showExerciseBrowser} onClose={() => setShowExerciseBrowser(false)} addPoints={addPoints} />
+      <CBTBrowser isOpen={showCBTBrowser} onClose={() => setShowCBTBrowser(false)} addPoints={addPoints} />
       <SettingsModal
         isOpen={showSettingsModal}
         onClose={() => setShowSettingsModal(false)}
