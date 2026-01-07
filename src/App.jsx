@@ -3036,44 +3036,19 @@ export default function App() {
               <GlobalCounter />
             </div>
 
-            {/* Points & Rank Display */}
-            <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-400/30 rounded-2xl p-5 mb-4 relative overflow-hidden">
-              <div className="text-center">
-                <div className="text-4xl mb-2">{currentRank.emoji}</div>
-                <h3 className="text-lg font-bold text-purple-300 mb-1">{currentRank.name}</h3>
-                <div className="text-3xl font-bold text-white mb-2">{totalPoints.toLocaleString()} <span className="text-base text-slate-400">joy points</span></div>
-
-                {nextRank && (
-                  <div className="mt-3">
-                    <div className="flex justify-between text-xs text-slate-400 mb-1">
-                      <span>{currentRank.name}</span>
-                      <span>{nextRank.name}</span>
-                    </div>
-                    <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-purple-400 to-pink-400 rounded-full transition-all duration-500"
-                        style={{ width: `${Math.min(100, ((totalPoints - currentRank.minPoints) / (nextRank.minPoints - currentRank.minPoints)) * 100)}%` }}
-                      />
-                    </div>
-                    <p className="text-xs text-purple-300 mt-1">{pointsToNextRank.toLocaleString()} points to {nextRank.emoji} {nextRank.name}</p>
-                  </div>
-                )}
-              </div>
-
+            {/* Inline Check-In - Primary Focus */}
+            <InlineCheckin onSave={handleCheckinSave} />
+            
+            <div className="bg-white/5 backdrop-blur rounded-2xl p-5 mb-4 border border-white/10 relative overflow-hidden">
               {/* Points Animation */}
               {showPointsAnimation && (
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
                   <div className="text-4xl font-bold text-yellow-400 animate-bounce">
                     +{pointsGained} 🎉
                   </div>
                 </div>
               )}
-            </div>
 
-            {/* Inline Check-In - Primary Focus */}
-            <InlineCheckin onSave={handleCheckinSave} />
-            
-            <div className="bg-white/5 backdrop-blur rounded-2xl p-5 mb-4 border border-white/10">
               {/* Day Streak Display */}
               <div className="text-center mb-4">
                 <p className="text-slate-400 uppercase tracking-widest text-xs mb-2">Your Streak</p>
@@ -3092,14 +3067,30 @@ export default function App() {
               )}
 
               {/* Today's Joy Points */}
-              {dailyPoints > 0 && (
-                <div className="text-center mb-4 pt-3 border-t border-white/10">
-                  <p className="text-slate-400 uppercase tracking-widest text-xs mb-2">Today's Joy</p>
-                  <div className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                    {dailyPoints} <span className="text-lg">points</span>
-                  </div>
+              <div className="text-center mb-4 pt-3 border-t border-white/10">
+                <p className="text-slate-400 uppercase tracking-widest text-xs mb-2">Today's Joy</p>
+                <div className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                  {dailyPoints.toLocaleString()} <span className="text-lg">points</span>
                 </div>
-              )}
+              </div>
+
+              {/* Rank Progress Bar */}
+              <div className="mb-4 pt-3 border-t border-white/10">
+                <p className="text-slate-400 uppercase tracking-widest text-xs mb-2 text-center">
+                  {currentRank.emoji} {currentRank.name} • {totalPoints.toLocaleString()} pts
+                </p>
+                {nextRank && (
+                  <>
+                    <div className="h-3 bg-white/10 rounded-full overflow-hidden mb-1">
+                      <div
+                        className="h-full bg-gradient-to-r from-purple-400 to-pink-400 rounded-full transition-all duration-500"
+                        style={{ width: `${Math.min(100, ((totalPoints - currentRank.minPoints) / (nextRank.minPoints - currentRank.minPoints)) * 100)}%` }}
+                      />
+                    </div>
+                    <p className="text-xs text-center text-purple-300">{pointsToNextRank.toLocaleString()} pts to {nextRank.emoji} {nextRank.name}</p>
+                  </>
+                )}
+              </div>
               
               {/* What Makes YOU Happy - Visual Reminder */}
               {checkins.length > 0 && (
