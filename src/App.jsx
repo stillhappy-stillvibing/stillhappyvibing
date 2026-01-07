@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '3.4.5';
+const APP_VERSION = '3.4.6';
 const BUILD_DATE = '2026-01-05';
 
 // Firebase Configuration
@@ -797,7 +797,7 @@ function GlobalCounter() {
       <div className="flex items-center justify-center gap-2 mb-3">
         <span className="text-lg">🌍</span>
         <span className="text-purple-300 font-medium text-sm">
-          <span className="text-white font-bold">{formatNumber(stats.activeStreaks)}</span> tracking happiness worldwide
+          <span className="text-white font-bold">{formatNumber(stats.activeStreaks)}</span> active sessions worldwide
         </span>
       </div>
       <div className="flex items-center justify-center gap-2 pt-3 border-t border-white/10">

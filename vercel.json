@@ -4,5 +4,29 @@
   "framework": "vite",
   "rewrites": [
     { "source": "/(.*)", "destination": "/" }
+  ],
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "stillhappy.app"
+        }
+      ],
+      "destination": "https://smileswithyou.com/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.stillhappy.app"
+        }
+      ],
+      "destination": "https://smileswithyou.com/:path*",
+      "permanent": true
+    }
   ]
 }
