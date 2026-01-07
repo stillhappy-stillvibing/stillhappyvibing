@@ -6,8 +6,43 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '3.6.0';
+const APP_VERSION = '3.7.0';
 const BUILD_DATE = '2026-01-07';
+
+// Gamification: Point Values
+const POINTS = {
+  // Check-in points
+  BASE_CHECKIN: 10,
+  PER_SOURCE: 5,
+  EVERYTHING_BONUS: 30,
+  NOTHING_CBT_COMPLETE: 40,
+
+  // Engagement points
+  VIEW_QUOTE: 3,
+  QUOTE_HELPED: 10,
+  VIEW_EXERCISE: 5,
+  COMPLETE_EXERCISE: 15,
+  EXERCISE_HELPED: 20,
+  COMPLETE_CBT: 25,
+  CBT_HELPED: 30,
+
+  // Daily bonuses
+  FIRST_CHECKIN: 25,
+  MORNING_RITUAL: 15,
+  EVENING_RITUAL: 15,
+  NIGHT_RITUAL: 15,
+  ALL_RITUALS: 50,
+};
+
+// Gamification: Levels & Ranks
+const RANKS = [
+  { level: 0, name: 'Happiness Seedling', emoji: '🌱', minPoints: 0 },
+  { level: 1, name: 'Joy Seeker', emoji: '🌿', minPoints: 100 },
+  { level: 2, name: 'Smile Spreader', emoji: '🌻', minPoints: 500 },
+  { level: 3, name: 'Radiant Soul', emoji: '✨', minPoints: 1500 },
+  { level: 4, name: 'Beacon of Joy', emoji: '🌟', minPoints: 3000 },
+  { level: 5, name: 'Enlightened', emoji: '💫', minPoints: 5000 },
+];
 
 // Firebase Configuration
 const firebaseConfig = {
@@ -45,6 +80,16 @@ const incrementCheckins = () => {
   const todayRef = ref(database, `globalStats/todayCheckins/${localDate}`);
   runTransaction(totalRef, (current) => (current || 0) + 1);
   runTransaction(todayRef, (current) => (current || 0) + 1);
+};
+
+// Gamification: Increment global joy points (world counter)
+const incrementGlobalJoyPoints = (points) => {
+  const now = new Date();
+  const localDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const totalRef = ref(database, 'globalStats/totalJoyPoints');
+  const todayRef = ref(database, `globalStats/todayJoyPoints/${localDate}`);
+  runTransaction(totalRef, (current) => (current || 0) + points);
+  runTransaction(todayRef, (current) => (current || 0) + points);
 };
 
 // Increment global happiness source counter
@@ -2747,7 +2792,44 @@ export default function App() {
   const [checkins, setCheckins] = useState(() => {
     try { return JSON.parse(localStorage.getItem(`happinessCheckins${CURRENT_YEAR}`) || '[]'); } catch { return []; }
   });
-  
+
+  // Gamification: Points tracking
+  const [totalPoints, setTotalPoints] = useState(() => {
+    try { return parseInt(localStorage.getItem(`happinessPoints${CURRENT_YEAR}`) || '0'); } catch { return 0; }
+  });
+
+  const [showPointsAnimation, setShowPointsAnimation] = useState(false);
+  const [pointsGained, setPointsGained] = useState(0);
+
+  // Helper function to add points
+  const addPoints = (points, reason = '') => {
+    const newTotal = totalPoints + points;
+    setTotalPoints(newTotal);
+    localStorage.setItem(`happinessPoints${CURRENT_YEAR}`, newTotal.toString());
+
+    // Show animation
+    setPointsGained(points);
+    setShowPointsAnimation(true);
+    setTimeout(() => setShowPointsAnimation(false), 2000);
+
+    // Track globally
+    incrementGlobalJoyPoints(points);
+  };
+
+  // Calculate current rank
+  const getCurrentRank = () => {
+    for (let i = RANKS.length - 1; i >= 0; i--) {
+      if (totalPoints >= RANKS[i].minPoints) {
+        return RANKS[i];
+      }
+    }
+    return RANKS[0];
+  };
+
+  const currentRank = getCurrentRank();
+  const nextRank = RANKS[currentRank.level + 1];
+  const pointsToNextRank = nextRank ? nextRank.minPoints - totalPoints : 0;
+
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showChallengeModal, setShowChallengeModal] = useState(false);
   const [showWeeklyReflection, setShowWeeklyReflection] = useState(false);
@@ -2908,14 +2990,14 @@ export default function App() {
     localStorage.setItem(`happinessCheckins${CURRENT_YEAR}`, JSON.stringify(checkins));
   }, [checkins]);
 
-  const handleCheckinSave = ({ sources, quote }) => {
+  const handleCheckinSave = ({ sources, quote, timeOfDay, isRitual }) => {
     const checkin = {
       id: Date.now(),
       sources: sources || [],
       quote,
       timestamp: new Date().toISOString()
     };
-    
+
     // Calculate what streak will be after this check-in
     const newCheckins = [...checkins, checkin];
     const days = [...new Set(newCheckins.map(c => getDayKey(c.timestamp)))].sort().reverse();
@@ -2926,9 +3008,36 @@ export default function App() {
         newStreak++;
       } else if (i > 0) break;
     }
-    
+
     setCheckins(newCheckins);
-    setShowCheckinModal(false);
+
+    // Gamification: Award points for check-in
+    let pointsEarned = POINTS.BASE_CHECKIN;
+
+    // Points per happiness source (max 6 sources to prevent gaming)
+    const validSources = sources.filter(s => s !== 'nothing' && s !== 'everything').slice(0, 6);
+    pointsEarned += validSources.length * POINTS.PER_SOURCE;
+
+    // Bonus for "Everything!"
+    if (sources.includes('everything')) {
+      pointsEarned += POINTS.EVERYTHING_BONUS;
+    }
+
+    // First check-in of the day bonus
+    const today = getDayKey(new Date());
+    const todayCheckins = newCheckins.filter(c => getDayKey(c.timestamp) === today);
+    if (todayCheckins.length === 1) {
+      pointsEarned += POINTS.FIRST_CHECKIN;
+    }
+
+    // Ritual bonuses
+    if (isRitual) {
+      if (timeOfDay === 'morning') pointsEarned += POINTS.MORNING_RITUAL;
+      if (timeOfDay === 'evening') pointsEarned += POINTS.EVENING_RITUAL;
+      if (timeOfDay === 'night') pointsEarned += POINTS.NIGHT_RITUAL;
+    }
+
+    addPoints(pointsEarned);
     
     // Check for milestone celebration
     if (milestoneThresholds.includes(newStreak) && !celebratedMilestones.includes(newStreak)) {
@@ -3030,6 +3139,40 @@ export default function App() {
             {/* Global Counter */}
             <div className="mb-4">
               <GlobalCounter />
+            </div>
+
+            {/* Points & Rank Display */}
+            <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-400/30 rounded-2xl p-5 mb-4 relative overflow-hidden">
+              <div className="text-center">
+                <div className="text-4xl mb-2">{currentRank.emoji}</div>
+                <h3 className="text-lg font-bold text-purple-300 mb-1">{currentRank.name}</h3>
+                <div className="text-3xl font-bold text-white mb-2">{totalPoints.toLocaleString()} <span className="text-base text-slate-400">joy points</span></div>
+
+                {nextRank && (
+                  <div className="mt-3">
+                    <div className="flex justify-between text-xs text-slate-400 mb-1">
+                      <span>{currentRank.name}</span>
+                      <span>{nextRank.name}</span>
+                    </div>
+                    <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-purple-400 to-pink-400 rounded-full transition-all duration-500"
+                        style={{ width: `${Math.min(100, ((totalPoints - currentRank.minPoints) / (nextRank.minPoints - currentRank.minPoints)) * 100)}%` }}
+                      />
+                    </div>
+                    <p className="text-xs text-purple-300 mt-1">{pointsToNextRank.toLocaleString()} points to {nextRank.emoji} {nextRank.name}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Points Animation */}
+              {showPointsAnimation && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <div className="text-4xl font-bold text-yellow-400 animate-bounce">
+                    +{pointsGained} 🎉
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Inline Check-In - Primary Focus */}
