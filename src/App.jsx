@@ -357,6 +357,7 @@ const timeRituals = {
     emoji: '🌅',
     greeting: 'Good morning!',
     title: 'Morning Ritual',
+    checkinPrompt: "Let's check in for the morning",
     sourcePrompt: "What's energizing you this morning?",
     color: 'amber',
     sources: [
@@ -374,6 +375,7 @@ const timeRituals = {
     emoji: '☀️',
     greeting: 'Good afternoon!',
     title: 'Midday Check-in',
+    checkinPrompt: "Let's check in - how's your day going?",
     sourcePrompt: "What's going well today?",
     color: 'yellow',
     sources: [
@@ -391,6 +393,7 @@ const timeRituals = {
     emoji: '🌆',
     greeting: 'Good evening!',
     title: 'Evening Reflection',
+    checkinPrompt: "Let's check in for the evening",
     sourcePrompt: "What made today good?",
     color: 'orange',
     sources: [
@@ -408,6 +411,7 @@ const timeRituals = {
     emoji: '🌙',
     greeting: 'Good night!',
     title: 'Night Wind-down',
+    checkinPrompt: "Let's wind down and reflect on your day",
     sourcePrompt: "What's bringing you peace tonight?",
     color: 'indigo',
     sources: [
@@ -425,9 +429,10 @@ const timeRituals = {
 
 // Regular check-in (used for afternoon + after ritual is done)
 const regularCheckin = {
-  emoji: '🌟',
+  emoji: '😊',
   greeting: 'Happiness Check-in',
   title: 'Check-in',
+  checkinPrompt: "Let's track what's making you smile right now",
   sourcePrompt: "What's bringing you happiness right now?",
   color: 'green',
   sources: [
@@ -1779,16 +1784,25 @@ function ConfirmDialog({ isOpen, onClose, onConfirm, title, message, confirmText
 function InlineCheckin({ onSave }) {
   const [step, setStep] = useState('source');
   const [sources, setSources] = useState([]);
-  const [isCompleted, setIsCompleted] = useState(false);
 
   // Get config based on time and whether ritual was done
   const [checkinConfig, setCheckinConfig] = useState(() => getCheckinConfig());
   const { ritual, isRitual, timeOfDay } = checkinConfig;
 
+  // Check if this check-in was already completed in this session
+  const completionKey = `checkinComplete_${timeOfDay}_${isRitual}`;
+  const [isCompleted, setIsCompleted] = useState(() => {
+    return sessionStorage.getItem(completionKey) === 'true';
+  });
+
   // Recalculate config periodically (every minute) to detect ritual changes
   useEffect(() => {
     const interval = setInterval(() => {
-      setCheckinConfig(getCheckinConfig());
+      const newConfig = getCheckinConfig();
+      setCheckinConfig(newConfig);
+      // Check if completion status changed with new ritual
+      const newCompletionKey = `checkinComplete_${newConfig.timeOfDay}_${newConfig.isRitual}`;
+      setIsCompleted(sessionStorage.getItem(newCompletionKey) === 'true');
     }, 60000); // Check every minute
     return () => clearInterval(interval);
   }, []);
@@ -1970,16 +1984,12 @@ function InlineCheckin({ onSave }) {
 
     onSave({ sources, quote: quote.author, timeOfDay, isRitual });
 
-    // Show completion state briefly
-    setIsCompleted(true);
+    // Mark this check-in as complete (hide it for this session)
+    const completionKey = `checkinComplete_${timeOfDay}_${isRitual}`;
+    sessionStorage.setItem(completionKey, 'true');
 
-    // Reset after 3 seconds
-    setTimeout(() => {
-      setSources([]);
-      setStep('source');
-      setIsCompleted(false);
-      setCheckinConfig(getCheckinConfig()); // Refresh config
-    }, 3000);
+    // Show completion state and stay completed (don't auto-reset)
+    setIsCompleted(true);
   };
 
   const handleSkip = () => {
@@ -1990,27 +2000,17 @@ function InlineCheckin({ onSave }) {
 
     onSave({ sources: [], quote: quote.author, timeOfDay, isRitual });
 
-    // Show completion state briefly
-    setIsCompleted(true);
+    // Mark this check-in as complete (hide it for this session)
+    const completionKey = `checkinComplete_${timeOfDay}_${isRitual}`;
+    sessionStorage.setItem(completionKey, 'true');
 
-    // Reset after 3 seconds
-    setTimeout(() => {
-      setSources([]);
-      setStep('source');
-      setIsCompleted(false);
-      setCheckinConfig(getCheckinConfig()); // Refresh config
-    }, 3000);
+    // Show completion state and stay completed (don't auto-reset)
+    setIsCompleted(true);
   };
 
-  // Show completion state
+  // Hide check-in completely if already completed
   if (isCompleted) {
-    return (
-      <div className="bg-gradient-to-r from-green-400/20 to-emerald-400/20 border border-green-400/40 rounded-3xl p-6 mb-4 text-center animate-pulse">
-        <div className="text-5xl mb-2">✓</div>
-        <h3 className="text-xl font-bold text-green-400 mb-1">Check-in Complete!</h3>
-        <p className="text-slate-300 text-sm">Your happiness has been recorded 🎉</p>
-      </div>
-    );
+    return null;
   }
 
   // Determine which steps to show based on flow
@@ -2027,8 +2027,8 @@ function InlineCheckin({ onSave }) {
         <div className="text-center mb-5">
           <div className="text-4xl mb-2">{ritual.emoji}</div>
           <h2 className="text-xl font-bold">{ritual.greeting}</h2>
-          <p className="text-slate-400 text-sm">
-            {isRitual ? ritual.title : 'Check-in'}
+          <p className="text-green-400 text-base font-medium mt-2">
+            {ritual.checkinPrompt}
           </p>
         </div>
 
