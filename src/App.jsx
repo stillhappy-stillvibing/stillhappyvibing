@@ -2074,14 +2074,16 @@ function InlineCheckin({ onSave }) {
 
             <button
               onClick={() => isNothing ? setStep('cbtExercise') : handleSave()}
-              className="w-full bg-gradient-to-r from-green-400 to-emerald-500 text-slate-900 font-bold py-3 rounded-xl"
+              disabled={sources.length === 0}
+              className={`w-full bg-gradient-to-r from-green-400 to-emerald-500 text-slate-900 font-bold py-3 rounded-xl ${sources.length === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 transition'}`}
             >
               {isNothing ? 'Continue →' : '✓ Complete Check-in'}
             </button>
           </>
         )}
 
-        {step === 'wisdom' && (
+        {/* Wisdom step removed from happy user flow - only used in old modal */}
+        {false && step === 'wisdom' && (
           <>
             <p className="text-center text-xs text-slate-400 mb-3">{quoteIndex + 1} of {wisdomQuotes.length}</p>
             <div className="border-l-4 border-green-400 bg-white/5 p-4 rounded-r-xl mb-3">
