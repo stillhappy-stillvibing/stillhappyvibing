@@ -6,8 +6,8 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '3.4.7';
-const BUILD_DATE = '2026-01-05';
+const APP_VERSION = '3.5.0';
+const BUILD_DATE = '2026-01-07';
 
 // Firebase Configuration
 const firebaseConfig = {
@@ -1775,20 +1775,23 @@ function ConfirmDialog({ isOpen, onClose, onConfirm, title, message, confirmText
 }
 
 // Check-in Modal Component - Gratitude & Happiness Source Tracker
-function CheckinModal({ isOpen, onClose, onSave }) {
+// Inline Check-In Component (embedded on Timer tab)
+function InlineCheckin({ onSave }) {
   const [step, setStep] = useState('source');
   const [sources, setSources] = useState([]);
+  const [isCompleted, setIsCompleted] = useState(false);
 
-  // Get config based on time and whether ritual was done - recalculate on every open
+  // Get config based on time and whether ritual was done
   const [checkinConfig, setCheckinConfig] = useState(() => getCheckinConfig());
   const { ritual, isRitual, timeOfDay } = checkinConfig;
 
-  // Recalculate config when modal opens
+  // Recalculate config periodically (every minute) to detect ritual changes
   useEffect(() => {
-    if (isOpen) {
+    const interval = setInterval(() => {
       setCheckinConfig(getCheckinConfig());
-    }
-  }, [isOpen]);
+    }, 60000); // Check every minute
+    return () => clearInterval(interval);
+  }, []);
 
   // Carousel for quotes
   const [quoteIndex, setQuoteIndex] = useState(() => Math.floor(Math.random() * wisdomQuotes.length));
@@ -1966,8 +1969,17 @@ function CheckinModal({ isOpen, onClose, onSave }) {
     }
 
     onSave({ sources, quote: quote.author, timeOfDay, isRitual });
-    setSources([]);
-    setStep('source');
+
+    // Show completion state briefly
+    setIsCompleted(true);
+
+    // Reset after 3 seconds
+    setTimeout(() => {
+      setSources([]);
+      setStep('source');
+      setIsCompleted(false);
+      setCheckinConfig(getCheckinConfig()); // Refresh config
+    }, 3000);
   };
 
   const handleSkip = () => {
@@ -1977,11 +1989,29 @@ function CheckinModal({ isOpen, onClose, onSave }) {
     }
 
     onSave({ sources: [], quote: quote.author, timeOfDay, isRitual });
-    setSources([]);
-    setStep('source');
+
+    // Show completion state briefly
+    setIsCompleted(true);
+
+    // Reset after 3 seconds
+    setTimeout(() => {
+      setSources([]);
+      setStep('source');
+      setIsCompleted(false);
+      setCheckinConfig(getCheckinConfig()); // Refresh config
+    }, 3000);
   };
 
-  if (!isOpen) return null;
+  // Show completion state
+  if (isCompleted) {
+    return (
+      <div className="bg-gradient-to-r from-green-400/20 to-emerald-400/20 border border-green-400/40 rounded-3xl p-6 mb-4 text-center animate-pulse">
+        <div className="text-5xl mb-2">✓</div>
+        <h3 className="text-xl font-bold text-green-400 mb-1">Check-in Complete!</h3>
+        <p className="text-slate-300 text-sm">Your happiness has been recorded 🎉</p>
+      </div>
+    );
+  }
 
   // Determine which steps to show based on flow
   // When "nothing" is selected: source → cbtExercise → wisdom → regularExercise
@@ -1991,8 +2021,7 @@ function CheckinModal({ isOpen, onClose, onSave }) {
     : ['source', 'wisdom', 'exercise'];
 
   return (
-    <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50 overflow-y-auto" onClick={onClose}>
-      <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-lg w-full p-6 border border-green-400/20 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+    <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl w-full p-6 border border-green-400/20 mb-4">{/* Inline check-in container */}
         
         <div className="text-center mb-5">
           <div className="text-4xl mb-2">{ritual.emoji}</div>
@@ -2564,7 +2593,6 @@ export default function App() {
     try { return JSON.parse(localStorage.getItem(`happinessCheckins${CURRENT_YEAR}`) || '[]'); } catch { return []; }
   });
   
-  const [showCheckinModal, setShowCheckinModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showChallengeModal, setShowChallengeModal] = useState(false);
   const [showWeeklyReflection, setShowWeeklyReflection] = useState(false);
@@ -2847,32 +2875,8 @@ export default function App() {
               <GlobalCounter />
             </div>
 
-            {/* Reminder Banner */}
-            {showReminder && (
-              <div className="bg-gradient-to-r from-yellow-400/20 to-amber-400/20 border border-yellow-400/30 rounded-2xl p-4 mb-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">🔔</span>
-                  <div>
-                    <p className="font-medium text-yellow-400">Time for a check-in!</p>
-                    <p className="text-xs text-slate-300">What's bringing you happiness today?</p>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <button 
-                    onClick={() => { setShowReminder(false); setShowCheckinModal(true); }}
-                    className="bg-yellow-400 text-slate-900 px-3 py-1 rounded-lg text-sm font-medium"
-                  >
-                    Check in
-                  </button>
-                  <button 
-                    onClick={() => setShowReminder(false)}
-                    className="text-slate-400 hover:text-white px-2"
-                  >
-                    ✕
-                  </button>
-                </div>
-              </div>
-            )}
+            {/* Inline Check-In - Primary Focus */}
+            <InlineCheckin onSave={handleCheckinSave} />
             
             <div className="bg-white/5 backdrop-blur rounded-2xl p-5 mb-4 border border-white/10">
               {/* Day Streak Display */}
@@ -2925,13 +2929,6 @@ export default function App() {
                   </div>
                 </div>
               )}
-              
-              <button
-                onClick={() => setShowCheckinModal(true)}
-                className="w-full bg-gradient-to-r from-green-400 to-emerald-500 text-slate-900 px-4 py-3 rounded-xl font-semibold hover:scale-105 transition shadow-lg shadow-green-500/20"
-              >
-                ✓ Check In
-              </button>
             </div>
 
             {/* Quick Actions */}
@@ -2999,7 +2996,6 @@ export default function App() {
       </div>
 
       {/* Modals */}
-      <CheckinModal isOpen={showCheckinModal} onClose={() => setShowCheckinModal(false)} onSave={handleCheckinSave} />
       <QuoteBrowser isOpen={showQuoteBrowser} onClose={() => setShowQuoteBrowser(false)} />
       <ExerciseBrowser isOpen={showExerciseBrowser} onClose={() => setShowExerciseBrowser(false)} />
       <SettingsModal
@@ -3034,15 +3030,6 @@ export default function App() {
         onClose={() => setShowShareSmile(false)}
       />
       <Confetti active={showConfetti} />
-
-      {/* Floating Action Button - Check In */}
-      <button
-        onClick={() => setShowCheckinModal(true)}
-        className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full shadow-lg shadow-green-500/30 flex items-center justify-center text-2xl hover:scale-110 active:scale-95 transition-transform z-40"
-        aria-label="Check in"
-      >
-        ✓
-      </button>
     </div>
   );
 }
