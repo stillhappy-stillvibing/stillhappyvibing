@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '4.1.1';
+const APP_VERSION = '4.2.0';
 const BUILD_DATE = '2026-01-07';
 
 // Gamification: Point Values
@@ -20,6 +20,7 @@ const POINTS = {
   // Engagement points (Boost feedback system!)
   QUOTE_BOOST: 10,
   EXERCISE_BOOST: 15,
+  BREATHWORK_BOOST: 15,
   CBT_BOOST: 20,
 
   // Daily bonuses
@@ -242,6 +243,64 @@ const exercises = [
   { title: "GLAD Technique", subtitle: "Find four daily wins", steps: ["G — One GOOD thing today", "L — One thing you LEARNED", "A — One small ACCOMPLISHMENT", "D — One thing that DELIGHTED you", "Reflect on each one with gratitude"], pattern: null },
   { title: "Three Good Things", subtitle: "Rewire your brain for positivity", steps: ["Think of three good things from today", "They can be tiny: a warm cup of tea, a kind word", "For each one, ask: Why did this happen?", "Write them down or just reflect", "Do this daily for two weeks", "Watch your brain start noticing more good"], pattern: null },
   { title: "Acts of Kindness Practice", subtitle: "Boost happiness through giving", steps: ["Think of one small kind act you can do today", "It can be tiny: hold a door, send a text, smile", "Do it without expecting anything back", "Notice how it feels in your body", "Kindness to others is kindness to yourself"], pattern: null },
+];
+
+// Breathwork patterns for stress relief and emotional regulation
+const breathworkPatterns = [
+  {
+    name: "Box Breathing",
+    subtitle: "Tactical calm for stress",
+    description: "Used by Navy SEALs to stay calm under pressure",
+    pattern: { inhale: 4, hold1: 4, exhale: 4, hold2: 4 },
+    emoji: "📦",
+    benefits: ["Reduces anxiety", "Improves focus", "Lowers stress"],
+    duration: 16,
+  },
+  {
+    name: "4-7-8 Breathing",
+    subtitle: "Sleep ease technique",
+    description: "Dr. Andrew Weil's method for deep relaxation",
+    pattern: { inhale: 4, hold1: 7, exhale: 8, hold2: 0 },
+    emoji: "😴",
+    benefits: ["Promotes sleep", "Calms nervous system", "Reduces tension"],
+    duration: 19,
+  },
+  {
+    name: "Heart Coherence",
+    subtitle: "Heart-brain harmony",
+    description: "Balance your heart rhythm and emotions",
+    pattern: { inhale: 5, hold1: 0, exhale: 5, hold2: 0 },
+    emoji: "💗",
+    benefits: ["Emotional balance", "Improves HRV", "Reduces stress"],
+    duration: 10,
+  },
+  {
+    name: "Resonant Breathing",
+    subtitle: "Deep calm state",
+    description: "Optimal breathing for heart rate variability",
+    pattern: { inhale: 6, hold1: 0, exhale: 6, hold2: 0 },
+    emoji: "🌊",
+    benefits: ["Maximum HRV", "Deep relaxation", "Mental clarity"],
+    duration: 12,
+  },
+  {
+    name: "Triangle Breathing",
+    subtitle: "Balance breath",
+    description: "Simple pattern for quick centering",
+    pattern: { inhale: 4, hold1: 4, exhale: 4, hold2: 0 },
+    emoji: "🔺",
+    benefits: ["Quick reset", "Improves balance", "Calms mind"],
+    duration: 12,
+  },
+  {
+    name: "Coherent Breathing",
+    subtitle: "Optimal flow state",
+    description: "5.5 breaths per minute for peak coherence",
+    pattern: { inhale: 5, hold1: 1, exhale: 5, hold2: 1 },
+    emoji: "✨",
+    benefits: ["Peak performance", "Deep coherence", "Stress relief"],
+    duration: 12,
+  },
 ];
 
 // CBT exercises for when someone selects "Nothing" (not feeling happy)
@@ -1423,6 +1482,166 @@ function CBTBrowser({ isOpen, onClose, addPoints }) {
   );
 }
 
+// Breathwork Browser Component - 1-minute breathing patterns
+function BreathworkBrowser({ isOpen, onClose, addPoints }) {
+  const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * breathworkPatterns.length));
+  const [isActive, setIsActive] = useState(false);
+  const [cycles, setCycles] = useState(0);
+  const [showCompletion, setShowCompletion] = useState(false);
+
+  const currentPattern = breathworkPatterns[currentIndex];
+  const targetCycles = Math.floor(60 / currentPattern.duration); // cycles in 1 minute
+
+  const randomPattern = () => {
+    let newIndex;
+    do {
+      newIndex = Math.floor(Math.random() * breathworkPatterns.length);
+    } while (newIndex === currentIndex && breathworkPatterns.length > 1);
+    setCurrentIndex(newIndex);
+    setIsActive(false);
+    setCycles(0);
+    setShowCompletion(false);
+  };
+
+  const handleStart = () => {
+    setIsActive(true);
+    setCycles(0);
+    setShowCompletion(false);
+  };
+
+  const handleBoost = () => {
+    addPoints(POINTS.BREATHWORK_BOOST);
+    randomPattern();
+  };
+
+  const handleSkip = () => {
+    randomPattern();
+  };
+
+  useEffect(() => {
+    if (!isActive) return;
+
+    const cycleTimer = setInterval(() => {
+      setCycles(prev => {
+        const newCycles = prev + 1;
+        if (newCycles >= targetCycles) {
+          setIsActive(false);
+          setShowCompletion(true);
+          return newCycles;
+        }
+        return newCycles;
+      });
+    }, currentPattern.duration * 1000);
+
+    return () => clearInterval(cycleTimer);
+  }, [isActive, currentPattern.duration, targetCycles]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50 overflow-y-auto" onClick={onClose}>
+      <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-lg w-full p-6 border border-teal-400/20 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-xl font-bold flex items-center gap-2">🌬️ Breathwork</h2>
+          <button onClick={onClose} className="text-slate-400 hover:text-white text-xl">✕</button>
+        </div>
+
+        <div className="mb-4">
+          {!isActive && !showCompletion && (
+            <>
+              <div className="bg-teal-400/10 border-teal-400/30 border rounded-xl p-5 mb-6">
+                <div className="text-center mb-4">
+                  <div className="text-5xl mb-3">{currentPattern.emoji}</div>
+                  <h3 className="text-teal-400 font-semibold text-xl mb-1">
+                    {currentPattern.name}
+                  </h3>
+                  <p className="text-slate-400 text-sm mb-3">{currentPattern.subtitle}</p>
+                  <p className="text-slate-300 text-sm italic">{currentPattern.description}</p>
+                </div>
+
+                <div className="bg-white/5 rounded-lg p-3 mb-4">
+                  <p className="text-xs text-slate-400 mb-2">Pattern:</p>
+                  <div className="flex gap-2 text-sm justify-center flex-wrap">
+                    <span className="text-teal-400">Inhale: {currentPattern.pattern.inhale}s</span>
+                    {currentPattern.pattern.hold1 > 0 && <span className="text-purple-400">Hold: {currentPattern.pattern.hold1}s</span>}
+                    <span className="text-pink-400">Exhale: {currentPattern.pattern.exhale}s</span>
+                    {currentPattern.pattern.hold2 > 0 && <span className="text-purple-400">Hold: {currentPattern.pattern.hold2}s</span>}
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <p className="text-xs text-slate-400 mb-1">Benefits:</p>
+                  {currentPattern.benefits.map((benefit, i) => (
+                    <div key={i} className="flex items-center gap-2 text-sm">
+                      <span className="text-teal-400">✓</span>
+                      <span>{benefit}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <button
+                onClick={handleStart}
+                className="w-full py-5 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 rounded-xl font-bold text-lg transition hover:scale-105 mb-3"
+              >
+                🧘 Start 1-Minute Zen
+              </button>
+
+              <button
+                onClick={randomPattern}
+                className="w-full py-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 text-sm transition"
+              >
+                → Try Different Pattern
+              </button>
+            </>
+          )}
+
+          {isActive && (
+            <div className="text-center py-10">
+              <div className="mb-6">
+                <BreathingGuide pattern={currentPattern.pattern} />
+              </div>
+              <div className="text-slate-400 text-sm">
+                Cycle {cycles + 1} of {targetCycles}
+              </div>
+              <div className="mt-4 text-xs text-slate-500">
+                Keep breathing... {Math.max(0, 60 - cycles * currentPattern.duration)}s remaining
+              </div>
+            </div>
+          )}
+
+          {showCompletion && (
+            <>
+              <div className="text-center py-8 mb-6">
+                <div className="text-6xl mb-4">✨</div>
+                <h3 className="text-2xl font-bold mb-2">Beautiful work!</h3>
+                <p className="text-slate-400">You completed {cycles} breathing cycles</p>
+              </div>
+
+              <p className="text-slate-400 text-sm mb-3 text-center">Did this boost you?</p>
+
+              <div className="flex gap-3 mb-4">
+                <button
+                  onClick={handleBoost}
+                  className="flex-1 py-4 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 rounded-xl font-bold text-lg transition hover:scale-105"
+                >
+                  💫 Boost! <span className="text-sm">(+{POINTS.BREATHWORK_BOOST} pts)</span>
+                </button>
+                <button
+                  onClick={handleSkip}
+                  className="px-6 py-4 bg-white/5 hover:bg-white/10 rounded-xl font-semibold transition"
+                >
+                  → Skip
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Micro-Moment Component - Gentle rotating mindfulness prompts
 function MicroMoment() {
   const [currentMoment, setCurrentMoment] = useState(() =>
@@ -2465,7 +2684,7 @@ function InlineCheckin({ onSave }) {
 }
 
 // Settings Modal
-function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats, checkins, onImportData, notificationSettings, setNotificationSettings }) {
+function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats, checkins, notificationSettings, setNotificationSettings }) {
   const [confirmAction, setConfirmAction] = useState(null);
   const [notificationPermission, setNotificationPermission] = useState(
     typeof Notification !== 'undefined' ? Notification.permission : 'denied'
@@ -2511,43 +2730,6 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats, ch
     localStorage.setItem(`happinessNotificationSettings${CURRENT_YEAR}`, JSON.stringify(updatedSettings));
   };
 
-  const handleExportData = () => {
-    const data = {
-      version: APP_VERSION,
-      exportDate: new Date().toISOString(),
-      checkins: checkins
-    };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `stillhappy-backup-${new Date().toISOString().split('T')[0]}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const handleImportData = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const data = JSON.parse(event.target.result);
-        if (data.checkins && Array.isArray(data.checkins)) {
-          onImportData(data.checkins);
-          alert(`✅ Imported ${data.checkins.length} entries!`);
-        } else {
-          alert('❌ Invalid backup file format');
-        }
-      } catch {
-        alert('❌ Could not read backup file');
-      }
-    };
-    reader.readAsText(file);
-    e.target.value = ''; // Reset input
-  };
-  
   if (!isOpen) return null;
 
   const actions = [
@@ -2650,24 +2832,6 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats, ch
         </div>
 
         <h3 className="font-semibold mb-3 text-slate-400 text-sm uppercase tracking-wider">Data Management</h3>
-        
-        {/* Backup & Restore */}
-        <div className="bg-blue-400/10 border border-blue-400/30 rounded-xl p-4 mb-4">
-          <h4 className="font-semibold text-blue-400 mb-3 flex items-center gap-2">💾 Backup & Restore</h4>
-          <div className="flex gap-2">
-            <button
-              onClick={handleExportData}
-              className="flex-1 py-2 rounded-lg bg-blue-500/20 border border-blue-500/30 text-blue-400 text-sm hover:bg-blue-500/30 transition"
-            >
-              📥 Export Data
-            </button>
-            <label className="flex-1 py-2 rounded-lg bg-green-500/20 border border-green-500/30 text-green-400 text-sm hover:bg-green-500/30 transition text-center cursor-pointer">
-              📤 Import
-              <input type="file" accept=".json" onChange={handleImportData} className="hidden" />
-            </label>
-          </div>
-          <p className="text-xs text-slate-400 mt-2">Download your data or restore from a backup</p>
-        </div>
 
         {/* Danger Zone */}
         <div className="space-y-2">
@@ -2790,6 +2954,7 @@ export default function App() {
   const [showReminder, setShowReminder] = useState(false);
   const [showQuoteBrowser, setShowQuoteBrowser] = useState(false);
   const [showExerciseBrowser, setShowExerciseBrowser] = useState(false);
+  const [showBreathworkBrowser, setShowBreathworkBrowser] = useState(false);
   const [showCBTBrowser, setShowCBTBrowser] = useState(false);
 
   // Version update notification
@@ -3018,13 +3183,6 @@ export default function App() {
   const handleClearAll = () => {
     setCheckins([]);
     localStorage.removeItem(`happinessCheckins${CURRENT_YEAR}`);
-  };
-
-  const handleImportData = (importedCheckins) => {
-    // Merge imported data with existing, avoiding duplicates by id
-    const existingIds = new Set(checkins.map(c => c.id));
-    const newCheckins = importedCheckins.filter(c => !existingIds.has(c.id));
-    setCheckins(prev => [...prev, ...newCheckins]);
   };
 
   // Calculate check-in streak (days in a row)
@@ -3270,6 +3428,21 @@ export default function App() {
               </button>
             </div>
 
+            {/* Breathwork Section */}
+            <div className="bg-white/5 rounded-2xl p-5 mb-4 border border-white/10">
+              <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                🌬️ Breathwork Patterns
+              </h3>
+              <button
+                onClick={() => setShowBreathworkBrowser(true)}
+                className="w-full bg-gradient-to-r from-teal-500/20 to-cyan-500/20 border border-teal-500/30 rounded-xl p-4 hover:from-teal-500/30 hover:to-cyan-500/30 transition"
+              >
+                <div className="text-3xl mb-2">🧘</div>
+                <div className="font-medium">Browse {breathworkPatterns.length} Breathing Patterns</div>
+                <div className="text-xs text-slate-400 mt-1">1-minute zen for stress relief</div>
+              </button>
+            </div>
+
             {/* CBT Tools Section */}
             <div className="bg-white/5 rounded-2xl p-5 mb-4 border border-white/10">
               <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
@@ -3303,6 +3476,7 @@ export default function App() {
       {/* Modals */}
       <QuoteBrowser isOpen={showQuoteBrowser} onClose={() => setShowQuoteBrowser(false)} addPoints={addPoints} />
       <ExerciseBrowser isOpen={showExerciseBrowser} onClose={() => setShowExerciseBrowser(false)} addPoints={addPoints} />
+      <BreathworkBrowser isOpen={showBreathworkBrowser} onClose={() => setShowBreathworkBrowser(false)} addPoints={addPoints} />
       <CBTBrowser isOpen={showCBTBrowser} onClose={() => setShowCBTBrowser(false)} addPoints={addPoints} />
       <SettingsModal
         isOpen={showSettingsModal}
@@ -3311,7 +3485,6 @@ export default function App() {
         onClearAll={handleClearAll}
         stats={{ checkins: checkins.length }}
         checkins={checkins}
-        onImportData={handleImportData}
         notificationSettings={notificationSettings}
         setNotificationSettings={setNotificationSettings}
       />
