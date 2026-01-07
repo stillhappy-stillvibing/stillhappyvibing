@@ -2021,7 +2021,8 @@ function InlineCheckin({ onSave }) {
     : ['source', 'wisdom', 'exercise'];
 
   return (
-    <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl w-full p-6 border border-green-400/20 mb-4">{/* Inline check-in container */}
+    <>
+      <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl w-full p-6 border border-green-400/20 mb-4">
         
         <div className="text-center mb-5">
           <div className="text-4xl mb-2">{ritual.emoji}</div>
@@ -2341,7 +2342,7 @@ function InlineCheckin({ onSave }) {
         type="exercise"
         data={exerciseToShare || exercise}
       />
-    </div>
+    </>
   );
 }
 
