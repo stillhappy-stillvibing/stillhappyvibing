@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '3.5.0';
+const APP_VERSION = '3.6.0';
 const BUILD_DATE = '2026-01-07';
 
 // Firebase Configuration
@@ -205,6 +205,19 @@ const exercises = [
 
 // CBT exercises for when someone selects "Nothing" (not feeling happy)
 const cbtExercises = [
+  {
+    title: "Smile Breath",
+    subtitle: "Reset with your breath",
+    steps: [
+      "Take a deep breath in for 4 counts",
+      "Hold for 4 counts",
+      "Breathe out slowly for 6 counts",
+      "As you breathe out, let a small smile form on your lips",
+      "Repeat 3 times",
+      "Notice how you feel now"
+    ],
+    pattern: { inhale: 4, hold: 4, exhale: 6 }
+  },
   { title: "Name It to Tame It", subtitle: "Reduce emotional intensity", steps: ["Take a deep breath", "Name the emotion you're feeling out loud", "Say: 'I notice I'm feeling [emotion]'", "This simple act reduces the emotion's power", "Remember: feelings are visitors, not permanent residents"], pattern: null },
   { title: "The 5-4-3-2-1 Grounding", subtitle: "Return to the present moment", steps: ["Name 5 things you can see", "Name 4 things you can touch", "Name 3 things you can hear", "Name 2 things you can smell", "Name 1 thing you can taste", "Notice how you feel more present"], pattern: null },
   { title: "Thought Diffusion", subtitle: "Distance yourself from negative thoughts", steps: ["Notice a negative thought", "Add this phrase: 'I'm having the thought that...'", "Example: 'I'm having the thought that I'm not good enough'", "This creates space between you and the thought", "You are not your thoughts"], pattern: null },
@@ -1660,21 +1673,6 @@ function TheWorldTab() {
         )}
       </div>
 
-      {/* Favorite Quotes - Carousel */}
-      {topQuotes.length > 0 && (
-        <WorldQuoteCarousel topQuotes={topQuotes} />
-      )}
-
-      {/* Favorite CBT Exercises - Carousel */}
-      {topCBTExercises.length > 0 && (
-        <WorldCBTCarousel topCBTExercises={topCBTExercises} />
-      )}
-
-      {/* Favorite Exercises - Carousel */}
-      {topExercises.length > 0 && (
-        <WorldExerciseCarousel topExercises={topExercises} />
-      )}
-
       {/* Global Milestones */}
       <div className="bg-white/5 backdrop-blur rounded-2xl p-4 border border-white/10">
         <h3 className="font-semibold mb-3 flex items-center justify-center gap-2 text-sm">
@@ -2014,11 +2012,13 @@ function InlineCheckin({ onSave }) {
   }
 
   // Determine which steps to show based on flow
-  // When "nothing" is selected: source → cbtExercise → wisdom → regularExercise
-  // When not "nothing": source → wisdom → exercise (original flow)
+  // New simplified logic:
+  // - "nothing" selected: source → cbtExercise (help them feel better)
+  // - "everything" or any sources: source only (they're already happy!)
+  const isEverything = sources.includes('everything');
   const steps = isNothing
-    ? ['source', 'cbtExercise', 'wisdom', 'regularExercise']
-    : ['source', 'wisdom', 'exercise'];
+    ? ['source', 'cbtExercise']  // Only CBT for users needing help
+    : ['source'];  // Just source selection for happy users
 
   return (
     <>
@@ -2073,10 +2073,10 @@ function InlineCheckin({ onSave }) {
             </div>
 
             <button
-              onClick={() => setStep(isNothing ? 'cbtExercise' : 'wisdom')}
+              onClick={() => isNothing ? setStep('cbtExercise') : handleSave()}
               className="w-full bg-gradient-to-r from-green-400 to-emerald-500 text-slate-900 font-bold py-3 rounded-xl"
             >
-              Continue →
+              {isNothing ? 'Continue →' : '✓ Complete Check-in'}
             </button>
           </>
         )}
@@ -2141,6 +2141,7 @@ function InlineCheckin({ onSave }) {
               {exercise.description && (
                 <p className="text-slate-300 text-sm mb-3 italic">{exercise.description}</p>
               )}
+              {exercise.pattern && <BreathingGuide pattern={exercise.pattern} />}
               <ul className="space-y-1 text-sm mt-3">
                 {exercise.steps.map((s, i) => (
                   <li key={i} className="flex gap-2">
@@ -2189,8 +2190,8 @@ function InlineCheckin({ onSave }) {
               </button>
             </div>
             <div className="flex gap-3">
-              <button onClick={() => setStep('source')} className="flex-1 bg-white/10 py-3 rounded-xl">← Back</button>
-              <button onClick={() => setStep('wisdom')} className="flex-1 bg-gradient-to-r from-green-400 to-emerald-500 text-slate-900 font-bold py-3 rounded-xl">Continue →</button>
+              <button onClick={handleSkip} className="flex-1 bg-white/10 py-3 rounded-xl">Skip & Save</button>
+              <button onClick={handleSave} className="flex-1 bg-gradient-to-r from-green-400 to-emerald-500 text-slate-900 font-bold py-3 rounded-xl">✓ Complete</button>
             </div>
           </>
         )}
@@ -2856,7 +2857,8 @@ export default function App() {
         <div className="flex bg-white/5 rounded-xl p-1 mb-4">
           {[
             { id: 'timer', label: '😊 Home' },
-            { id: 'world', label: '🌍 The World' },
+            { id: 'tools', label: '🧘 Tools' },
+            { id: 'world', label: '🌍 World' },
           ].map(tab => (
             <button
               key={tab.id}
@@ -2978,6 +2980,61 @@ export default function App() {
                     </div>
                   );
                 })}
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Tools For Happiness Tab */}
+        {activeTab === 'tools' && (
+          <>
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold mb-2">🧘 Tools For Happiness</h2>
+              <p className="text-slate-400 text-sm">Quotes, exercises, and practices to lift your spirits</p>
+            </div>
+
+            {/* Quote Browser Section */}
+            <div className="bg-white/5 rounded-2xl p-5 mb-4 border border-white/10">
+              <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                💬 Wisdom Quotes
+              </h3>
+              <button
+                onClick={() => setShowQuoteBrowser(true)}
+                className="w-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl p-4 hover:from-purple-500/30 hover:to-pink-500/30 transition"
+              >
+                <div className="text-3xl mb-2">📚</div>
+                <div className="font-medium">Browse {wisdomQuotes.length} Wisdom Quotes</div>
+                <div className="text-xs text-slate-400 mt-1">Inspiration from world traditions</div>
+              </button>
+            </div>
+
+            {/* Exercise Browser Section */}
+            <div className="bg-white/5 rounded-2xl p-5 mb-4 border border-white/10">
+              <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                🧘 Mindfulness Exercises
+              </h3>
+              <button
+                onClick={() => setShowExerciseBrowser(true)}
+                className="w-full bg-gradient-to-r from-green-500/20 to-teal-500/20 border border-green-500/30 rounded-xl p-4 hover:from-green-500/30 hover:to-teal-500/30 transition"
+              >
+                <div className="text-3xl mb-2">🌿</div>
+                <div className="font-medium">Browse {exercises.length + 1} Exercises</div>
+                <div className="text-xs text-slate-400 mt-1">Breathing, meditation & mindfulness practices</div>
+              </button>
+            </div>
+
+            {/* CBT Tools Section */}
+            <div className="bg-white/5 rounded-2xl p-5 mb-4 border border-white/10">
+              <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                💙 When You Need a Lift
+              </h3>
+              <div className="space-y-2">
+                {cbtExercises.map((ex, idx) => (
+                  <div key={idx} className="bg-blue-400/10 border border-blue-400/30 rounded-xl p-3">
+                    <div className="font-medium text-blue-400 mb-1">{ex.title}</div>
+                    <div className="text-xs text-slate-400">{ex.subtitle}</div>
+                  </div>
+                ))}
               </div>
             </div>
           </>
