@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '4.5.0';
+const APP_VERSION = '4.6.2';
 const BUILD_DATE = '2026-01-07';
 
 // Gamification: Point Values
@@ -876,6 +876,64 @@ function WeeklyReflection({ isOpen, onClose, checkins, onShare }) {
   );
 }
 
+// Sound Effects System - Web Audio API
+const createSound = () => {
+  if (typeof window === 'undefined' || !window.AudioContext) return null;
+
+  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+  const playSound = (frequency, duration, type = 'sine') => {
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    oscillator.frequency.value = frequency;
+    oscillator.type = type;
+
+    gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + duration);
+  };
+
+  return {
+    // Gentle ding for check-in
+    checkIn: () => {
+      playSound(523.25, 0.2); // C5
+      setTimeout(() => playSound(659.25, 0.15), 100); // E5
+    },
+    // Soft chime for points
+    points: () => {
+      playSound(659.25, 0.15); // E5
+    },
+    // Sparkle for power boost
+    powerBoost: () => {
+      playSound(523.25, 0.1); // C5
+      setTimeout(() => playSound(659.25, 0.1), 50); // E5
+      setTimeout(() => playSound(783.99, 0.15), 100); // G5
+    },
+    // Celebration bells for milestone
+    milestone: () => {
+      playSound(523.25, 0.2); // C5
+      setTimeout(() => playSound(659.25, 0.2), 100); // E5
+      setTimeout(() => playSound(783.99, 0.2), 200); // G5
+      setTimeout(() => playSound(1046.50, 0.3), 300); // C6
+    },
+    // Breathing phase bell - gentle guidance
+    breathInhale: () => {
+      playSound(659.25, 0.25); // E5 - slightly longer for breath transitions
+    },
+    breathExhale: () => {
+      playSound(523.25, 0.25); // C5 - lower tone for exhale
+    },
+  };
+};
+
+const soundSystem = createSound();
+
 // Dynamic - always uses current year
 const CURRENT_YEAR = new Date().getFullYear();
 
@@ -1412,7 +1470,7 @@ function ExerciseBrowser({ isOpen, onClose, addPoints, onBoost }) {
             {currentExercise.description && (
               <p className="text-slate-300 text-sm mb-3 italic">{currentExercise.description}</p>
             )}
-            {currentExercise.pattern && <BreathingGuide pattern={currentExercise.pattern} />}
+            {currentExercise.pattern && <BreathingGuide pattern={currentExercise.pattern} playSound={playSound} />}
             <ul className="space-y-1.5 text-sm mt-3">
               {currentExercise.steps.map((s, i) => (
                 <li key={i} className="flex gap-2">
@@ -1460,7 +1518,7 @@ function ExerciseBrowser({ isOpen, onClose, addPoints, onBoost }) {
 }
 
 // CBT Exercise Browser/Carousel Component
-function CBTBrowser({ isOpen, onClose, addPoints, onBoost }) {
+function CBTBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
   const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * cbtExercises.length));
   const [showShareModal, setShowShareModal] = useState(false);
 
@@ -1503,7 +1561,7 @@ function CBTBrowser({ isOpen, onClose, addPoints, onBoost }) {
             {currentExercise.description && (
               <p className="text-slate-300 text-sm mb-3 italic">{currentExercise.description}</p>
             )}
-            {currentExercise.pattern && <BreathingGuide pattern={currentExercise.pattern} />}
+            {currentExercise.pattern && <BreathingGuide pattern={currentExercise.pattern} playSound={playSound} />}
             <ul className="space-y-1.5 text-sm mt-3">
               {currentExercise.steps.map((s, i) => (
                 <li key={i} className="flex gap-2">
@@ -1551,7 +1609,7 @@ function CBTBrowser({ isOpen, onClose, addPoints, onBoost }) {
 }
 
 // Breathwork Browser Component - 1-minute breathing patterns
-function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost }) {
+function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
   const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * breathworkPatterns.length));
   const [isActive, setIsActive] = useState(false);
   const [cycles, setCycles] = useState(0);
@@ -1668,7 +1726,7 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost }) {
           {isActive && (
             <div className="text-center py-10">
               <div className="mb-6">
-                <BreathingGuide pattern={currentPattern.pattern} />
+                <BreathingGuide pattern={currentPattern.pattern} playSound={playSound} />
               </div>
               <div className="text-slate-400 text-sm">
                 Cycle {cycles + 1} of {targetCycles}
@@ -2116,26 +2174,17 @@ const getDayKey = (date) => {
 };
 
 // Breathing Guide Component - Heart Coherence (5 in, 5 out)
-function BreathingGuide({ pattern }) {
-  const [countdown, setCountdown] = useState(3);
-  const [isStarted, setIsStarted] = useState(false);
+function BreathingGuide({ pattern, playSound }) {
   const [phase, setPhase] = useState('inhale');
   const [count, setCount] = useState(5);
 
-  // Countdown before starting
+  // Play first inhale bell on mount
   useEffect(() => {
-    if (countdown > 0) {
-      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
-      return () => clearTimeout(timer);
-    } else if (countdown === 0 && !isStarted) {
-      setIsStarted(true);
-    }
-  }, [countdown, isStarted]);
+    if (playSound) playSound('breathInhale');
+  }, [playSound]);
 
-  // Heart coherence breathing cycle
+  // Heart coherence breathing cycle - starts immediately
   useEffect(() => {
-    if (!isStarted) return;
-
     let currentPhase = 'inhale';
     let currentCount = 5;
 
@@ -2147,27 +2196,28 @@ function BreathingGuide({ pattern }) {
         currentPhase = currentPhase === 'inhale' ? 'exhale' : 'inhale';
         currentCount = 5;
         setPhase(currentPhase);
+
+        // Play bell on phase transition
+        if (playSound) {
+          if (currentPhase === 'inhale') {
+            playSound('breathInhale');
+          } else {
+            playSound('breathExhale');
+          }
+        }
       }
 
       setCount(currentCount);
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isStarted]);
+  }, [playSound]);
 
   const labels = { inhale: 'Breathe In', exhale: 'Breathe Out' };
   const colors = {
     inhale: 'bg-green-500/30 scale-110',
     exhale: 'bg-blue-500/30 scale-90'
   };
-
-  if (countdown > 0) {
-    return (
-      <div className="w-24 h-24 mx-auto rounded-full flex items-center justify-center bg-purple-500/30 transition-all duration-300">
-        <span className="text-4xl font-bold">{countdown}</span>
-      </div>
-    );
-  }
 
   return (
     <div className={`w-24 h-24 mx-auto rounded-full flex flex-col items-center justify-center transition-all duration-1000 ${colors[phase]}`}>
@@ -2810,7 +2860,7 @@ function InlineCheckin({ onSave }) {
 }
 
 // Settings Modal
-function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats, checkins, notificationSettings, setNotificationSettings }) {
+function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats, checkins, notificationSettings, setNotificationSettings, soundEnabled, setSoundEnabled }) {
   const [confirmAction, setConfirmAction] = useState(null);
   const [notificationPermission, setNotificationPermission] = useState(
     typeof Notification !== 'undefined' ? Notification.permission : 'denied'
@@ -2930,6 +2980,25 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats, ch
               📱 Install the app for notifications
             </p>
           )}
+        </div>
+
+        {/* Sound Effects Section */}
+        <div className="bg-purple-400/10 border border-purple-400/30 rounded-xl p-4 mb-6">
+          <h3 className="font-semibold text-purple-400 mb-3 flex items-center gap-2">🔊 Sound Effects</h3>
+
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-slate-300">Gentle sound effects</span>
+            <button
+              onClick={() => setSoundEnabled(!soundEnabled)}
+              className={`w-12 h-6 rounded-full transition-colors ${soundEnabled ? 'bg-green-500' : 'bg-white/20'}`}
+            >
+              <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${soundEnabled ? 'translate-x-6' : 'translate-x-0.5'}`} />
+            </button>
+          </div>
+
+          <p className="text-xs text-slate-400 mt-2">
+            {soundEnabled ? 'Enjoy delightful chimes on check-ins, points, and milestones' : 'Sound effects are muted'}
+          </p>
         </div>
 
         <div className="bg-green-400/10 border border-green-400/30 rounded-xl p-4 mb-6">
@@ -3064,6 +3133,7 @@ export default function App() {
     // Show encouragement for round numbers
     if (newTotal % 100 === 0 && newTotal > 0) {
       setTimeout(() => showEncouragement('roundNumber', { points: newTotal }), 2500);
+      setTimeout(() => playSound('points'), 2000);
     }
   };
 
@@ -3206,6 +3276,24 @@ export default function App() {
     }
   });
 
+  // Sound effects settings (default ON)
+  const [soundEnabled, setSoundEnabled] = useState(() => {
+    const stored = localStorage.getItem('happinessSoundEnabled');
+    return stored === null ? true : stored === 'true';
+  });
+
+  // Save sound settings
+  useEffect(() => {
+    localStorage.setItem('happinessSoundEnabled', soundEnabled.toString());
+  }, [soundEnabled]);
+
+  // Helper to play sound if enabled
+  const playSound = (soundType) => {
+    if (soundEnabled && soundSystem) {
+      soundSystem[soundType]?.();
+    }
+  };
+
   // Request notification permission on first load
   useEffect(() => {
     const hasAsked = localStorage.getItem('happinessNotificationAsked');
@@ -3337,6 +3425,9 @@ export default function App() {
     setShowConfetti(true);
     setTimeout(() => setShowConfetti(false), 3000);
 
+    // Play check-in sound
+    playSound('checkIn');
+
     // Show encouragement after check-in
     setTimeout(() => showEncouragement('afterCheckIn', { count: todayCheckins.length, streak: newStreak }), 3500);
 
@@ -3348,6 +3439,8 @@ export default function App() {
       setTimeout(() => setShowMilestone(true), 500);
       setTimeout(() => setShowConfetti(false), 4000);
       setCelebratedMilestones(prev => [...prev, newStreak]);
+      // Play milestone celebration sound
+      setTimeout(() => playSound('milestone'), 600);
     }
     
     // Increment global counters
@@ -3396,6 +3489,9 @@ export default function App() {
     const newCount = toolUsageThisWeek + 1;
     setToolUsageThisWeek(newCount);
     localStorage.setItem(weekKey, newCount.toString());
+
+    // Play power boost sound
+    playSound('powerBoost');
 
     // Show encouragement (every 5 tools or on milestones)
     if (newCount % 5 === 0 || [3, 7, 10, 15, 20].includes(newCount)) {
@@ -3721,8 +3817,8 @@ export default function App() {
       {/* Modals */}
       <QuoteBrowser isOpen={showQuoteBrowser} onClose={() => setShowQuoteBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} />
       <ExerciseBrowser isOpen={showExerciseBrowser} onClose={() => setShowExerciseBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} />
-      <BreathworkBrowser isOpen={showBreathworkBrowser} onClose={() => setShowBreathworkBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} />
-      <CBTBrowser isOpen={showCBTBrowser} onClose={() => setShowCBTBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} />
+      <BreathworkBrowser isOpen={showBreathworkBrowser} onClose={() => setShowBreathworkBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} playSound={playSound} />
+      <CBTBrowser isOpen={showCBTBrowser} onClose={() => setShowCBTBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} playSound={playSound} />
       <SettingsModal
         isOpen={showSettingsModal}
         onClose={() => setShowSettingsModal(false)}
@@ -3732,6 +3828,8 @@ export default function App() {
         checkins={checkins}
         notificationSettings={notificationSettings}
         setNotificationSettings={setNotificationSettings}
+        soundEnabled={soundEnabled}
+        setSoundEnabled={setSoundEnabled}
       />
       <ChallengeModal
         isOpen={showChallengeModal}
