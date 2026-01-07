@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '4.6.0';
+const APP_VERSION = '4.6.1';
 const BUILD_DATE = '2026-01-07';
 
 // Gamification: Point Values
@@ -922,6 +922,13 @@ const createSound = () => {
       setTimeout(() => playSound(783.99, 0.2), 200); // G5
       setTimeout(() => playSound(1046.50, 0.3), 300); // C6
     },
+    // Breathing phase bell - gentle guidance
+    breathInhale: () => {
+      playSound(659.25, 0.25); // E5 - slightly longer for breath transitions
+    },
+    breathExhale: () => {
+      playSound(523.25, 0.25); // C5 - lower tone for exhale
+    },
   };
 };
 
@@ -1463,7 +1470,7 @@ function ExerciseBrowser({ isOpen, onClose, addPoints, onBoost }) {
             {currentExercise.description && (
               <p className="text-slate-300 text-sm mb-3 italic">{currentExercise.description}</p>
             )}
-            {currentExercise.pattern && <BreathingGuide pattern={currentExercise.pattern} />}
+            {currentExercise.pattern && <BreathingGuide pattern={currentExercise.pattern} playSound={playSound} />}
             <ul className="space-y-1.5 text-sm mt-3">
               {currentExercise.steps.map((s, i) => (
                 <li key={i} className="flex gap-2">
@@ -1511,7 +1518,7 @@ function ExerciseBrowser({ isOpen, onClose, addPoints, onBoost }) {
 }
 
 // CBT Exercise Browser/Carousel Component
-function CBTBrowser({ isOpen, onClose, addPoints, onBoost }) {
+function CBTBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
   const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * cbtExercises.length));
   const [showShareModal, setShowShareModal] = useState(false);
 
@@ -1554,7 +1561,7 @@ function CBTBrowser({ isOpen, onClose, addPoints, onBoost }) {
             {currentExercise.description && (
               <p className="text-slate-300 text-sm mb-3 italic">{currentExercise.description}</p>
             )}
-            {currentExercise.pattern && <BreathingGuide pattern={currentExercise.pattern} />}
+            {currentExercise.pattern && <BreathingGuide pattern={currentExercise.pattern} playSound={playSound} />}
             <ul className="space-y-1.5 text-sm mt-3">
               {currentExercise.steps.map((s, i) => (
                 <li key={i} className="flex gap-2">
@@ -1602,7 +1609,7 @@ function CBTBrowser({ isOpen, onClose, addPoints, onBoost }) {
 }
 
 // Breathwork Browser Component - 1-minute breathing patterns
-function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost }) {
+function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
   const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * breathworkPatterns.length));
   const [isActive, setIsActive] = useState(false);
   const [cycles, setCycles] = useState(0);
@@ -1719,7 +1726,7 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost }) {
           {isActive && (
             <div className="text-center py-10">
               <div className="mb-6">
-                <BreathingGuide pattern={currentPattern.pattern} />
+                <BreathingGuide pattern={currentPattern.pattern} playSound={playSound} />
               </div>
               <div className="text-slate-400 text-sm">
                 Cycle {cycles + 1} of {targetCycles}
@@ -2167,7 +2174,7 @@ const getDayKey = (date) => {
 };
 
 // Breathing Guide Component - Heart Coherence (5 in, 5 out)
-function BreathingGuide({ pattern }) {
+function BreathingGuide({ pattern, playSound }) {
   const [countdown, setCountdown] = useState(3);
   const [isStarted, setIsStarted] = useState(false);
   const [phase, setPhase] = useState('inhale');
@@ -2180,8 +2187,10 @@ function BreathingGuide({ pattern }) {
       return () => clearTimeout(timer);
     } else if (countdown === 0 && !isStarted) {
       setIsStarted(true);
+      // Play first inhale bell when starting
+      if (playSound) playSound('breathInhale');
     }
-  }, [countdown, isStarted]);
+  }, [countdown, isStarted, playSound]);
 
   // Heart coherence breathing cycle
   useEffect(() => {
@@ -2198,13 +2207,22 @@ function BreathingGuide({ pattern }) {
         currentPhase = currentPhase === 'inhale' ? 'exhale' : 'inhale';
         currentCount = 5;
         setPhase(currentPhase);
+
+        // Play bell on phase transition
+        if (playSound) {
+          if (currentPhase === 'inhale') {
+            playSound('breathInhale');
+          } else {
+            playSound('breathExhale');
+          }
+        }
       }
 
       setCount(currentCount);
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isStarted]);
+  }, [isStarted, playSound]);
 
   const labels = { inhale: 'Breathe In', exhale: 'Breathe Out' };
   const colors = {
@@ -3818,8 +3836,8 @@ export default function App() {
       {/* Modals */}
       <QuoteBrowser isOpen={showQuoteBrowser} onClose={() => setShowQuoteBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} />
       <ExerciseBrowser isOpen={showExerciseBrowser} onClose={() => setShowExerciseBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} />
-      <BreathworkBrowser isOpen={showBreathworkBrowser} onClose={() => setShowBreathworkBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} />
-      <CBTBrowser isOpen={showCBTBrowser} onClose={() => setShowCBTBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} />
+      <BreathworkBrowser isOpen={showBreathworkBrowser} onClose={() => setShowBreathworkBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} playSound={playSound} />
+      <CBTBrowser isOpen={showCBTBrowser} onClose={() => setShowCBTBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} playSound={playSound} />
       <SettingsModal
         isOpen={showSettingsModal}
         onClose={() => setShowSettingsModal(false)}
