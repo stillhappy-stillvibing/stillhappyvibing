@@ -2177,30 +2177,36 @@ const getDayKey = (date) => {
 function BreathingGuide({ pattern, playSound }) {
   const [phase, setPhase] = useState('inhale');
   const [count, setCount] = useState(pattern.inhale);
+  const [resetKey, setResetKey] = useState(0);
   const playSoundRef = useRef(playSound);
   const patternRef = useRef(pattern);
 
   // Update refs when props change (but don't re-run effects)
   useEffect(() => {
     playSoundRef.current = playSound;
-    patternRef.current = pattern;
-  }, [playSound, pattern]);
+  }, [playSound]);
 
-  // Play first inhale bell on mount only
+  // When pattern changes, reset the breathing cycle
   useEffect(() => {
+    patternRef.current = pattern;
+    setPhase('inhale');
+    setCount(pattern.inhale);
+    setResetKey(prev => prev + 1); // Force interval recreation
     if (playSoundRef.current) playSoundRef.current('breathInhale');
-  }, []); // Empty deps - run once on mount
+  }, [pattern]);
 
   // Breathing cycle with pattern support - starts immediately
   useEffect(() => {
-    const p = patternRef.current;
     let currentPhase = 'inhale';
-    let currentCount = p.inhale;
+    let currentCount = patternRef.current.inhale;
 
     const interval = setInterval(() => {
       currentCount--;
 
       if (currentCount <= 0) {
+        // Access current pattern directly from ref to handle pattern changes
+        const p = patternRef.current;
+
         // Determine next phase based on pattern
         if (currentPhase === 'inhale') {
           if (p.hold1 && p.hold1 > 0) {
@@ -2237,7 +2243,7 @@ function BreathingGuide({ pattern, playSound }) {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, []); // Empty deps - run once on mount
+  }, [resetKey]); // Recreate interval when pattern changes
 
   const labels = {
     inhale: 'Breathe In',
