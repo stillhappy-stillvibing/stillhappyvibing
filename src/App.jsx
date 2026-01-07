@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '4.6.2';
+const APP_VERSION = '4.7.0';
 const BUILD_DATE = '2026-01-07';
 
 // Gamification: Point Values
@@ -2307,6 +2307,120 @@ function PowerBoost({ onSkip, onSelectTool }) {
   );
 }
 
+// Recovery Quest - Inline component for streak recovery
+function RecoveryQuest({ brokenStreak, progress, activeQuest, onSelectQuest, onSkip }) {
+  const quests = {
+    triple: {
+      name: "Triple Joy",
+      emoji: "🎯",
+      description: "3 check-ins today",
+      current: progress.checkins,
+      total: 3,
+      color: "from-yellow-500/20 to-orange-500/20",
+      border: "border-yellow-400/30",
+    },
+    tools: {
+      name: "Power Trio",
+      emoji: "💫",
+      description: "3 power boost tools today",
+      current: progress.tools,
+      total: 3,
+      color: "from-purple-500/20 to-pink-500/20",
+      border: "border-purple-400/30",
+    },
+    bookend: {
+      name: "Bookend Ritual",
+      emoji: "🌅🌙",
+      description: "Morning + Evening check-in",
+      current: (progress.morning ? 1 : 0) + (progress.evening ? 1 : 0),
+      total: 2,
+      color: "from-blue-500/20 to-indigo-500/20",
+      border: "border-blue-400/30",
+    },
+  };
+
+  if (activeQuest) {
+    const quest = quests[activeQuest];
+    const isComplete = quest.current >= quest.total;
+
+    return (
+      <div className={`bg-gradient-to-br ${quest.color} backdrop-blur rounded-2xl p-6 mb-4 border ${quest.border} animate-fade-in`}>
+        <div className="text-center mb-4">
+          <div className="text-4xl mb-2">{quest.emoji}</div>
+          <h3 className="text-xl font-bold mb-1">{quest.name}</h3>
+          <p className="text-slate-400 text-sm">{quest.description}</p>
+        </div>
+
+        <div className="bg-white/5 rounded-xl p-4 mb-4">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-sm text-slate-300">Progress</span>
+            <span className="text-lg font-bold">{quest.current}/{quest.total}</span>
+          </div>
+          <div className="h-3 bg-white/10 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full transition-all duration-500"
+              style={{ width: `${(quest.current / quest.total) * 100}%` }}
+            />
+          </div>
+        </div>
+
+        {isComplete ? (
+          <div className="text-center">
+            <p className="text-green-400 font-bold mb-2">✨ Quest Complete! ✨</p>
+            <p className="text-sm text-slate-300">Your {brokenStreak}-day streak has been restored!</p>
+          </div>
+        ) : (
+          <p className="text-center text-sm text-slate-400">
+            {activeQuest === 'bookend'
+              ? `${!progress.morning ? '🌅 Morning' : ''}${!progress.morning && !progress.evening ? ' & ' : ''}${!progress.evening ? '🌙 Evening' : ''} check-in needed`
+              : `${quest.total - quest.current} more to go!`}
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-gradient-to-br from-amber-500/20 to-red-500/20 backdrop-blur rounded-2xl p-6 mb-4 border border-amber-400/30 animate-fade-in">
+      <div className="text-center mb-4">
+        <div className="text-5xl mb-3">🌬️</div>
+        <h3 className="text-2xl font-bold mb-2">Recovery Breath</h3>
+        <p className="text-slate-300 mb-1">Life happened. Want to save your {brokenStreak}-day streak?</p>
+        <p className="text-slate-400 text-sm">Pick a quest to restore it:</p>
+      </div>
+
+      <div className="space-y-3 mb-4">
+        {Object.entries(quests).map(([key, quest]) => (
+          <button
+            key={key}
+            onClick={() => onSelectQuest(key)}
+            className={`w-full bg-gradient-to-br ${quest.color} border ${quest.border} rounded-xl p-4 hover:scale-105 transition text-left`}
+          >
+            <div className="flex items-center gap-3">
+              <span className="text-3xl">{quest.emoji}</span>
+              <div className="flex-1">
+                <div className="font-bold">{quest.name}</div>
+                <div className="text-sm text-slate-400">{quest.description}</div>
+              </div>
+            </div>
+          </button>
+        ))}
+      </div>
+
+      <button
+        onClick={onSkip}
+        className="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition font-medium"
+      >
+        Let It Go →
+      </button>
+
+      <p className="text-xs text-center text-slate-500 mt-3">
+        💎 Your best: {brokenStreak} days - this stays forever!
+      </p>
+    </div>
+  );
+}
+
 // Check-in Modal Component - Gratitude & Happiness Source Tracker
 // Inline Check-In Component (embedded on Timer tab)
 function InlineCheckin({ onSave }) {
@@ -3189,6 +3303,24 @@ export default function App() {
   const [toastEmoji, setToastEmoji] = useState('');
   const [showToast, setShowToast] = useState(false);
 
+  // Streak recovery state
+  const [recoveryActive, setRecoveryActive] = useState(false);
+  const [recoveryQuest, setRecoveryQuest] = useState(null); // 'triple', 'tools', 'bookend'
+  const [brokenStreak, setBrokenStreak] = useState(0);
+  const [recoveryProgress, setRecoveryProgress] = useState({
+    checkins: 0,
+    tools: 0,
+    morning: false,
+    evening: false,
+  });
+  const [recoveryUsedToday, setRecoveryUsedToday] = useState(() => {
+    const today = getDayKey(new Date());
+    return localStorage.getItem(`recoveryUsed_${today}`) === 'true';
+  });
+  const [maxStreak, setMaxStreak] = useState(() => {
+    try { return parseInt(localStorage.getItem(`maxStreak${CURRENT_YEAR}`) || '0'); } catch { return 0; }
+  });
+
   // Version update notification
   const { updateAvailable, newVersion } = useVersionCheck(APP_VERSION);
   const [showUpdateNotification, setShowUpdateNotification] = useState(true);
@@ -3450,6 +3582,20 @@ export default function App() {
       incrementHappinessSource(source);
     });
 
+    // Track recovery progress if active
+    if (recoveryActive && recoveryQuest) {
+      const hour = new Date().getHours();
+      const isMorning = hour >= 5 && hour < 12;
+      const isEvening = hour >= 17 && hour < 23;
+
+      setRecoveryProgress(prev => ({
+        ...prev,
+        checkins: prev.checkins + 1,
+        morning: prev.morning || isMorning,
+        evening: prev.evening || isEvening,
+      }));
+    }
+
     // Show power boost menu for happy check-ins
     const isHappyCheckIn = sources && sources.length > 0 && !sources.includes('nothing');
     if (isHappyCheckIn) {
@@ -3490,6 +3636,14 @@ export default function App() {
     setToolUsageThisWeek(newCount);
     localStorage.setItem(weekKey, newCount.toString());
 
+    // Track recovery progress if active
+    if (recoveryActive && recoveryQuest === 'tools') {
+      setRecoveryProgress(prev => ({
+        ...prev,
+        tools: prev.tools + 1,
+      }));
+    }
+
     // Play power boost sound
     playSound('powerBoost');
 
@@ -3529,6 +3683,123 @@ export default function App() {
 
   const checkinStreak = getCheckinStreak();
   const todayCheckins = checkins.filter(c => getDayKey(c.timestamp) === getDayKey(new Date())).length;
+
+  // Detect streak break and offer recovery
+  useEffect(() => {
+    if (recoveryUsedToday || recoveryActive) return; // Already used or active
+
+    const today = getDayKey(new Date());
+    const yesterday = getDayKey(new Date(Date.now() - 86400000));
+    const dayBeforeYesterday = getDayKey(new Date(Date.now() - 2 * 86400000));
+
+    // Check if yesterday is missing but we had a streak before
+    const hasYesterday = checkins.some(c => getDayKey(c.timestamp) === yesterday);
+    const hasToday = checkins.some(c => getDayKey(c.timestamp) === today);
+    const hadStreakBefore = checkins.some(c => getDayKey(c.timestamp) === dayBeforeYesterday);
+
+    // Streak broken: yesterday missing, had streak before, haven't checked in today yet
+    if (!hasYesterday && hadStreakBefore && !hasToday) {
+      // Calculate what the streak was before it broke
+      const daysWithCheckins = [...new Set(checkins.map(c => getDayKey(c.timestamp)))].sort().reverse();
+      let previousStreak = 0;
+      for (let i = 1; i < daysWithCheckins.length + 1; i++) {
+        const expected = getDayKey(new Date(Date.now() - i * 86400000));
+        if (daysWithCheckins.includes(expected)) {
+          previousStreak++;
+        } else {
+          break;
+        }
+      }
+
+      if (previousStreak > 0) {
+        setBrokenStreak(previousStreak);
+        setRecoveryActive(true);
+        // Update max streak if this was the highest
+        if (previousStreak > maxStreak) {
+          setMaxStreak(previousStreak);
+          localStorage.setItem(`maxStreak${CURRENT_YEAR}`, previousStreak.toString());
+        }
+      }
+    }
+  }, [checkins, recoveryUsedToday, recoveryActive, maxStreak]);
+
+  // Check for quest completion and restore streak
+  useEffect(() => {
+    if (!recoveryActive || !recoveryQuest) return;
+
+    let isComplete = false;
+
+    switch (recoveryQuest) {
+      case 'triple':
+        isComplete = recoveryProgress.checkins >= 3;
+        break;
+      case 'tools':
+        isComplete = recoveryProgress.tools >= 3;
+        break;
+      case 'bookend':
+        isComplete = recoveryProgress.morning && recoveryProgress.evening;
+        break;
+    }
+
+    if (isComplete) {
+      // Restore the streak by adding a backdated check-in for yesterday
+      const yesterday = new Date(Date.now() - 86400000);
+      const recoveryCheckin = {
+        id: Date.now() - 1, // Unique ID
+        sources: ['recovery'],
+        quote: '🌬️ Recovery Breath - You showed up when it mattered',
+        timestamp: yesterday.toISOString()
+      };
+
+      setCheckins(prev => [...prev, recoveryCheckin]);
+
+      // Celebrate!
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 4000);
+      playSound('milestone');
+
+      // Show success message
+      setTimeout(() => {
+        setToastMessage(`✨ Quest Complete! Your ${brokenStreak}-day streak has been restored! ✨`);
+        setToastEmoji('🌬️');
+        setShowToast(true);
+      }, 500);
+
+      // Reset recovery state
+      setTimeout(() => {
+        setRecoveryActive(false);
+        setRecoveryQuest(null);
+        setBrokenStreak(0);
+        setRecoveryProgress({ checkins: 0, tools: 0, morning: false, evening: false });
+
+        const today = getDayKey(new Date());
+        localStorage.setItem(`recoveryUsed_${today}`, 'true');
+        setRecoveryUsedToday(true);
+      }, 3000);
+    }
+  }, [recoveryActive, recoveryQuest, recoveryProgress, brokenStreak, playSound]);
+
+  // Update max streak when current streak exceeds it
+  useEffect(() => {
+    if (checkinStreak > maxStreak) {
+      setMaxStreak(checkinStreak);
+      localStorage.setItem(`maxStreak${CURRENT_YEAR}`, checkinStreak.toString());
+    }
+  }, [checkinStreak, maxStreak]);
+
+  // Reset recovery availability on new day
+  useEffect(() => {
+    const today = getDayKey(new Date());
+    const storedDay = localStorage.getItem('lastRecoveryCheckDay');
+
+    if (storedDay && storedDay !== today) {
+      // New day - reset recovery availability
+      setRecoveryUsedToday(false);
+      setRecoveryProgress({ checkins: 0, tools: 0, morning: false, evening: false });
+    }
+
+    localStorage.setItem('lastRecoveryCheckDay', today);
+  }, [checkins]); // Run when checkins change (new check-in triggers day check)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white p-4">
@@ -3577,7 +3848,22 @@ export default function App() {
             </div>
 
             {/* Inline Check-In - Primary Focus */}
-            {showPowerBoost ? (
+            {recoveryActive ? (
+              <RecoveryQuest
+                brokenStreak={brokenStreak}
+                progress={recoveryProgress}
+                activeQuest={recoveryQuest}
+                onSelectQuest={(quest) => setRecoveryQuest(quest)}
+                onSkip={() => {
+                  setRecoveryActive(false);
+                  setRecoveryQuest(null);
+                  setBrokenStreak(0);
+                  const today = getDayKey(new Date());
+                  localStorage.setItem(`recoveryUsed_${today}`, 'true');
+                  setRecoveryUsedToday(true);
+                }}
+              />
+            ) : showPowerBoost ? (
               <PowerBoost
                 onSkip={handlePowerBoostSkip}
                 onSelectTool={handlePowerBoostSelect}
