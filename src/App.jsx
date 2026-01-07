@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '4.5.0';
+const APP_VERSION = '4.6.0';
 const BUILD_DATE = '2026-01-07';
 
 // Gamification: Point Values
@@ -875,6 +875,57 @@ function WeeklyReflection({ isOpen, onClose, checkins, onShare }) {
     </div>
   );
 }
+
+// Sound Effects System - Web Audio API
+const createSound = () => {
+  if (typeof window === 'undefined' || !window.AudioContext) return null;
+
+  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+  const playSound = (frequency, duration, type = 'sine') => {
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    oscillator.frequency.value = frequency;
+    oscillator.type = type;
+
+    gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + duration);
+  };
+
+  return {
+    // Gentle ding for check-in
+    checkIn: () => {
+      playSound(523.25, 0.2); // C5
+      setTimeout(() => playSound(659.25, 0.15), 100); // E5
+    },
+    // Soft chime for points
+    points: () => {
+      playSound(659.25, 0.15); // E5
+    },
+    // Sparkle for power boost
+    powerBoost: () => {
+      playSound(523.25, 0.1); // C5
+      setTimeout(() => playSound(659.25, 0.1), 50); // E5
+      setTimeout(() => playSound(783.99, 0.15), 100); // G5
+    },
+    // Celebration bells for milestone
+    milestone: () => {
+      playSound(523.25, 0.2); // C5
+      setTimeout(() => playSound(659.25, 0.2), 100); // E5
+      setTimeout(() => playSound(783.99, 0.2), 200); // G5
+      setTimeout(() => playSound(1046.50, 0.3), 300); // C6
+    },
+  };
+};
+
+const soundSystem = createSound();
 
 // Dynamic - always uses current year
 const CURRENT_YEAR = new Date().getFullYear();
@@ -2810,7 +2861,7 @@ function InlineCheckin({ onSave }) {
 }
 
 // Settings Modal
-function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats, checkins, notificationSettings, setNotificationSettings }) {
+function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats, checkins, notificationSettings, setNotificationSettings, soundEnabled, setSoundEnabled }) {
   const [confirmAction, setConfirmAction] = useState(null);
   const [notificationPermission, setNotificationPermission] = useState(
     typeof Notification !== 'undefined' ? Notification.permission : 'denied'
@@ -2930,6 +2981,25 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats, ch
               📱 Install the app for notifications
             </p>
           )}
+        </div>
+
+        {/* Sound Effects Section */}
+        <div className="bg-purple-400/10 border border-purple-400/30 rounded-xl p-4 mb-6">
+          <h3 className="font-semibold text-purple-400 mb-3 flex items-center gap-2">🔊 Sound Effects</h3>
+
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-slate-300">Gentle sound effects</span>
+            <button
+              onClick={() => setSoundEnabled(!soundEnabled)}
+              className={`w-12 h-6 rounded-full transition-colors ${soundEnabled ? 'bg-green-500' : 'bg-white/20'}`}
+            >
+              <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${soundEnabled ? 'translate-x-6' : 'translate-x-0.5'}`} />
+            </button>
+          </div>
+
+          <p className="text-xs text-slate-400 mt-2">
+            {soundEnabled ? 'Enjoy delightful chimes on check-ins, points, and milestones' : 'Sound effects are muted'}
+          </p>
         </div>
 
         <div className="bg-green-400/10 border border-green-400/30 rounded-xl p-4 mb-6">
@@ -3064,6 +3134,7 @@ export default function App() {
     // Show encouragement for round numbers
     if (newTotal % 100 === 0 && newTotal > 0) {
       setTimeout(() => showEncouragement('roundNumber', { points: newTotal }), 2500);
+      setTimeout(() => playSound('points'), 2000);
     }
   };
 
@@ -3206,6 +3277,24 @@ export default function App() {
     }
   });
 
+  // Sound effects settings (default ON)
+  const [soundEnabled, setSoundEnabled] = useState(() => {
+    const stored = localStorage.getItem('happinessSoundEnabled');
+    return stored === null ? true : stored === 'true';
+  });
+
+  // Save sound settings
+  useEffect(() => {
+    localStorage.setItem('happinessSoundEnabled', soundEnabled.toString());
+  }, [soundEnabled]);
+
+  // Helper to play sound if enabled
+  const playSound = (soundType) => {
+    if (soundEnabled && soundSystem) {
+      soundSystem[soundType]?.();
+    }
+  };
+
   // Request notification permission on first load
   useEffect(() => {
     const hasAsked = localStorage.getItem('happinessNotificationAsked');
@@ -3337,6 +3426,9 @@ export default function App() {
     setShowConfetti(true);
     setTimeout(() => setShowConfetti(false), 3000);
 
+    // Play check-in sound
+    playSound('checkIn');
+
     // Show encouragement after check-in
     setTimeout(() => showEncouragement('afterCheckIn', { count: todayCheckins.length, streak: newStreak }), 3500);
 
@@ -3348,6 +3440,8 @@ export default function App() {
       setTimeout(() => setShowMilestone(true), 500);
       setTimeout(() => setShowConfetti(false), 4000);
       setCelebratedMilestones(prev => [...prev, newStreak]);
+      // Play milestone celebration sound
+      setTimeout(() => playSound('milestone'), 600);
     }
     
     // Increment global counters
@@ -3396,6 +3490,9 @@ export default function App() {
     const newCount = toolUsageThisWeek + 1;
     setToolUsageThisWeek(newCount);
     localStorage.setItem(weekKey, newCount.toString());
+
+    // Play power boost sound
+    playSound('powerBoost');
 
     // Show encouragement (every 5 tools or on milestones)
     if (newCount % 5 === 0 || [3, 7, 10, 15, 20].includes(newCount)) {
@@ -3732,6 +3829,8 @@ export default function App() {
         checkins={checkins}
         notificationSettings={notificationSettings}
         setNotificationSettings={setNotificationSettings}
+        soundEnabled={soundEnabled}
+        setSoundEnabled={setSoundEnabled}
       />
       <ChallengeModal
         isOpen={showChallengeModal}
