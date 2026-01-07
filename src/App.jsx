@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '3.4.6';
+const APP_VERSION = '3.4.7';
 const BUILD_DATE = '2026-01-05';
 
 // Firebase Configuration
@@ -2600,6 +2600,22 @@ export default function App() {
       incrementActiveStreaks();
       sessionStorage.setItem(sessionKey, 'true');
     }
+  }, []);
+
+  // Suppress PWA install prompt (prevent it from showing repeatedly)
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e) => {
+      // Prevent the mini-infobar from appearing on mobile
+      e.preventDefault();
+      // Store the event if you want to trigger it manually later
+      // For now, we'll just suppress it to avoid annoying users
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
   }, []);
 
   // Handle app shortcuts (URL params)
