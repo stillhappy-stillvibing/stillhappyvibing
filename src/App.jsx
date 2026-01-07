@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '4.6.1';
+const APP_VERSION = '4.6.2';
 const BUILD_DATE = '2026-01-07';
 
 // Gamification: Point Values
@@ -2175,27 +2175,16 @@ const getDayKey = (date) => {
 
 // Breathing Guide Component - Heart Coherence (5 in, 5 out)
 function BreathingGuide({ pattern, playSound }) {
-  const [countdown, setCountdown] = useState(3);
-  const [isStarted, setIsStarted] = useState(false);
   const [phase, setPhase] = useState('inhale');
   const [count, setCount] = useState(5);
 
-  // Countdown before starting
+  // Play first inhale bell on mount
   useEffect(() => {
-    if (countdown > 0) {
-      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
-      return () => clearTimeout(timer);
-    } else if (countdown === 0 && !isStarted) {
-      setIsStarted(true);
-      // Play first inhale bell when starting
-      if (playSound) playSound('breathInhale');
-    }
-  }, [countdown, isStarted, playSound]);
+    if (playSound) playSound('breathInhale');
+  }, [playSound]);
 
-  // Heart coherence breathing cycle
+  // Heart coherence breathing cycle - starts immediately
   useEffect(() => {
-    if (!isStarted) return;
-
     let currentPhase = 'inhale';
     let currentCount = 5;
 
@@ -2222,21 +2211,13 @@ function BreathingGuide({ pattern, playSound }) {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isStarted, playSound]);
+  }, [playSound]);
 
   const labels = { inhale: 'Breathe In', exhale: 'Breathe Out' };
   const colors = {
     inhale: 'bg-green-500/30 scale-110',
     exhale: 'bg-blue-500/30 scale-90'
   };
-
-  if (countdown > 0) {
-    return (
-      <div className="w-24 h-24 mx-auto rounded-full flex items-center justify-center bg-purple-500/30 transition-all duration-300">
-        <span className="text-4xl font-bold">{countdown}</span>
-      </div>
-    );
-  }
 
   return (
     <div className={`w-24 h-24 mx-auto rounded-full flex flex-col items-center justify-center transition-all duration-1000 ${colors[phase]}`}>
