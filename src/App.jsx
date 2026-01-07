@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '4.3.0';
+const APP_VERSION = '4.4.0';
 const BUILD_DATE = '2026-01-07';
 
 // Gamification: Point Values
@@ -2131,6 +2131,63 @@ function ConfirmDialog({ isOpen, onClose, onConfirm, title, message, confirmText
   );
 }
 
+// Power Boost Menu - Inline component shown after happy check-ins
+function PowerBoost({ onSkip, onSelectTool }) {
+  return (
+    <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur rounded-2xl p-6 mb-4 border border-purple-400/30 animate-fade-in">
+      <div className="text-center mb-4">
+        <h3 className="text-xl font-bold mb-1">Want a Power Boost? 💫</h3>
+        <p className="text-slate-400 text-sm">Keep the momentum going with one of these tools</p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 mb-4">
+        <button
+          onClick={() => onSelectTool('quotes')}
+          className="bg-gradient-to-br from-purple-500/30 to-pink-500/30 hover:from-purple-500/40 hover:to-pink-500/40 border border-purple-400/30 rounded-xl p-4 transition hover:scale-105"
+        >
+          <div className="text-3xl mb-2">📖</div>
+          <div className="font-semibold text-sm">Wisdom Quotes</div>
+          <div className="text-xs text-purple-300 mt-1">+10 pts</div>
+        </button>
+
+        <button
+          onClick={() => onSelectTool('exercises')}
+          className="bg-gradient-to-br from-green-500/30 to-teal-500/30 hover:from-green-500/40 hover:to-teal-500/40 border border-green-400/30 rounded-xl p-4 transition hover:scale-105"
+        >
+          <div className="text-3xl mb-2">🧘</div>
+          <div className="font-semibold text-sm">Mindfulness</div>
+          <div className="text-xs text-green-300 mt-1">+15 pts</div>
+        </button>
+
+        <button
+          onClick={() => onSelectTool('breathwork')}
+          className="bg-gradient-to-br from-teal-500/30 to-cyan-500/30 hover:from-teal-500/40 hover:to-cyan-500/40 border border-teal-400/30 rounded-xl p-4 transition hover:scale-105"
+        >
+          <div className="text-3xl mb-2">🌬️</div>
+          <div className="font-semibold text-sm">Breathwork</div>
+          <div className="text-xs text-teal-300 mt-1">+15 pts</div>
+        </button>
+
+        <button
+          onClick={() => onSelectTool('cbt')}
+          className="bg-gradient-to-br from-blue-500/30 to-indigo-500/30 hover:from-blue-500/40 hover:to-indigo-500/40 border border-blue-400/30 rounded-xl p-4 transition hover:scale-105"
+        >
+          <div className="text-3xl mb-2">💙</div>
+          <div className="font-semibold text-sm">CBT Tools</div>
+          <div className="text-xs text-blue-300 mt-1">+20 pts</div>
+        </button>
+      </div>
+
+      <button
+        onClick={onSkip}
+        className="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition font-medium"
+      >
+        Maybe Later →
+      </button>
+    </div>
+  );
+}
+
 // Check-in Modal Component - Gratitude & Happiness Source Tracker
 // Inline Check-In Component (embedded on Timer tab)
 function InlineCheckin({ onSave }) {
@@ -2956,6 +3013,9 @@ export default function App() {
   const [showExerciseBrowser, setShowExerciseBrowser] = useState(false);
   const [showBreathworkBrowser, setShowBreathworkBrowser] = useState(false);
   const [showCBTBrowser, setShowCBTBrowser] = useState(false);
+  const [showPowerBoost, setShowPowerBoost] = useState(false);
+  const [checkInCooldownUntil, setCheckInCooldownUntil] = useState(0);
+  const [cooldownRemaining, setCooldownRemaining] = useState(0);
 
   // Version update notification
   const { updateAvailable, newVersion } = useVersionCheck(APP_VERSION);
@@ -2970,6 +3030,15 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem(`happinessCelebratedMilestones${CURRENT_YEAR}`, JSON.stringify(celebratedMilestones));
   }, [celebratedMilestones]);
+
+  // Check-in cooldown timer
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const remaining = Math.max(0, checkInCooldownUntil - Date.now());
+      setCooldownRemaining(remaining);
+    }, 100);
+    return () => clearInterval(interval);
+  }, [checkInCooldownUntil]);
 
   // Track active users globally (only once per session)
   useEffect(() => {
@@ -3173,6 +3242,38 @@ export default function App() {
     (sources || []).forEach(source => {
       incrementHappinessSource(source);
     });
+
+    // Show power boost menu for happy check-ins
+    const isHappyCheckIn = sources && sources.length > 0 && !sources.includes('nothing');
+    if (isHappyCheckIn) {
+      setShowPowerBoost(true);
+    }
+  };
+
+  const handlePowerBoostSkip = () => {
+    setShowPowerBoost(false);
+    setCheckInCooldownUntil(Date.now() + 60000); // 60 second cooldown
+  };
+
+  const handlePowerBoostSelect = (tool) => {
+    setShowPowerBoost(false);
+    setCheckInCooldownUntil(Date.now() + 60000); // 60 second cooldown
+
+    // Open the appropriate browser modal
+    switch (tool) {
+      case 'quotes':
+        setShowQuoteBrowser(true);
+        break;
+      case 'exercises':
+        setShowExerciseBrowser(true);
+        break;
+      case 'breathwork':
+        setShowBreathworkBrowser(true);
+        break;
+      case 'cbt':
+        setShowCBTBrowser(true);
+        break;
+    }
   };
 
   const handleDeleteCheckin = (id) => {
@@ -3253,7 +3354,20 @@ export default function App() {
             </div>
 
             {/* Inline Check-In - Primary Focus */}
-            <InlineCheckin onSave={handleCheckinSave} />
+            {showPowerBoost ? (
+              <PowerBoost
+                onSkip={handlePowerBoostSkip}
+                onSelectTool={handlePowerBoostSelect}
+              />
+            ) : cooldownRemaining > 0 ? (
+              <div className="bg-white/5 backdrop-blur rounded-2xl p-6 mb-4 border border-white/10 text-center">
+                <p className="text-slate-400 text-sm mb-2">Taking a happiness break...</p>
+                <p className="text-2xl font-bold text-purple-400">{Math.ceil(cooldownRemaining / 1000)}s</p>
+                <p className="text-xs text-slate-500 mt-2">Next check-in available soon</p>
+              </div>
+            ) : (
+              <InlineCheckin onSave={handleCheckinSave} />
+            )}
             
             <div className="bg-white/5 backdrop-blur rounded-2xl p-5 mb-4 border border-white/10 relative overflow-hidden">
               {/* Points Animation */}
