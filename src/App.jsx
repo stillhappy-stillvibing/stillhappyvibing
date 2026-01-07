@@ -598,7 +598,7 @@ function Confetti({ active }) {
 function MilestoneCelebration({ isOpen, onClose, streak, badge, onShare, onChallenge }) {
   if (!isOpen) return null;
 
-  const shareText = `🎉 I just hit a ${streak}-day happiness streak!\n\n${badge?.icon} ${badge?.name}\n\nTrack what makes you smile 😊\n\n${APP_URL}`;
+  const shareText = `🎉 I just hit a ${streak}-day happiness streak!\n\n${badge?.icon} ${badge?.name}\n\nLet's make happiness addictively fun! 🎮✨\n\n${APP_URL}`;
 
   return (
     <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50" onClick={onClose}>
@@ -636,7 +636,7 @@ function ChallengeModal({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
-  const inviteText = `😊 Let's smile together for ${days} days!\n\nI'm tracking what makes me smile. Want to join me?\n\nLet's smile together: ${APP_URL}`;
+  const inviteText = `😊 Let's smile together for ${days} days!\n\nI'm building joy points and discovering happiness boosts. Want to join me?\n\nLet's make happiness addictively fun: ${APP_URL}`;
 
   const sendInvite = () => {
     shareContent(inviteText, 'Invitation copied! Send it to a friend 💛');
@@ -701,7 +701,7 @@ function WeeklyReflection({ isOpen, onClose, checkins, onShare }) {
   const totalCheckins = weekCheckins.length;
   const daysActive = new Set(weekCheckins.map(c => new Date(c.timestamp).toDateString())).size;
 
-  const shareText = `📊 My Happiness Week in Review\n\n✅ ${totalCheckins} check-ins\n📅 ${daysActive} days active\n\nTop sources:\n${topSources.map(([s, c], i) => `${['🥇', '🥈', '🥉'][i]} ${sourceLabels[s] || s}`).join('\n')}\n\nTrack your happiness: ${APP_URL}`;
+  const shareText = `📊 My Happiness Week in Review\n\n✅ ${totalCheckins} check-ins\n📅 ${daysActive} days active\n\nTop sources:\n${topSources.map(([s, c], i) => `${['🥇', '🥈', '🥉'][i]} ${sourceLabels[s] || s}`).join('\n')}\n\nLet's make happiness addictively fun! ${APP_URL}`;
 
   return (
     <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50" onClick={onClose}>
@@ -2586,7 +2586,7 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats, ch
           <p className="text-sm text-slate-300 mb-3">Help someone you love have a happier {CURRENT_YEAR}</p>
           <button
             onClick={() => {
-              const shareText = `Happiness Tracker: Track what makes you smile.\n\n🌍 See what's making the world happy\n🔥 Build your daily streak\n🧘 Daily mindfulness exercises\n\nSmile, and the whole world smileswithyou.com`;
+              const shareText = `Happiness Tracker: Let's make happiness addictively fun!\n\n💫 Earn joy points for every boost\n🏆 Level up your happiness rank\n🎮 Discover quotes, exercises & CBT tools\n🔥 Build your daily streak\n\nSmile, and the whole world smileswithyou.com`;
               shareContent(shareText, 'Shared to clipboard!');
             }}
             className="w-full py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold hover:scale-105 transition"
