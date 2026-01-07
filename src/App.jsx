@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '4.4.0';
+const APP_VERSION = '4.5.0';
 const BUILD_DATE = '2026-01-07';
 
 // Gamification: Point Values
@@ -152,6 +152,39 @@ const microMoments = [
   { icon: "🦋", text: "Change begins with this breath" },
   { icon: "🌟", text: "You are exactly where you need to be" }
 ];
+
+// Random encouragement messages - personalized joy sprinkles
+const encouragementMessages = {
+  appOpen: [
+    { text: "Welcome back, joy warrior!", emoji: "💫" },
+    { text: "Your happiness journey continues!", emoji: "✨" },
+    { text: "Ready to spread some smiles?", emoji: "😊" },
+    { text: "So glad you're here!", emoji: "💛" },
+    { text: "Let's make today beautiful!", emoji: "🌟" },
+  ],
+  afterCheckIn: [
+    { text: "That's {count} smile{s} today!", emoji: "🌟" },
+    { text: "Your {streak}-day streak is glowing!", emoji: "🔥" },
+    { text: "You're building something beautiful!", emoji: "✨" },
+    { text: "Another moment of joy captured!", emoji: "💫" },
+  ],
+  afterPowerBoost: [
+    { text: "That's {count} tool{s} this week!", emoji: "🔥" },
+    { text: "You're on fire!", emoji: "✨" },
+    { text: "Keep that momentum going!", emoji: "💪" },
+    { text: "Your happiness toolkit grows!", emoji: "🌟" },
+  ],
+  roundNumber: [
+    { text: "Nice! {points} points!", emoji: "✨" },
+    { text: "Wow! {points} points of pure joy!", emoji: "🎉" },
+    { text: "{points} points - you're amazing!", emoji: "💫" },
+  ],
+  milestone: [
+    { text: "That's your best streak ever!", emoji: "🏆" },
+    { text: "You're a happiness legend!", emoji: "👑" },
+    { text: "Incredible dedication!", emoji: "💎" },
+  ],
+};
 
 // Wisdom quotes from various traditions
 const wisdomQuotes = [
@@ -647,6 +680,38 @@ function Confetti({ active }) {
         @keyframes confetti-fall {
           0% { transform: translateY(0) rotate(0deg); opacity: 1; }
           100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+// Toast Notification - Random encouragements
+function Toast({ message, emoji, isVisible, onClose }) {
+  useEffect(() => {
+    if (isVisible) {
+      const timer = setTimeout(onClose, 3000); // Auto-hide after 3 seconds
+      return () => clearTimeout(timer);
+    }
+  }, [isVisible, onClose]);
+
+  if (!isVisible) return null;
+
+  return (
+    <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 animate-slide-down">
+      <div className="bg-gradient-to-r from-purple-500/90 to-pink-500/90 backdrop-blur-lg rounded-2xl px-6 py-4 border border-white/20 shadow-2xl">
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">{emoji}</span>
+          <p className="text-white font-medium">{message}</p>
+        </div>
+      </div>
+      <style>{`
+        @keyframes slide-down {
+          0% { transform: translate(-50%, -100px); opacity: 0; }
+          100% { transform: translate(-50%, 0); opacity: 1; }
+        }
+        .animate-slide-down {
+          animation: slide-down 0.3s ease-out;
         }
       `}</style>
     </div>
@@ -1225,7 +1290,7 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
 }
 
 // Quote Browser/Carousel Component
-function QuoteBrowser({ isOpen, onClose, addPoints }) {
+function QuoteBrowser({ isOpen, onClose, addPoints, onBoost }) {
   const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * wisdomQuotes.length));
   const [showShareModal, setShowShareModal] = useState(false);
 
@@ -1241,6 +1306,7 @@ function QuoteBrowser({ isOpen, onClose, addPoints }) {
 
   const handleBoost = () => {
     addPoints(POINTS.QUOTE_BOOST);
+    onBoost?.();
     randomQuote();
   };
 
@@ -1302,7 +1368,7 @@ function QuoteBrowser({ isOpen, onClose, addPoints }) {
 }
 
 // Exercise Browser/Carousel Component
-function ExerciseBrowser({ isOpen, onClose, addPoints }) {
+function ExerciseBrowser({ isOpen, onClose, addPoints, onBoost }) {
   const allExercises = [...exercises, nightExercise];
   const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * allExercises.length));
   const [showShareModal, setShowShareModal] = useState(false);
@@ -1319,6 +1385,7 @@ function ExerciseBrowser({ isOpen, onClose, addPoints }) {
 
   const handleBoost = () => {
     addPoints(POINTS.EXERCISE_BOOST);
+    onBoost?.();
     randomExercise();
   };
 
@@ -1393,7 +1460,7 @@ function ExerciseBrowser({ isOpen, onClose, addPoints }) {
 }
 
 // CBT Exercise Browser/Carousel Component
-function CBTBrowser({ isOpen, onClose, addPoints }) {
+function CBTBrowser({ isOpen, onClose, addPoints, onBoost }) {
   const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * cbtExercises.length));
   const [showShareModal, setShowShareModal] = useState(false);
 
@@ -1409,6 +1476,7 @@ function CBTBrowser({ isOpen, onClose, addPoints }) {
 
   const handleBoost = () => {
     addPoints(POINTS.CBT_BOOST);
+    onBoost?.();
     randomExercise();
   };
 
@@ -1483,7 +1551,7 @@ function CBTBrowser({ isOpen, onClose, addPoints }) {
 }
 
 // Breathwork Browser Component - 1-minute breathing patterns
-function BreathworkBrowser({ isOpen, onClose, addPoints }) {
+function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost }) {
   const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * breathworkPatterns.length));
   const [isActive, setIsActive] = useState(false);
   const [cycles, setCycles] = useState(0);
@@ -1511,6 +1579,7 @@ function BreathworkBrowser({ isOpen, onClose, addPoints }) {
 
   const handleBoost = () => {
     addPoints(POINTS.BREATHWORK_BOOST);
+    onBoost?.();
     randomPattern();
   };
 
@@ -2947,6 +3016,31 @@ export default function App() {
   const [showPointsAnimation, setShowPointsAnimation] = useState(false);
   const [pointsGained, setPointsGained] = useState(0);
 
+  // Track tool usage for encouragements
+  const [toolUsageThisWeek, setToolUsageThisWeek] = useState(() => {
+    const weekKey = `toolUsage_${getDayKey(new Date())}`;
+    try { return parseInt(localStorage.getItem(weekKey) || '0'); } catch { return 0; }
+  });
+
+  // Helper function to show encouragement
+  const showEncouragement = (type, data = {}) => {
+    const messages = encouragementMessages[type];
+    if (!messages || messages.length === 0) return;
+
+    let message = messages[Math.floor(Math.random() * messages.length)];
+    let text = message.text;
+
+    // Personalize with data
+    text = text.replace('{count}', data.count || 0);
+    text = text.replace('{s}', (data.count || 0) === 1 ? '' : 's');
+    text = text.replace('{streak}', data.streak || 0);
+    text = text.replace('{points}', (data.points || 0).toLocaleString());
+
+    setToastMessage(text);
+    setToastEmoji(message.emoji);
+    setShowToast(true);
+  };
+
   // Helper function to add points
   const addPoints = (points, reason = '') => {
     const newTotal = totalPoints + points;
@@ -2966,6 +3060,11 @@ export default function App() {
 
     // Track globally
     incrementGlobalJoyPoints(points);
+
+    // Show encouragement for round numbers
+    if (newTotal % 100 === 0 && newTotal > 0) {
+      setTimeout(() => showEncouragement('roundNumber', { points: newTotal }), 2500);
+    }
   };
 
   // Reset daily points at midnight
@@ -3016,6 +3115,9 @@ export default function App() {
   const [showPowerBoost, setShowPowerBoost] = useState(false);
   const [checkInCooldownUntil, setCheckInCooldownUntil] = useState(0);
   const [cooldownRemaining, setCooldownRemaining] = useState(0);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastEmoji, setToastEmoji] = useState('');
+  const [showToast, setShowToast] = useState(false);
 
   // Version update notification
   const { updateAvailable, newVersion } = useVersionCheck(APP_VERSION);
@@ -3039,6 +3141,15 @@ export default function App() {
     }, 100);
     return () => clearInterval(interval);
   }, [checkInCooldownUntil]);
+
+  // Show welcome encouragement on app open (once per session)
+  useEffect(() => {
+    const hasShownWelcome = sessionStorage.getItem('welcomeShown');
+    if (!hasShownWelcome) {
+      setTimeout(() => showEncouragement('appOpen'), 1000);
+      sessionStorage.setItem('welcomeShown', 'true');
+    }
+  }, []);
 
   // Track active users globally (only once per session)
   useEffect(() => {
@@ -3226,6 +3337,9 @@ export default function App() {
     setShowConfetti(true);
     setTimeout(() => setShowConfetti(false), 3000);
 
+    // Show encouragement after check-in
+    setTimeout(() => showEncouragement('afterCheckIn', { count: todayCheckins.length, streak: newStreak }), 3500);
+
     // Check for milestone celebration
     if (milestoneThresholds.includes(newStreak) && !celebratedMilestones.includes(newStreak)) {
       const badge = streakBadges.find(b => b.threshold === newStreak);
@@ -3273,6 +3387,19 @@ export default function App() {
       case 'cbt':
         setShowCBTBrowser(true);
         break;
+    }
+  };
+
+  const handleToolBoost = () => {
+    // Track tool usage
+    const weekKey = `toolUsage_${getDayKey(new Date())}`;
+    const newCount = toolUsageThisWeek + 1;
+    setToolUsageThisWeek(newCount);
+    localStorage.setItem(weekKey, newCount.toString());
+
+    // Show encouragement (every 5 tools or on milestones)
+    if (newCount % 5 === 0 || [3, 7, 10, 15, 20].includes(newCount)) {
+      setTimeout(() => showEncouragement('afterPowerBoost', { count: newCount }), 1000);
     }
   };
 
@@ -3592,10 +3719,10 @@ export default function App() {
       </div>
 
       {/* Modals */}
-      <QuoteBrowser isOpen={showQuoteBrowser} onClose={() => setShowQuoteBrowser(false)} addPoints={addPoints} />
-      <ExerciseBrowser isOpen={showExerciseBrowser} onClose={() => setShowExerciseBrowser(false)} addPoints={addPoints} />
-      <BreathworkBrowser isOpen={showBreathworkBrowser} onClose={() => setShowBreathworkBrowser(false)} addPoints={addPoints} />
-      <CBTBrowser isOpen={showCBTBrowser} onClose={() => setShowCBTBrowser(false)} addPoints={addPoints} />
+      <QuoteBrowser isOpen={showQuoteBrowser} onClose={() => setShowQuoteBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} />
+      <ExerciseBrowser isOpen={showExerciseBrowser} onClose={() => setShowExerciseBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} />
+      <BreathworkBrowser isOpen={showBreathworkBrowser} onClose={() => setShowBreathworkBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} />
+      <CBTBrowser isOpen={showCBTBrowser} onClose={() => setShowCBTBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} />
       <SettingsModal
         isOpen={showSettingsModal}
         onClose={() => setShowSettingsModal(false)}
@@ -3627,6 +3754,12 @@ export default function App() {
         onClose={() => setShowShareSmile(false)}
       />
       <Confetti active={showConfetti} />
+      <Toast
+        message={toastMessage}
+        emoji={toastEmoji}
+        isVisible={showToast}
+        onClose={() => setShowToast(false)}
+      />
     </div>
   );
 }
