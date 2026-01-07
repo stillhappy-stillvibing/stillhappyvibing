@@ -1161,6 +1161,14 @@ function QuoteBrowser({ isOpen, onClose }) {
     setCurrentIndex((currentIndex - 1 + wisdomQuotes.length) % wisdomQuotes.length);
   };
 
+  const randomQuote = () => {
+    let newIndex;
+    do {
+      newIndex = Math.floor(Math.random() * wisdomQuotes.length);
+    } while (newIndex === currentIndex && wisdomQuotes.length > 1);
+    setCurrentIndex(newIndex);
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -1202,12 +1210,20 @@ function QuoteBrowser({ isOpen, onClose }) {
             </button>
           </div>
 
-          <button
-            onClick={() => shareQuote(currentQuote)}
-            className="w-full py-2 rounded-lg bg-purple-500/20 border border-purple-500/30 text-purple-400 text-sm hover:bg-purple-500/30 transition"
-          >
-            📤 Share this quote
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => shareQuote(currentQuote)}
+              className="flex-1 py-2 rounded-lg bg-purple-500/20 border border-purple-500/30 text-purple-400 text-sm hover:bg-purple-500/30 transition"
+            >
+              📤 Share
+            </button>
+            <button
+              onClick={randomQuote}
+              className="flex-1 py-2 rounded-lg bg-amber-500/20 border border-amber-500/30 text-amber-400 text-sm hover:bg-amber-500/30 transition"
+            >
+              🔀 Shuffle
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -1250,6 +1266,14 @@ function ExerciseBrowser({ isOpen, onClose }) {
 
   const prevExercise = () => {
     setCurrentIndex((currentIndex - 1 + allExercises.length) % allExercises.length);
+  };
+
+  const randomExercise = () => {
+    let newIndex;
+    do {
+      newIndex = Math.floor(Math.random() * allExercises.length);
+    } while (newIndex === currentIndex && allExercises.length > 1);
+    setCurrentIndex(newIndex);
   };
 
   if (!isOpen) return null;
@@ -1306,12 +1330,139 @@ function ExerciseBrowser({ isOpen, onClose }) {
             </button>
           </div>
 
-          <button
-            onClick={() => shareExercise(currentExercise)}
-            className="w-full py-2 rounded-lg bg-blue-500/20 border border-blue-500/30 text-blue-400 text-sm hover:bg-blue-500/30 transition"
-          >
-            📤 Share this exercise
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => shareExercise(currentExercise)}
+              className="flex-1 py-2 rounded-lg bg-blue-500/20 border border-blue-500/30 text-blue-400 text-sm hover:bg-blue-500/30 transition"
+            >
+              📤 Share
+            </button>
+            <button
+              onClick={randomExercise}
+              className="flex-1 py-2 rounded-lg bg-amber-500/20 border border-amber-500/30 text-amber-400 text-sm hover:bg-amber-500/30 transition"
+            >
+              🔀 Shuffle
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// CBT Exercise Browser/Carousel Component
+function CBTBrowser({ isOpen, onClose }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [favorites, setFavorites] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('happinessFavoriteCBT') || '[]');
+    } catch {
+      return [];
+    }
+  });
+
+  const currentExercise = cbtExercises[currentIndex];
+  const isFavorite = favorites.includes(currentIndex);
+
+  const toggleFavorite = () => {
+    const newFavorites = isFavorite
+      ? favorites.filter(i => i !== currentIndex)
+      : [...favorites, currentIndex];
+    setFavorites(newFavorites);
+    localStorage.setItem('happinessFavoriteCBT', JSON.stringify(newFavorites));
+
+    // Update global favorites counter
+    if (isFavorite) {
+      decrementCBTFavorite(currentIndex);
+    } else {
+      incrementCBTFavorite(currentIndex);
+    }
+  };
+
+  const nextExercise = () => {
+    setCurrentIndex((currentIndex + 1) % cbtExercises.length);
+  };
+
+  const prevExercise = () => {
+    setCurrentIndex((currentIndex - 1 + cbtExercises.length) % cbtExercises.length);
+  };
+
+  const randomExercise = () => {
+    let newIndex;
+    do {
+      newIndex = Math.floor(Math.random() * cbtExercises.length);
+    } while (newIndex === currentIndex && cbtExercises.length > 1);
+    setCurrentIndex(newIndex);
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50 overflow-y-auto" onClick={onClose}>
+      <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-lg w-full p-6 border border-blue-400/20 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-xl font-bold flex items-center gap-2">💙 CBT Tools</h2>
+          <button onClick={onClose} className="text-slate-400 hover:text-white text-xl">✕</button>
+        </div>
+
+        <div className="mb-4">
+          <p className="text-xs text-slate-400 mb-4 text-center">{currentIndex + 1} of {cbtExercises.length}</p>
+
+          <div className="bg-blue-400/10 border-blue-400/30 border rounded-xl p-4 mb-4">
+            <h3 className="text-blue-400 font-semibold text-lg mb-1">
+              💙 {currentExercise.title}
+            </h3>
+            <p className="text-slate-400 text-sm mb-3">{currentExercise.subtitle}</p>
+            {currentExercise.description && (
+              <p className="text-slate-300 text-sm mb-3 italic">{currentExercise.description}</p>
+            )}
+            {currentExercise.pattern && <BreathingGuide pattern={currentExercise.pattern} />}
+            <ul className="space-y-1.5 text-sm mt-3">
+              {currentExercise.steps.map((s, i) => (
+                <li key={i} className="flex gap-2">
+                  <span className="text-blue-400">{i + 1}.</span>
+                  {s}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="flex items-center justify-between gap-4 mb-4">
+            <button
+              onClick={prevExercise}
+              className="flex-1 py-3 bg-white/5 hover:bg-white/10 rounded-xl font-semibold transition"
+            >
+              ← Previous
+            </button>
+            <button
+              onClick={toggleFavorite}
+              className={`px-4 py-3 rounded-xl transition ${isFavorite ? 'bg-pink-500/20 text-pink-400' : 'bg-white/5 text-slate-400'}`}
+              title={isFavorite ? "Remove from favorites" : "Add to favorites"}
+            >
+              {isFavorite ? '❤️' : '🤍'}
+            </button>
+            <button
+              onClick={nextExercise}
+              className="flex-1 py-3 bg-gradient-to-r from-blue-400 to-teal-500 hover:from-blue-500 hover:to-teal-600 text-slate-900 rounded-xl font-semibold transition"
+            >
+              Next →
+            </button>
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              onClick={() => shareExercise(currentExercise)}
+              className="flex-1 py-2 rounded-lg bg-blue-500/20 border border-blue-500/30 text-blue-400 text-sm hover:bg-blue-500/30 transition"
+            >
+              📤 Share
+            </button>
+            <button
+              onClick={randomExercise}
+              className="flex-1 py-2 rounded-lg bg-amber-500/20 border border-amber-500/30 text-amber-400 text-sm hover:bg-amber-500/30 transition"
+            >
+              🔀 Shuffle
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -2608,6 +2759,7 @@ export default function App() {
   const [showReminder, setShowReminder] = useState(false);
   const [showQuoteBrowser, setShowQuoteBrowser] = useState(false);
   const [showExerciseBrowser, setShowExerciseBrowser] = useState(false);
+  const [showCBTBrowser, setShowCBTBrowser] = useState(false);
 
   // Version update notification
   const { updateAvailable, newVersion } = useVersionCheck(APP_VERSION);
@@ -3030,14 +3182,14 @@ export default function App() {
               <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
                 💙 When You Need a Lift
               </h3>
-              <div className="space-y-2">
-                {cbtExercises.map((ex, idx) => (
-                  <div key={idx} className="bg-blue-400/10 border border-blue-400/30 rounded-xl p-3">
-                    <div className="font-medium text-blue-400 mb-1">{ex.title}</div>
-                    <div className="text-xs text-slate-400">{ex.subtitle}</div>
-                  </div>
-                ))}
-              </div>
+              <button
+                onClick={() => setShowCBTBrowser(true)}
+                className="w-full bg-gradient-to-r from-blue-500/20 to-teal-500/20 border border-blue-500/30 rounded-xl p-4 hover:from-blue-500/30 hover:to-teal-500/30 transition"
+              >
+                <div className="text-3xl mb-2">💙</div>
+                <div className="font-medium">Browse {cbtExercises.length} CBT Exercises</div>
+                <div className="text-xs text-slate-400 mt-1">Tools to help you feel better</div>
+              </button>
             </div>
           </>
         )}
@@ -3058,6 +3210,7 @@ export default function App() {
       {/* Modals */}
       <QuoteBrowser isOpen={showQuoteBrowser} onClose={() => setShowQuoteBrowser(false)} />
       <ExerciseBrowser isOpen={showExerciseBrowser} onClose={() => setShowExerciseBrowser(false)} />
+      <CBTBrowser isOpen={showCBTBrowser} onClose={() => setShowCBTBrowser(false)} />
       <SettingsModal
         isOpen={showSettingsModal}
         onClose={() => setShowSettingsModal(false)}
