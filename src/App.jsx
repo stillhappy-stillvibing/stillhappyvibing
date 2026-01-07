@@ -2176,41 +2176,61 @@ const getDayKey = (date) => {
 // Breathing Guide Component - Heart Coherence (5 in, 5 out)
 function BreathingGuide({ pattern, playSound }) {
   const [phase, setPhase] = useState('inhale');
-  const [count, setCount] = useState(5);
+  const [count, setCount] = useState(pattern.inhale);
   const playSoundRef = useRef(playSound);
+  const patternRef = useRef(pattern);
 
-  // Update ref when playSound changes (but don't re-run effects)
+  // Update refs when props change (but don't re-run effects)
   useEffect(() => {
     playSoundRef.current = playSound;
-  }, [playSound]);
+    patternRef.current = pattern;
+  }, [playSound, pattern]);
 
   // Play first inhale bell on mount only
   useEffect(() => {
     if (playSoundRef.current) playSoundRef.current('breathInhale');
   }, []); // Empty deps - run once on mount
 
-  // Heart coherence breathing cycle - starts immediately
+  // Breathing cycle with pattern support - starts immediately
   useEffect(() => {
+    const p = patternRef.current;
     let currentPhase = 'inhale';
-    let currentCount = 5;
+    let currentCount = p.inhale;
 
     const interval = setInterval(() => {
       currentCount--;
 
       if (currentCount <= 0) {
-        // Switch phase
-        currentPhase = currentPhase === 'inhale' ? 'exhale' : 'inhale';
-        currentCount = 5;
-        setPhase(currentPhase);
-
-        // Play bell on phase transition
-        if (playSoundRef.current) {
-          if (currentPhase === 'inhale') {
-            playSoundRef.current('breathInhale');
+        // Determine next phase based on pattern
+        if (currentPhase === 'inhale') {
+          if (p.hold1 && p.hold1 > 0) {
+            currentPhase = 'hold1';
+            currentCount = p.hold1;
           } else {
-            playSoundRef.current('breathExhale');
+            currentPhase = 'exhale';
+            currentCount = p.exhale;
+            if (playSoundRef.current) playSoundRef.current('breathExhale');
           }
+        } else if (currentPhase === 'hold1') {
+          currentPhase = 'exhale';
+          currentCount = p.exhale;
+          if (playSoundRef.current) playSoundRef.current('breathExhale');
+        } else if (currentPhase === 'exhale') {
+          if (p.hold2 && p.hold2 > 0) {
+            currentPhase = 'hold2';
+            currentCount = p.hold2;
+          } else {
+            currentPhase = 'inhale';
+            currentCount = p.inhale;
+            if (playSoundRef.current) playSoundRef.current('breathInhale');
+          }
+        } else if (currentPhase === 'hold2') {
+          currentPhase = 'inhale';
+          currentCount = p.inhale;
+          if (playSoundRef.current) playSoundRef.current('breathInhale');
         }
+
+        setPhase(currentPhase);
       }
 
       setCount(currentCount);
@@ -2219,10 +2239,17 @@ function BreathingGuide({ pattern, playSound }) {
     return () => clearInterval(interval);
   }, []); // Empty deps - run once on mount
 
-  const labels = { inhale: 'Breathe In', exhale: 'Breathe Out' };
+  const labels = {
+    inhale: 'Breathe In',
+    exhale: 'Breathe Out',
+    hold1: 'Hold',
+    hold2: 'Hold'
+  };
   const colors = {
     inhale: 'bg-green-500/30 scale-110',
-    exhale: 'bg-blue-500/30 scale-90'
+    exhale: 'bg-blue-500/30 scale-90',
+    hold1: 'bg-yellow-500/30 scale-100',
+    hold2: 'bg-purple-500/30 scale-95'
   };
 
   return (
