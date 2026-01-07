@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '4.2.0';
+const APP_VERSION = '4.2.1';
 const BUILD_DATE = '2026-01-07';
 
 // Gamification: Point Values
@@ -3152,7 +3152,11 @@ export default function App() {
     }
 
     addPoints(pointsEarned);
-    
+
+    // Show smile card for dopamine boost (auto-hide after 1 minute)
+    setShowShareSmile(true);
+    setTimeout(() => setShowShareSmile(false), 60000);
+
     // Check for milestone celebration
     if (milestoneThresholds.includes(newStreak) && !celebratedMilestones.includes(newStreak)) {
       const badge = streakBadges.find(b => b.threshold === newStreak);
