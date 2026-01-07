@@ -1,6 +1,6 @@
 {
   "name": "happiness-tracker-2026",
-  "version": "3.7.0",
+  "version": "4.0.0",
   "description": "Track your happiness in 2026 with daily check-ins and mindfulness exercises",
   "type": "module",
   "scripts": {
