@@ -1167,7 +1167,8 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
 
 // Quote Browser/Carousel Component
 function QuoteBrowser({ isOpen, onClose, addPoints }) {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * wisdomQuotes.length));
+  const [showShareModal, setShowShareModal] = useState(false);
 
   const currentQuote = wisdomQuotes[currentIndex];
 
@@ -1223,13 +1224,20 @@ function QuoteBrowser({ isOpen, onClose, addPoints }) {
           </div>
 
           <button
-            onClick={() => shareQuote(currentQuote)}
+            onClick={() => setShowShareModal(true)}
             className="w-full py-2 rounded-lg bg-purple-500/20 border border-purple-500/30 text-purple-400 text-sm hover:bg-purple-500/30 transition"
           >
             📤 Share
           </button>
         </div>
       </div>
+
+      <ShareImageCard
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        type="quote"
+        data={currentQuote}
+      />
     </div>
   );
 }
@@ -1237,7 +1245,8 @@ function QuoteBrowser({ isOpen, onClose, addPoints }) {
 // Exercise Browser/Carousel Component
 function ExerciseBrowser({ isOpen, onClose, addPoints }) {
   const allExercises = [...exercises, nightExercise];
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * allExercises.length));
+  const [showShareModal, setShowShareModal] = useState(false);
 
   const currentExercise = allExercises[currentIndex];
 
@@ -1306,20 +1315,28 @@ function ExerciseBrowser({ isOpen, onClose, addPoints }) {
           </div>
 
           <button
-            onClick={() => shareExercise(currentExercise)}
+            onClick={() => setShowShareModal(true)}
             className="w-full py-2 rounded-lg bg-blue-500/20 border border-blue-500/30 text-blue-400 text-sm hover:bg-blue-500/30 transition"
           >
             📤 Share
           </button>
         </div>
       </div>
+
+      <ShareImageCard
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        type="exercise"
+        data={currentExercise}
+      />
     </div>
   );
 }
 
 // CBT Exercise Browser/Carousel Component
 function CBTBrowser({ isOpen, onClose, addPoints }) {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * cbtExercises.length));
+  const [showShareModal, setShowShareModal] = useState(false);
 
   const currentExercise = cbtExercises[currentIndex];
 
@@ -1388,13 +1405,20 @@ function CBTBrowser({ isOpen, onClose, addPoints }) {
           </div>
 
           <button
-            onClick={() => shareExercise(currentExercise)}
+            onClick={() => setShowShareModal(true)}
             className="w-full py-2 rounded-lg bg-blue-500/20 border border-blue-500/30 text-blue-400 text-sm hover:bg-blue-500/30 transition"
           >
             📤 Share
           </button>
         </div>
       </div>
+
+      <ShareImageCard
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        type="exercise"
+        data={currentExercise}
+      />
     </div>
   );
 }
@@ -1803,29 +1827,59 @@ const getDayKey = (date) => {
   return `${year}-${month}-${day}`;
 };
 
-// Breathing Guide Component
+// Breathing Guide Component - Heart Coherence (5 in, 5 out)
 function BreathingGuide({ pattern }) {
+  const [countdown, setCountdown] = useState(3);
+  const [isStarted, setIsStarted] = useState(false);
   const [phase, setPhase] = useState('inhale');
-  const [count, setCount] = useState(pattern?.inhale || 4);
-  
-  useEffect(() => {
-    if (!pattern) return;
-    const phases = ['inhale', 'hold1', 'exhale', 'hold2'].filter(p => pattern[p] > 0);
-    let idx = 0, cnt = pattern[phases[0]];
-    const interval = setInterval(() => {
-      cnt--;
-      if (cnt <= 0) {
-        idx = (idx + 1) % phases.length;
-        cnt = pattern[phases[idx]];
-        setPhase(phases[idx]);
-      }
-      setCount(cnt);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [pattern]);
+  const [count, setCount] = useState(5);
 
-  const labels = { inhale: 'Breathe In', hold1: 'Hold', exhale: 'Breathe Out', hold2: 'Hold' };
-  const colors = { inhale: 'bg-green-500/30 scale-110', exhale: 'bg-blue-500/30 scale-90', hold1: 'bg-purple-500/30', hold2: 'bg-purple-500/30' };
+  // Countdown before starting
+  useEffect(() => {
+    if (countdown > 0) {
+      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+      return () => clearTimeout(timer);
+    } else if (countdown === 0 && !isStarted) {
+      setIsStarted(true);
+    }
+  }, [countdown, isStarted]);
+
+  // Heart coherence breathing cycle
+  useEffect(() => {
+    if (!isStarted) return;
+
+    let currentPhase = 'inhale';
+    let currentCount = 5;
+
+    const interval = setInterval(() => {
+      currentCount--;
+
+      if (currentCount <= 0) {
+        // Switch phase
+        currentPhase = currentPhase === 'inhale' ? 'exhale' : 'inhale';
+        currentCount = 5;
+        setPhase(currentPhase);
+      }
+
+      setCount(currentCount);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [isStarted]);
+
+  const labels = { inhale: 'Breathe In', exhale: 'Breathe Out' };
+  const colors = {
+    inhale: 'bg-green-500/30 scale-110',
+    exhale: 'bg-blue-500/30 scale-90'
+  };
+
+  if (countdown > 0) {
+    return (
+      <div className="w-24 h-24 mx-auto rounded-full flex items-center justify-center bg-purple-500/30 transition-all duration-300">
+        <span className="text-4xl font-bold">{countdown}</span>
+      </div>
+    );
+  }
 
   return (
     <div className={`w-24 h-24 mx-auto rounded-full flex flex-col items-center justify-center transition-all duration-1000 ${colors[phase]}`}>
