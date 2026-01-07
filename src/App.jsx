@@ -2177,11 +2177,17 @@ const getDayKey = (date) => {
 function BreathingGuide({ pattern, playSound }) {
   const [phase, setPhase] = useState('inhale');
   const [count, setCount] = useState(5);
+  const playSoundRef = useRef(playSound);
 
-  // Play first inhale bell on mount
+  // Update ref when playSound changes (but don't re-run effects)
   useEffect(() => {
-    if (playSound) playSound('breathInhale');
+    playSoundRef.current = playSound;
   }, [playSound]);
+
+  // Play first inhale bell on mount only
+  useEffect(() => {
+    if (playSoundRef.current) playSoundRef.current('breathInhale');
+  }, []); // Empty deps - run once on mount
 
   // Heart coherence breathing cycle - starts immediately
   useEffect(() => {
@@ -2198,11 +2204,11 @@ function BreathingGuide({ pattern, playSound }) {
         setPhase(currentPhase);
 
         // Play bell on phase transition
-        if (playSound) {
+        if (playSoundRef.current) {
           if (currentPhase === 'inhale') {
-            playSound('breathInhale');
+            playSoundRef.current('breathInhale');
           } else {
-            playSound('breathExhale');
+            playSoundRef.current('breathExhale');
           }
         }
       }
@@ -2211,7 +2217,7 @@ function BreathingGuide({ pattern, playSound }) {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [playSound]);
+  }, []); // Empty deps - run once on mount
 
   const labels = { inhale: 'Breathe In', exhale: 'Breathe Out' };
   const colors = {
