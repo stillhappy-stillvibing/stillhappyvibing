@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '4.12.2';
+const APP_VERSION = '4.12.3';
 const BUILD_DATE = '2026-01-08';
 
 // Gamification: Point Values
@@ -1863,25 +1863,21 @@ function MindfulnessVisual({ exercise, isOpen, onComplete, onClose }) {
                 </button>
               </>
             ) : (
-              // Last 5 seconds - bright yellow screen for afterimage effect
+              // Last 5 seconds - white screen with bounded square for afterimage effect
               <div className="animate-in fade-in duration-500">
                 <div className="relative mb-8 flex justify-center">
-                  {/* Bright yellow/white glow - creates afterimage when you look away */}
-                  <div className="w-full h-96 bg-gradient-to-br from-yellow-200 via-yellow-100 to-white rounded-3xl flex items-center justify-center relative overflow-hidden">
-                    {/* Pulsing center light */}
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-40 h-40 rounded-full bg-white blur-3xl animate-pulse" style={{ animationDuration: '2s' }}></div>
-                    </div>
-
-                    {/* Bright center point */}
-                    <div className="relative z-10">
-                      <div className="w-8 h-8 rounded-full bg-white shadow-2xl shadow-yellow-400/50 animate-pulse"></div>
+                  {/* White screen with bounded square - creates afterimage when you look away */}
+                  <div className="w-full h-96 bg-white rounded-3xl flex items-center justify-center relative overflow-hidden">
+                    {/* Bounded square */}
+                    <div className="w-64 h-64 border-4 border-black flex items-center justify-center">
+                      {/* Pulsing center point */}
+                      <div className="w-4 h-4 rounded-full bg-black animate-pulse" style={{ animationDuration: '2s' }}></div>
                     </div>
                   </div>
                 </div>
 
-                <p className="text-slate-400 mb-4 text-sm">Look at the light, then gently look away...</p>
-                <div className="text-3xl font-bold text-yellow-400">{timeLeft}</div>
+                <p className="text-slate-400 mb-4 text-sm">Gaze at the square, then gently look away...</p>
+                <div className="text-3xl font-bold text-slate-400">{timeLeft}</div>
               </div>
             )}
           </div>
