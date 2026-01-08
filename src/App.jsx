@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '4.11.0';
+const APP_VERSION = '4.12.0';
 const BUILD_DATE = '2026-01-08';
 
 // Gamification: Point Values
@@ -1776,26 +1776,31 @@ function QuoteBrowser({ isOpen, onClose, addPoints, onBoost }) {
   );
 }
 
-// Mindfulness Visual Meditation Component - 60 second spark of zen
+// Mindfulness Visual Meditation Component - 60 second Tratak (candle gazing)
 function MindfulnessVisual({ exercise, isOpen, onComplete, onClose }) {
   const [timeLeft, setTimeLeft] = useState(60);
   const [isComplete, setIsComplete] = useState(false);
   const [showSeedThought, setShowSeedThought] = useState(false);
+  const [showCloseEyes, setShowCloseEyes] = useState(false);
 
   useEffect(() => {
     if (!isOpen) {
       setTimeLeft(60);
       setIsComplete(false);
       setShowSeedThought(false);
+      setShowCloseEyes(false);
       return;
     }
 
     const timer = setInterval(() => {
       setTimeLeft(prev => {
+        if (prev === 10) {
+          setShowCloseEyes(true);
+        }
         if (prev <= 1) {
           clearInterval(timer);
           setIsComplete(true);
-          setTimeout(() => setShowSeedThought(true), 500);
+          setTimeout(() => setShowSeedThought(true), 1000);
           return 0;
         }
         return prev - 1;
@@ -1807,152 +1812,106 @@ function MindfulnessVisual({ exercise, isOpen, onComplete, onClose }) {
 
   if (!isOpen) return null;
 
-  // Visual animation variants based on visualType
-  const getVisualAnimation = () => {
-    const baseClasses = "w-full h-64 flex items-center justify-center relative overflow-hidden rounded-2xl";
-
-    switch (exercise.visualType) {
-      case 'breathing-circle':
-        return (
-          <div className={`${baseClasses} bg-gradient-to-br from-green-900/20 to-emerald-900/20`}>
-            <div className="w-32 h-32 rounded-full bg-green-400/20 animate-pulse flex items-center justify-center">
-              <div className="w-24 h-24 rounded-full bg-green-400/30 animate-pulse" style={{ animationDuration: '4s' }}></div>
-            </div>
-          </div>
-        );
-
-      case 'ripple':
-      case 'kindness-ripple':
-      case 'listening-ripples':
-        return (
-          <div className={`${baseClasses} bg-gradient-to-br from-blue-900/20 to-cyan-900/20`}>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-16 h-16 rounded-full border-2 border-blue-400/30 animate-ping"></div>
-              <div className="w-24 h-24 rounded-full border-2 border-blue-400/20 animate-ping absolute" style={{ animationDelay: '1s' }}></div>
-              <div className="w-32 h-32 rounded-full border-2 border-blue-400/10 animate-ping absolute" style={{ animationDelay: '2s' }}></div>
-            </div>
-          </div>
-        );
-
-      case 'sky-clouds':
-      case 'thought-clouds':
-        return (
-          <div className={`${baseClasses} bg-gradient-to-b from-blue-900/20 via-indigo-900/20 to-purple-900/20`}>
-            <div className="absolute top-10 left-10 w-20 h-8 bg-white/10 rounded-full animate-pulse"></div>
-            <div className="absolute top-20 right-20 w-24 h-10 bg-white/10 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
-            <div className="absolute bottom-20 left-1/4 w-16 h-6 bg-white/10 rounded-full animate-pulse" style={{ animationDelay: '2s' }}></div>
-          </div>
-        );
-
-      case 'flowing-water':
-        return (
-          <div className={`${baseClasses} bg-gradient-to-r from-blue-900/20 via-cyan-900/20 to-teal-900/20`}>
-            <div className="w-full h-2 bg-gradient-to-r from-transparent via-blue-400/30 to-transparent animate-pulse"></div>
-            <div className="w-full h-2 bg-gradient-to-r from-transparent via-cyan-400/30 to-transparent animate-pulse absolute" style={{ animationDelay: '0.5s' }}></div>
-          </div>
-        );
-
-      case 'four-elements':
-        return (
-          <div className={`${baseClasses} bg-gradient-to-br from-amber-900/20 via-blue-900/20 to-green-900/20`}>
-            <div className="grid grid-cols-2 gap-4 w-48 h-48">
-              <div className="bg-amber-400/20 rounded-lg animate-pulse"></div>
-              <div className="bg-blue-400/20 rounded-lg animate-pulse" style={{ animationDelay: '0.5s' }}></div>
-              <div className="bg-red-400/20 rounded-lg animate-pulse" style={{ animationDelay: '1s' }}></div>
-              <div className="bg-green-400/20 rounded-lg animate-pulse" style={{ animationDelay: '1.5s' }}></div>
-            </div>
-          </div>
-        );
-
-      case 'expanding-universe':
-      case 'spacious-awareness':
-        return (
-          <div className={`${baseClasses} bg-gradient-to-br from-indigo-900/20 via-purple-900/20 to-pink-900/20`}>
-            <div className="w-2 h-2 rounded-full bg-white/40 animate-ping"></div>
-            <div className="w-32 h-32 rounded-full border border-white/10 animate-ping absolute"></div>
-            <div className="w-48 h-48 rounded-full border border-white/5 animate-ping absolute" style={{ animationDelay: '1s' }}></div>
-          </div>
-        );
-
-      case 'radiating-love':
-      case 'warm-heart':
-        return (
-          <div className={`${baseClasses} bg-gradient-to-br from-rose-900/20 to-pink-900/20`}>
-            <div className="text-6xl animate-pulse">💗</div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-32 h-32 rounded-full border-2 border-pink-400/20 animate-ping"></div>
-            </div>
-          </div>
-        );
-
-      case 'golden-glow':
-      case 'memory-glow':
-        return (
-          <div className={`${baseClasses} bg-gradient-to-br from-yellow-900/20 to-amber-900/20`}>
-            <div className="w-40 h-40 rounded-full bg-gradient-to-br from-yellow-400/20 to-amber-400/10 animate-pulse blur-xl"></div>
-          </div>
-        );
-
-      default:
-        return (
-          <div className={`${baseClasses} bg-gradient-to-br from-slate-900/20 to-indigo-900/20`}>
-            <div className="w-32 h-32 rounded-full bg-indigo-400/20 animate-pulse"></div>
-          </div>
-        );
-    }
-  };
-
   return (
-    <div className="fixed inset-0 bg-black/95 flex items-center justify-center p-4 z-50" onClick={onClose}>
+    <div className="fixed inset-0 bg-black flex items-center justify-center p-4 z-50" onClick={onClose}>
       <div className="max-w-lg w-full" onClick={e => e.stopPropagation()}>
         {!showSeedThought ? (
-          // During practice
+          // During practice - Tratak candle meditation
           <div className="text-center">
-            <div className="mb-6">
-              {getVisualAnimation()}
-            </div>
+            {!showCloseEyes ? (
+              <>
+                {/* Candle Flame Animation */}
+                <div className="relative mb-8 flex justify-center">
+                  <div className="relative">
+                    {/* Flame - multiple layers for realistic flicker */}
+                    <div className="relative w-16 h-32">
+                      {/* Outer glow */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-orange-500/0 via-orange-400/30 to-yellow-300/50 blur-2xl animate-pulse"></div>
 
-            <h3 className="text-2xl font-bold mb-2">{exercise.title}</h3>
-            <p className="text-slate-400 mb-6">{exercise.subtitle}</p>
+                      {/* Main flame */}
+                      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-24">
+                        <div className="absolute inset-0 bg-gradient-to-t from-orange-500 via-orange-400 to-yellow-300 rounded-full opacity-90"
+                             style={{
+                               clipPath: 'ellipse(45% 50% at 50% 60%)',
+                               animation: 'flicker 2s ease-in-out infinite'
+                             }}>
+                        </div>
+                      </div>
 
-            <div className="mb-6">
-              <div className="text-6xl font-bold text-white mb-2">{timeLeft}</div>
-              <div className="text-sm text-slate-400">seconds of zen</div>
-            </div>
+                      {/* Inner bright core */}
+                      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-6 h-12 bg-gradient-to-t from-yellow-200 to-white rounded-full opacity-80 blur-sm animate-pulse"
+                           style={{ animationDuration: '1.5s' }}>
+                      </div>
 
-            <div className="bg-white/5 rounded-xl p-4 mb-4 max-h-48 overflow-y-auto">
-              <ul className="space-y-2 text-sm text-left">
-                {exercise.steps.map((step, i) => (
-                  <li key={i} className="flex gap-2">
-                    <span className="text-green-400 flex-shrink-0">{i + 1}.</span>
-                    <span>{step}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+                      {/* Flickering tip */}
+                      <div className="absolute top-2 left-1/2 -translate-x-1/2 w-3 h-6 bg-yellow-100 rounded-full opacity-60 animate-pulse"
+                           style={{ animationDuration: '0.8s' }}>
+                      </div>
+                    </div>
 
-            <button
-              onClick={onClose}
-              className="px-6 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-sm transition"
-            >
-              ✕ Exit Practice
-            </button>
+                    {/* Candle body */}
+                    <div className="w-8 h-20 bg-gradient-to-b from-amber-100 to-amber-200 rounded-b-lg mx-auto mt-1 shadow-lg"></div>
+                    <div className="w-10 h-2 bg-amber-200 rounded-full mx-auto -mt-1"></div>
+                  </div>
+                </div>
+
+                <h3 className="text-xl font-bold mb-2">{exercise.title}</h3>
+                <p className="text-slate-400 text-sm mb-6">Gaze softly at the flame</p>
+
+                <div className="mb-6">
+                  <div className="text-5xl font-bold text-orange-400 mb-2">{timeLeft}</div>
+                  <div className="text-xs text-slate-500">Focus on the flame, let thoughts pass</div>
+                </div>
+
+                <button
+                  onClick={onClose}
+                  className="px-6 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-sm transition"
+                >
+                  ✕ Exit
+                </button>
+              </>
+            ) : (
+              // Last 10 seconds - close eyes
+              <div className="animate-in fade-in duration-1000">
+                <div className="relative mb-8 flex justify-center">
+                  {/* Fading afterimage */}
+                  <div className="w-24 h-24 rounded-full bg-orange-400/30 blur-2xl animate-pulse"
+                       style={{ animationDuration: '3s' }}>
+                  </div>
+                </div>
+
+                <h3 className="text-2xl font-bold mb-4">Now close your eyes...</h3>
+                <p className="text-slate-400 mb-6">Notice the spark of light within</p>
+
+                <div className="text-4xl font-bold text-orange-400/50">{timeLeft}</div>
+              </div>
+            )}
           </div>
         ) : (
-          // After completion - blooming thought
+          // After completion - The spark within (blooming thought)
           <div className="text-center animate-in fade-in duration-1000">
             <div className="mb-6">
-              <div className="text-7xl mb-4 animate-bounce">✨</div>
-              <h3 className="text-3xl font-bold mb-4">A Seed Planted</h3>
+              {/* Glowing inner spark */}
+              <div className="relative flex justify-center mb-6">
+                <div className="w-32 h-32 rounded-full bg-gradient-to-t from-orange-500/20 via-yellow-400/30 to-yellow-200/40 blur-3xl animate-pulse"></div>
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-6xl">✨</div>
+              </div>
+
+              <h3 className="text-3xl font-bold mb-2">A Spark Within</h3>
+              <p className="text-slate-400 text-sm mb-6">The light you gazed upon now shines from within</p>
             </div>
 
-            <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 border-2 border-green-400/30 rounded-2xl p-8 mb-6">
-              <p className="text-2xl font-medium leading-relaxed italic">
-                "{exercise.seedThought}"
-              </p>
+            {/* The seed thought - glowing like inner wisdom */}
+            <div className="relative mb-8">
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-yellow-500/10 to-amber-500/10 blur-2xl rounded-2xl"></div>
+              <div className="relative bg-gradient-to-br from-orange-500/20 to-yellow-500/20 border-2 border-orange-400/30 rounded-2xl p-8">
+                <p className="text-2xl font-medium leading-relaxed italic text-orange-100">
+                  "{exercise.seedThought}"
+                </p>
+              </div>
             </div>
 
-            <p className="text-slate-400 mb-6 text-sm">Carry this thought with you today</p>
+            <p className="text-slate-400 mb-6 text-sm">This spark is yours to carry and share</p>
 
             <div className="flex gap-3">
               <button
@@ -1960,9 +1919,9 @@ function MindfulnessVisual({ exercise, isOpen, onComplete, onClose }) {
                   onComplete();
                   onClose();
                 }}
-                className="flex-1 py-4 bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-slate-900 rounded-xl font-bold text-lg transition hover:scale-105"
+                className="flex-1 py-4 bg-gradient-to-r from-orange-400 to-yellow-500 hover:from-orange-500 hover:to-yellow-600 text-slate-900 rounded-xl font-bold text-lg transition hover:scale-105"
               >
-                💫 Complete & Boost
+                ✨ Share This Spark
               </button>
               <button
                 onClick={onClose}
@@ -1974,6 +1933,15 @@ function MindfulnessVisual({ exercise, isOpen, onComplete, onClose }) {
           </div>
         )}
       </div>
+
+      <style>{`
+        @keyframes flicker {
+          0%, 100% { transform: scaleY(1) scaleX(1); }
+          25% { transform: scaleY(1.05) scaleX(0.98); }
+          50% { transform: scaleY(0.98) scaleX(1.02); }
+          75% { transform: scaleY(1.02) scaleX(0.99); }
+        }
+      `}</style>
     </div>
   );
 }
