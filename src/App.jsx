@@ -1112,9 +1112,7 @@ function GlobalCounter() {
   const [stats, setStats] = useState({
     activeStreaks: 0,
     totalCheckins: 0,
-    todayCheckins: 0,
-    todayJoyPoints: 0,
-    hourlyJoyPoints: 0
+    todayCheckins: 0
   });
   const [loading, setLoading] = useState(true);
   const [currentMoment, setCurrentMoment] = useState(() =>
@@ -1127,14 +1125,11 @@ function GlobalCounter() {
       // Use local date instead of UTC
       const now = new Date();
       const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-      const currentHour = `${today}-${String(now.getHours()).padStart(2, '0')}`;
 
       setStats({
         activeStreaks: data.activeStreaks || 0,
         totalCheckins: data.totalCheckins || 0,
-        todayCheckins: data.todayCheckins?.[today] || 0,
-        todayJoyPoints: data.todayJoyPoints?.[today] || 0,
-        hourlyJoyPoints: data.hourlyJoyPoints?.[currentHour] || 0
+        todayCheckins: data.todayCheckins?.[today] || 0
       });
       setLoading(false);
     }, (error) => {
@@ -1181,30 +1176,9 @@ function GlobalCounter() {
       <div className="flex items-center justify-center gap-2 mb-3">
         <span className="text-lg">🌍</span>
         <span className="text-purple-300 font-medium text-sm">
-          <span className="text-white font-bold">{formatNumber(stats.totalCheckins)}</span> smiles shared worldwide
+          <span className="text-white font-bold">{formatNumber(stats.activeStreaks)}</span> active sessions worldwide
         </span>
       </div>
-
-      {/* Joy Points - This Hour and Today */}
-      {(stats.hourlyJoyPoints > 0 || stats.todayJoyPoints > 0) && (
-        <div className="grid grid-cols-2 gap-3 mb-3 pt-3 border-t border-white/10">
-          <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-2">
-            <div className="text-xs text-yellow-300/80 uppercase tracking-wide mb-1">This Hour</div>
-            <div className="flex items-center justify-center gap-1">
-              <span className="text-yellow-400 text-lg font-bold">{formatNumber(stats.hourlyJoyPoints)}</span>
-              <span className="text-xs text-yellow-400/60">joy</span>
-            </div>
-          </div>
-          <div className="bg-pink-500/10 border border-pink-500/20 rounded-xl p-2">
-            <div className="text-xs text-pink-300/80 uppercase tracking-wide mb-1">Today</div>
-            <div className="flex items-center justify-center gap-1">
-              <span className="text-pink-400 text-lg font-bold">{formatNumber(stats.todayJoyPoints)}</span>
-              <span className="text-xs text-pink-400/60">joy</span>
-            </div>
-          </div>
-        </div>
-      )}
-
       <div className="flex items-center justify-center gap-2 pt-3 border-t border-white/10">
         <span className="text-2xl">{currentMoment.icon}</span>
         <p className="text-sm text-slate-200 italic">{currentMoment.text}</p>
