@@ -6,8 +6,8 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '4.7.2';
-const BUILD_DATE = '2026-01-07';
+const APP_VERSION = '4.7.3';
+const BUILD_DATE = '2026-01-08';
 
 // Gamification: Point Values
 const POINTS = {
@@ -1426,7 +1426,7 @@ function QuoteBrowser({ isOpen, onClose, addPoints, onBoost }) {
 }
 
 // Exercise Browser/Carousel Component
-function ExerciseBrowser({ isOpen, onClose, addPoints, onBoost }) {
+function ExerciseBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
   const allExercises = [...exercises, nightExercise];
   const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * allExercises.length));
   const [showShareModal, setShowShareModal] = useState(false);
@@ -4141,7 +4141,7 @@ export default function App() {
 
       {/* Modals */}
       <QuoteBrowser isOpen={showQuoteBrowser} onClose={() => setShowQuoteBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} />
-      <ExerciseBrowser isOpen={showExerciseBrowser} onClose={() => setShowExerciseBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} />
+      <ExerciseBrowser isOpen={showExerciseBrowser} onClose={() => setShowExerciseBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} playSound={playSound} />
       <BreathworkBrowser isOpen={showBreathworkBrowser} onClose={() => setShowBreathworkBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} playSound={playSound} />
       <CBTBrowser isOpen={showCBTBrowser} onClose={() => setShowCBTBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} playSound={playSound} />
       <SettingsModal
