@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '4.12.1';
+const APP_VERSION = '4.12.2';
 const BUILD_DATE = '2026-01-08';
 
 // Gamification: Point Values
@@ -1863,19 +1863,25 @@ function MindfulnessVisual({ exercise, isOpen, onComplete, onClose }) {
                 </button>
               </>
             ) : (
-              // Last 5 seconds - close eyes
-              <div className="animate-in fade-in duration-1000">
+              // Last 5 seconds - bright yellow screen for afterimage effect
+              <div className="animate-in fade-in duration-500">
                 <div className="relative mb-8 flex justify-center">
-                  {/* Fading afterimage */}
-                  <div className="w-32 h-32 rounded-full bg-orange-400/20 blur-3xl animate-pulse"
-                       style={{ animationDuration: '3s' }}>
+                  {/* Bright yellow/white glow - creates afterimage when you look away */}
+                  <div className="w-full h-96 bg-gradient-to-br from-yellow-200 via-yellow-100 to-white rounded-3xl flex items-center justify-center relative overflow-hidden">
+                    {/* Pulsing center light */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-40 h-40 rounded-full bg-white blur-3xl animate-pulse" style={{ animationDuration: '2s' }}></div>
+                    </div>
+
+                    {/* Bright center point */}
+                    <div className="relative z-10">
+                      <div className="w-8 h-8 rounded-full bg-white shadow-2xl shadow-yellow-400/50 animate-pulse"></div>
+                    </div>
                   </div>
                 </div>
 
-                <h3 className="text-2xl font-bold mb-4">Now close your eyes...</h3>
-                <p className="text-slate-400 mb-6">See the spark within</p>
-
-                <div className="text-4xl font-bold text-orange-400/50">{timeLeft}</div>
+                <p className="text-slate-400 mb-4 text-sm">Look at the light, then gently look away...</p>
+                <div className="text-3xl font-bold text-yellow-400">{timeLeft}</div>
               </div>
             )}
           </div>
