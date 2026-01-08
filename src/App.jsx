@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '4.12.0';
+const APP_VERSION = '4.12.1';
 const BUILD_DATE = '2026-01-08';
 
 // Gamification: Point Values
@@ -1776,16 +1776,16 @@ function QuoteBrowser({ isOpen, onClose, addPoints, onBoost }) {
   );
 }
 
-// Mindfulness Visual Meditation Component - 60 second Tratak (candle gazing)
+// Mindfulness Visual Meditation Component - 30 second Tratak (circle gazing)
 function MindfulnessVisual({ exercise, isOpen, onComplete, onClose }) {
-  const [timeLeft, setTimeLeft] = useState(60);
+  const [timeLeft, setTimeLeft] = useState(30);
   const [isComplete, setIsComplete] = useState(false);
   const [showSeedThought, setShowSeedThought] = useState(false);
   const [showCloseEyes, setShowCloseEyes] = useState(false);
 
   useEffect(() => {
     if (!isOpen) {
-      setTimeLeft(60);
+      setTimeLeft(30);
       setIsComplete(false);
       setShowSeedThought(false);
       setShowCloseEyes(false);
@@ -1794,7 +1794,7 @@ function MindfulnessVisual({ exercise, isOpen, onComplete, onClose }) {
 
     const timer = setInterval(() => {
       setTimeLeft(prev => {
-        if (prev === 10) {
+        if (prev === 5) {
           setShowCloseEyes(true);
         }
         if (prev <= 1) {
@@ -1820,47 +1820,39 @@ function MindfulnessVisual({ exercise, isOpen, onComplete, onClose }) {
           <div className="text-center">
             {!showCloseEyes ? (
               <>
-                {/* Candle Flame Animation */}
+                {/* Tratak Circle with Spark Text */}
                 <div className="relative mb-8 flex justify-center">
-                  <div className="relative">
-                    {/* Flame - multiple layers for realistic flicker */}
-                    <div className="relative w-16 h-32">
-                      {/* Outer glow */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-orange-500/0 via-orange-400/30 to-yellow-300/50 blur-2xl animate-pulse"></div>
+                  <div className="relative w-80 h-80 flex items-center justify-center">
+                    {/* Outer glow */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-orange-500/0 via-orange-400/20 to-yellow-300/30 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '3s' }}></div>
 
-                      {/* Main flame */}
-                      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-24">
-                        <div className="absolute inset-0 bg-gradient-to-t from-orange-500 via-orange-400 to-yellow-300 rounded-full opacity-90"
-                             style={{
-                               clipPath: 'ellipse(45% 50% at 50% 60%)',
-                               animation: 'flicker 2s ease-in-out infinite'
-                             }}>
-                        </div>
-                      </div>
+                    {/* Main circle */}
+                    <div className="relative w-64 h-64 rounded-full border-2 border-orange-400/60 flex items-center justify-center">
+                      {/* Seed thought text in circle */}
+                      <p className="text-orange-200/80 text-sm italic px-8 text-center leading-relaxed">
+                        {exercise.seedThought}
+                      </p>
 
-                      {/* Inner bright core */}
-                      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-6 h-12 bg-gradient-to-t from-yellow-200 to-white rounded-full opacity-80 blur-sm animate-pulse"
-                           style={{ animationDuration: '1.5s' }}>
-                      </div>
-
-                      {/* Flickering tip */}
-                      <div className="absolute top-2 left-1/2 -translate-x-1/2 w-3 h-6 bg-yellow-100 rounded-full opacity-60 animate-pulse"
-                           style={{ animationDuration: '0.8s' }}>
+                      {/* Central point - the focus */}
+                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                        <div className="w-3 h-3 rounded-full bg-orange-400 animate-pulse" style={{ animationDuration: '2s' }}></div>
+                        <div className="absolute inset-0 w-3 h-3 rounded-full bg-orange-300/50 blur-sm animate-pulse" style={{ animationDuration: '1.5s' }}></div>
                       </div>
                     </div>
 
-                    {/* Candle body */}
-                    <div className="w-8 h-20 bg-gradient-to-b from-amber-100 to-amber-200 rounded-b-lg mx-auto mt-1 shadow-lg"></div>
-                    <div className="w-10 h-2 bg-amber-200 rounded-full mx-auto -mt-1"></div>
+                    {/* Pulsing rings */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-72 h-72 rounded-full border border-orange-400/20 animate-ping" style={{ animationDuration: '3s' }}></div>
+                    </div>
                   </div>
                 </div>
 
                 <h3 className="text-xl font-bold mb-2">{exercise.title}</h3>
-                <p className="text-slate-400 text-sm mb-6">Gaze softly at the flame</p>
+                <p className="text-slate-400 text-sm mb-6">Gaze softly at the center point</p>
 
                 <div className="mb-6">
                   <div className="text-5xl font-bold text-orange-400 mb-2">{timeLeft}</div>
-                  <div className="text-xs text-slate-500">Focus on the flame, let thoughts pass</div>
+                  <div className="text-xs text-slate-500">Let the spark sink in</div>
                 </div>
 
                 <button
@@ -1871,17 +1863,17 @@ function MindfulnessVisual({ exercise, isOpen, onComplete, onClose }) {
                 </button>
               </>
             ) : (
-              // Last 10 seconds - close eyes
+              // Last 5 seconds - close eyes
               <div className="animate-in fade-in duration-1000">
                 <div className="relative mb-8 flex justify-center">
                   {/* Fading afterimage */}
-                  <div className="w-24 h-24 rounded-full bg-orange-400/30 blur-2xl animate-pulse"
+                  <div className="w-32 h-32 rounded-full bg-orange-400/20 blur-3xl animate-pulse"
                        style={{ animationDuration: '3s' }}>
                   </div>
                 </div>
 
                 <h3 className="text-2xl font-bold mb-4">Now close your eyes...</h3>
-                <p className="text-slate-400 mb-6">Notice the spark of light within</p>
+                <p className="text-slate-400 mb-6">See the spark within</p>
 
                 <div className="text-4xl font-bold text-orange-400/50">{timeLeft}</div>
               </div>
@@ -1915,33 +1907,23 @@ function MindfulnessVisual({ exercise, isOpen, onComplete, onClose }) {
 
             <div className="flex gap-3">
               <button
-                onClick={() => {
-                  onComplete();
-                  onClose();
-                }}
+                onClick={onClose}
                 className="flex-1 py-4 bg-gradient-to-r from-orange-400 to-yellow-500 hover:from-orange-500 hover:to-yellow-600 text-slate-900 rounded-xl font-bold text-lg transition hover:scale-105"
               >
-                ✨ Share This Spark
+                ✨ Keep This Spark
               </button>
               <button
-                onClick={onClose}
-                className="px-6 py-4 bg-white/5 hover:bg-white/10 rounded-xl font-semibold transition"
+                onClick={() => {
+                  onComplete();
+                }}
+                className="px-6 py-4 bg-white/10 hover:bg-white/20 rounded-xl font-semibold transition"
               >
-                ✕ Close
+                Next →
               </button>
             </div>
           </div>
         )}
       </div>
-
-      <style>{`
-        @keyframes flicker {
-          0%, 100% { transform: scaleY(1) scaleX(1); }
-          25% { transform: scaleY(1.05) scaleX(0.98); }
-          50% { transform: scaleY(0.98) scaleX(1.02); }
-          75% { transform: scaleY(1.02) scaleX(0.99); }
-        }
-      `}</style>
     </div>
   );
 }
