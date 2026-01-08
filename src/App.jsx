@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '4.12.3';
+const APP_VERSION = '4.12.4';
 const BUILD_DATE = '2026-01-08';
 
 // Gamification: Point Values
@@ -1882,20 +1882,20 @@ function MindfulnessVisual({ exercise, isOpen, onComplete, onClose }) {
             )}
           </div>
         ) : (
-          // After completion - The spark within (blooming thought)
+          // After completion - Blooming flower
           <div className="text-center animate-in fade-in duration-1000">
             <div className="mb-6">
-              {/* Glowing inner spark */}
+              {/* Blooming flower animation */}
               <div className="relative flex justify-center mb-6">
-                <div className="w-32 h-32 rounded-full bg-gradient-to-t from-orange-500/20 via-yellow-400/30 to-yellow-200/40 blur-3xl animate-pulse"></div>
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-6xl">✨</div>
+                <div className="text-9xl animate-in zoom-in duration-1000" style={{ animation: 'bloom 2s ease-out forwards' }}>
+                  🌸
+                </div>
               </div>
 
-              <h3 className="text-3xl font-bold mb-2">A Spark Within</h3>
-              <p className="text-slate-400 text-sm mb-6">The light you gazed upon now shines from within</p>
+              <h3 className="text-2xl font-bold mb-4 text-orange-200">Plant this spark of joy in your mind</h3>
             </div>
 
-            {/* The seed thought - glowing like inner wisdom */}
+            {/* The seed thought */}
             <div className="relative mb-8">
               <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-yellow-500/10 to-amber-500/10 blur-2xl rounded-2xl"></div>
               <div className="relative bg-gradient-to-br from-orange-500/20 to-yellow-500/20 border-2 border-orange-400/30 rounded-2xl p-8">
@@ -1904,8 +1904,6 @@ function MindfulnessVisual({ exercise, isOpen, onComplete, onClose }) {
                 </p>
               </div>
             </div>
-
-            <p className="text-slate-400 mb-6 text-sm">This spark is yours to carry and share</p>
 
             <div className="flex gap-3">
               <button
@@ -1926,6 +1924,21 @@ function MindfulnessVisual({ exercise, isOpen, onComplete, onClose }) {
           </div>
         )}
       </div>
+      <style>{`
+        @keyframes bloom {
+          0% {
+            transform: scale(0.3) rotate(0deg);
+            opacity: 0;
+          }
+          50% {
+            transform: scale(1.1) rotate(10deg);
+          }
+          100% {
+            transform: scale(1) rotate(0deg);
+            opacity: 1;
+          }
+        }
+      `}</style>
     </div>
   );
 }
