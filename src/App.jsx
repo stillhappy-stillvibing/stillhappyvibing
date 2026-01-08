@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '4.9.1';
+const APP_VERSION = '4.9.2';
 const BUILD_DATE = '2026-01-08';
 
 // Gamification: Point Values
@@ -1534,20 +1534,18 @@ function QuoteBrowser({ isOpen, onClose, addPoints, onBoost }) {
             <p className="text-slate-400 text-sm">{currentQuote.tradition}</p>
           </div>
 
-          <p className="text-slate-400 text-sm mb-3">Did this boost you?</p>
-
           <div className="flex gap-3 mb-4">
             <button
               onClick={handleBoost}
               className="flex-1 py-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-xl font-bold text-lg transition hover:scale-105"
             >
-              💫 Boost! <span className="text-sm">(+{POINTS.QUOTE_BOOST} pts)</span>
+              💫 +{POINTS.QUOTE_BOOST} Boost & Next
             </button>
             <button
-              onClick={handleSkip}
+              onClick={onClose}
               className="px-6 py-4 bg-white/5 hover:bg-white/10 rounded-xl font-semibold transition"
             >
-              → Skip
+              ✕ Close
             </button>
           </div>
 
@@ -1626,20 +1624,18 @@ function ExerciseBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
             </ul>
           </div>
 
-          <p className="text-slate-400 text-sm mb-3 text-center">Did this boost you?</p>
-
           <div className="flex gap-3 mb-4">
             <button
               onClick={handleBoost}
               className="flex-1 py-4 bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-slate-900 rounded-xl font-bold text-lg transition hover:scale-105"
             >
-              💫 Boost! <span className="text-sm">(+{POINTS.EXERCISE_BOOST} pts)</span>
+              💫 +{POINTS.EXERCISE_BOOST} Boost & Next
             </button>
             <button
-              onClick={handleSkip}
+              onClick={onClose}
               className="px-6 py-4 bg-white/5 hover:bg-white/10 rounded-xl font-semibold transition"
             >
-              → Skip
+              ✕ Close
             </button>
           </div>
 
@@ -1717,20 +1713,18 @@ function CBTBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
             </ul>
           </div>
 
-          <p className="text-slate-400 text-sm mb-3 text-center">Did this boost you?</p>
-
           <div className="flex gap-3 mb-4">
             <button
               onClick={handleBoost}
               className="flex-1 py-4 bg-gradient-to-r from-blue-400 to-teal-500 hover:from-blue-500 hover:to-teal-600 text-slate-900 rounded-xl font-bold text-lg transition hover:scale-105"
             >
-              💫 Boost! <span className="text-sm">(+{POINTS.CBT_BOOST} pts)</span>
+              💫 +{POINTS.CBT_BOOST} Boost & Next
             </button>
             <button
-              onClick={handleSkip}
+              onClick={onClose}
               className="px-6 py-4 bg-white/5 hover:bg-white/10 rounded-xl font-semibold transition"
             >
-              → Skip
+              ✕ Close
             </button>
           </div>
 
@@ -1890,20 +1884,18 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
                 <p className="text-slate-400">You completed {cycles} breathing cycles</p>
               </div>
 
-              <p className="text-slate-400 text-sm mb-3 text-center">Did this boost you?</p>
-
               <div className="flex gap-3 mb-4">
                 <button
                   onClick={handleBoost}
                   className="flex-1 py-4 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 rounded-xl font-bold text-lg transition hover:scale-105"
                 >
-                  💫 Boost! <span className="text-sm">(+{POINTS.BREATHWORK_BOOST} pts)</span>
+                  💫 +{POINTS.BREATHWORK_BOOST} Boost & Next
                 </button>
                 <button
-                  onClick={handleSkip}
+                  onClick={onClose}
                   className="px-6 py-4 bg-white/5 hover:bg-white/10 rounded-xl font-semibold transition"
                 >
-                  → Skip
+                  ✕ Close
                 </button>
               </div>
             </>
