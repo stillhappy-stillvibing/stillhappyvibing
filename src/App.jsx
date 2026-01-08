@@ -1426,7 +1426,7 @@ function QuoteBrowser({ isOpen, onClose, addPoints, onBoost }) {
 }
 
 // Exercise Browser/Carousel Component
-function ExerciseBrowser({ isOpen, onClose, addPoints, onBoost }) {
+function ExerciseBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
   const allExercises = [...exercises, nightExercise];
   const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * allExercises.length));
   const [showShareModal, setShowShareModal] = useState(false);
@@ -4141,7 +4141,7 @@ export default function App() {
 
       {/* Modals */}
       <QuoteBrowser isOpen={showQuoteBrowser} onClose={() => setShowQuoteBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} />
-      <ExerciseBrowser isOpen={showExerciseBrowser} onClose={() => setShowExerciseBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} />
+      <ExerciseBrowser isOpen={showExerciseBrowser} onClose={() => setShowExerciseBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} playSound={playSound} />
       <BreathworkBrowser isOpen={showBreathworkBrowser} onClose={() => setShowBreathworkBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} playSound={playSound} />
       <CBTBrowser isOpen={showCBTBrowser} onClose={() => setShowCBTBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} playSound={playSound} />
       <SettingsModal
