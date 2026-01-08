@@ -45,8 +45,25 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
-        // Don't cache API calls
+        // Don't cache API calls or version.json
         navigateFallbackDenylist: [/^\/api/],
+        // Exclude version.json from precaching - always fetch fresh
+        globIgnores: ['**/version.json'],
+        // Network-first strategy for version.json
+        runtimeCaching: [
+          {
+            urlPattern: /\/version\.json$/,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'version-cache',
+              expiration: {
+                maxEntries: 1,
+                maxAgeSeconds: 0 // Don't cache at all
+              },
+              networkTimeoutSeconds: 3
+            }
+          }
+        ],
         // Clean up old caches
         cleanupOutdatedCaches: true,
         // Skip waiting - activate new SW immediately
