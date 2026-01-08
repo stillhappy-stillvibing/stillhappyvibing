@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '4.9.2';
+const APP_VERSION = '4.9.3';
 const BUILD_DATE = '2026-01-08';
 
 // Gamification: Point Values
@@ -273,9 +273,10 @@ const wisdomQuotes = [
 ];
 
 const exercises = [
-  { title: "4-7-8 Breathing", subtitle: "Calms your nervous system", steps: ["Exhale completely through your mouth", "Inhale through nose for 4 counts", "Hold breath for 7 counts", "Exhale through mouth for 8 counts", "Repeat 3-4 times"], pattern: { inhale: 4, hold1: 7, exhale: 8, hold2: 0 } },
-  { title: "Box Breathing", subtitle: "Used by Navy SEALs", steps: ["Breathe in for 4 counts", "Hold at top for 4 counts", "Breathe out for 4 counts", "Hold at bottom for 4 counts", "Repeat 4-6 times"], pattern: { inhale: 4, hold1: 4, exhale: 4, hold2: 4 } },
-  { title: "Heart Coherence Breathing", subtitle: "Sync your heart and mind", steps: ["Place your hand on your heart", "Breathe slowly: 5 counts in, 5 counts out", "Focus attention on your heart area", "Recall a feeling of love or gratitude", "Breathe that feeling in and out", "Continue for 2-3 minutes"], pattern: { inhale: 5, hold1: 0, exhale: 5, hold2: 0 } },
+  { title: "Anapana Breath Awareness", subtitle: "Ancient Vipassana technique", steps: ["Sit comfortably with a straight spine", "Close your eyes gently", "Bring attention to the area below your nostrils", "Simply observe the natural breath - don't control it", "Notice the sensation of air entering and leaving", "When mind wanders, gently return to the breath", "Continue for 2-5 minutes"], pattern: null },
+  { title: "Zen Koan Contemplation", subtitle: "Transcend ordinary thinking", steps: ["Sit quietly and center yourself", "Contemplate: 'What is the sound of one hand clapping?'", "Don't try to solve it logically", "Let the question sit in your awareness", "Notice what arises without grasping", "The koan bypasses the rational mind", "Sit with the mystery"], pattern: null },
+  { title: "Walking Meditation", subtitle: "Mindfulness in motion", steps: ["Stand and feel your feet on the ground", "Walk very slowly, feeling each step", "Notice: lifting, moving, placing each foot", "Coordinate breath with steps naturally", "When mind wanders, return to the feet", "Walking is meditation, meditation is walking"], pattern: null },
+  { title: "Open Awareness Practice", subtitle: "Choiceless attention", steps: ["Sit comfortably and relax", "Rather than focus on one thing, open your awareness", "Notice whatever arises: sounds, sensations, thoughts", "Don't follow or push away anything", "Be like the sky - let everything pass through", "Rest in pure awareness itself"], pattern: null },
   { title: "Progressive Muscle Relaxation", subtitle: "Release physical tension", steps: ["Sit or lie down comfortably", "Tense your toes for 5 seconds, then release", "Move up: calves, thighs, belly, chest", "Tense and release hands, arms, shoulders", "Finish with jaw and face muscles", "Notice the wave of relaxation throughout your body"], pattern: null },
   { title: "Savoring Exercise", subtitle: "Amplify positive moments", steps: ["Find something pleasant happening now", "Close other tabs in your mind", "Notice every detail - sight, sound, feeling", "Let yourself fully enjoy this moment", "Store this memory for later", "Thank yourself for pausing to notice"], pattern: null },
   { title: "Gratitude Visualization", subtitle: "Shift to abundance", steps: ["Close eyes, take 3 deep breaths", "Picture someone you love smiling", "Feel warmth in your chest", "Think of 3 things you're grateful for", "Let a gentle smile form"], pattern: null },
