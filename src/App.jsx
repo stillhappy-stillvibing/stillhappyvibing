@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '4.10.0';
+const APP_VERSION = '4.10.1';
 const BUILD_DATE = '2026-01-08';
 
 // Gamification: Point Values
@@ -273,33 +273,222 @@ const wisdomQuotes = [
 ];
 
 const exercises = [
-  { title: "Anapana Breath Awareness", subtitle: "Ancient Vipassana technique", steps: ["Sit comfortably with a straight spine", "Close your eyes gently", "Bring attention to the area below your nostrils", "Simply observe the natural breath - don't control it", "Notice the sensation of air entering and leaving", "When mind wanders, gently return to the breath", "Continue for 2-5 minutes"], pattern: null },
-  { title: "Zen Koan Contemplation", subtitle: "Transcend ordinary thinking", steps: ["Sit quietly and center yourself", "Contemplate: 'What is the sound of one hand clapping?'", "Don't try to solve it logically", "Let the question sit in your awareness", "Notice what arises without grasping", "The koan bypasses the rational mind", "Sit with the mystery"], pattern: null },
-  { title: "Walking Meditation", subtitle: "Mindfulness in motion", steps: ["Stand and feel your feet on the ground", "Walk very slowly, feeling each step", "Notice: lifting, moving, placing each foot", "Coordinate breath with steps naturally", "When mind wanders, return to the feet", "Walking is meditation, meditation is walking"], pattern: null },
-  { title: "Open Awareness Practice", subtitle: "Choiceless attention", steps: ["Sit comfortably and relax", "Rather than focus on one thing, open your awareness", "Notice whatever arises: sounds, sensations, thoughts", "Don't follow or push away anything", "Be like the sky - let everything pass through", "Rest in pure awareness itself"], pattern: null },
-  { title: "Mental Noting Practice", subtitle: "Mahasi Sayadaw technique", steps: ["Sit and begin observing your breath", "When anything arises, silently note it: 'thinking', 'feeling', 'hearing'", "Note sensations: 'tingling', 'pressure', 'warmth'", "Note emotions: 'joy', 'sadness', 'anxiety'", "Keep labels simple and objective", "Return to breath between notes", "This builds clear seeing of reality"], pattern: null },
-  { title: "Just Sitting (Shikantaza)", subtitle: "Zen practice of pure presence", steps: ["Sit upright with dignity", "Don't focus on anything in particular", "Don't try to achieve anything", "Simply be completely present", "When thoughts arise, don't follow them", "Rest in the clarity of this moment", "Sitting itself is enlightenment"], pattern: null },
-  { title: "Breath Counting", subtitle: "Zen concentration practice", steps: ["Sit and bring attention to your breath", "Count 'one' on the exhale", "Count 'two' on the next exhale", "Continue counting up to ten", "When you reach ten, start over at one", "If you lose count, gently return to one", "Build concentration through patient repetition"], pattern: null },
-  { title: "Sound Meditation", subtitle: "Listen without labeling", steps: ["Sit quietly and close your eyes", "Let your ears open to all sounds", "Don't name the sounds - just hear them", "Notice sound as pure vibration", "Near sounds, far sounds, silence between", "Your awareness is the space sounds appear in", "Rest in listening presence"], pattern: null },
-  { title: "Watching Thoughts", subtitle: "Observe the mind like clouds", steps: ["Sit comfortably and settle in", "Notice thoughts arising like clouds in the sky", "Don't engage with thoughts - just watch them", "Observe: thoughts come, thoughts go", "You are the sky, not the clouds", "Some clouds are dark, some bright - all pass", "Rest in the spaciousness that watches"], pattern: null },
-  { title: "Four Elements Meditation", subtitle: "Traditional contemplation", steps: ["Feel the solidity in your body (earth element)", "Notice fluidity, moisture, circulation (water element)", "Sense warmth and temperature (fire element)", "Feel movement, breath, space (wind element)", "Your body is made of these elements", "They arise and pass away naturally", "You are nature, nature is you"], pattern: null },
-  { title: "Impermanence Reflection", subtitle: "Wisdom through observation", steps: ["Sit and observe your breath", "Notice: each breath is unique and unrepeatable", "Observe sensations - they change constantly", "Watch thoughts - they appear and vanish", "Nothing stays the same even for a moment", "This is the nature of all things", "Peace comes from embracing change"], pattern: null },
-  { title: "Spacious Awareness", subtitle: "Rest in the vast mind", steps: ["Close your eyes and feel your body", "Now expand awareness to the room around you", "Expand further to include the building, the street", "Keep expanding to the city, the country, the planet", "Feel yourself as vast, spacious awareness", "Everything arises in this space", "This spaciousness is your true nature"], pattern: null },
-  { title: "Mindful Listening", subtitle: "Deep presence with sound", steps: ["Choose a piece of music or natural sound", "Listen with complete attention", "Notice layers, textures, spaces between sounds", "Feel how sound affects your body", "Don't judge or analyze - just receive", "When mind wanders, return to listening", "Hearing becomes meditation"], pattern: null },
-  { title: "Gap Between Thoughts", subtitle: "Recognize natural peace", steps: ["Sit quietly and watch your thoughts", "Notice the tiny gap between two thoughts", "That gap is naturally peaceful and aware", "Don't try to create gaps - just notice them", "These gaps are always there", "This is your natural mind before thinking", "Rest in the stillness between"], pattern: null },
-  { title: "Present Moment Check-In", subtitle: "Quick mindfulness reset", steps: ["Pause whatever you're doing", "Ask: What's happening right now?", "Notice your body, breath, emotions", "Notice sounds, sights, sensations", "No need to change anything", "This moment is already complete", "Return to this practice throughout the day"], pattern: null },
-  { title: "Progressive Muscle Relaxation", subtitle: "Release physical tension", steps: ["Sit or lie down comfortably", "Tense your toes for 5 seconds, then release", "Move up: calves, thighs, belly, chest", "Tense and release hands, arms, shoulders", "Finish with jaw and face muscles", "Notice the wave of relaxation throughout your body"], pattern: null },
-  { title: "Savoring Exercise", subtitle: "Amplify positive moments", steps: ["Find something pleasant happening now", "Close other tabs in your mind", "Notice every detail - sight, sound, feeling", "Let yourself fully enjoy this moment", "Store this memory for later", "Thank yourself for pausing to notice"], pattern: null },
-  { title: "Gratitude Visualization", subtitle: "Shift to abundance", steps: ["Close eyes, take 3 deep breaths", "Picture someone you love smiling", "Feel warmth in your chest", "Think of 3 things you're grateful for", "Let a gentle smile form"], pattern: null },
-  { title: "Loving-Kindness Meditation", subtitle: "Buddhist practice for joy", steps: ["Place hand on heart", "Say: May I be happy, healthy, safe", "Wish the same to someone you love", "Extend to a neutral person", "Extend to someone difficult", "Finally, wish this for all beings"], pattern: null },
-  { title: "Body Scan Release", subtitle: "Release hidden tension", steps: ["Start at top of head", "Notice tension in forehead, jaw", "With each exhale, let it melt", "Move down: neck, chest, belly, legs", "End at feet, feeling grounded"], pattern: null },
-  { title: "Safe Place Visualization", subtitle: "Create inner sanctuary", steps: ["Close your eyes and breathe deeply", "Imagine a place where you feel completely safe", "It can be real or imaginary", "Notice the colors, sounds, temperature", "Feel the peace of this place", "Know you can return here anytime"], pattern: null },
-  { title: "Mindful Minute", subtitle: "Quick reset anywhere", steps: ["Stop and close your eyes", "Take 5 slow, deep breaths", "Notice 3 things you can hear", "Notice 2 things you can feel", "Notice 1 thing you're grateful for"], pattern: null },
-  { title: "Joy Recall", subtitle: "Relive your happiest moments", steps: ["Close your eyes and relax", "Remember a moment of pure joy", "Where were you? Who was there?", "Feel the emotions fully again", "Let a smile spread across your face", "Carry this feeling with you"], pattern: null },
-  { title: "Smile Meditation", subtitle: "The happiness feedback loop", steps: ["Sit comfortably and close your eyes", "Gently smile — even if you don't feel it", "Notice how your face muscles feel", "Let the smile soften your eyes", "Feel warmth spreading through you", "Your body tells your mind: be happy"], pattern: null },
-  { title: "GLAD Technique", subtitle: "Find four daily wins", steps: ["G — One GOOD thing today", "L — One thing you LEARNED", "A — One small ACCOMPLISHMENT", "D — One thing that DELIGHTED you", "Reflect on each one with gratitude"], pattern: null },
-  { title: "Three Good Things", subtitle: "Rewire your brain for positivity", steps: ["Think of three good things from today", "They can be tiny: a warm cup of tea, a kind word", "For each one, ask: Why did this happen?", "Write them down or just reflect", "Do this daily for two weeks", "Watch your brain start noticing more good"], pattern: null },
-  { title: "Acts of Kindness Practice", subtitle: "Boost happiness through giving", steps: ["Think of one small kind act you can do today", "It can be tiny: hold a door, send a text, smile", "Do it without expecting anything back", "Notice how it feels in your body", "Kindness to others is kindness to yourself"], pattern: null },
+  {
+    title: "Anapana Breath Awareness",
+    subtitle: "Ancient Vipassana technique",
+    steps: ["Sit comfortably with a straight spine", "Close your eyes gently", "Bring attention to the area below your nostrils", "Simply observe the natural breath - don't control it", "Notice the sensation of air entering and leaving", "When mind wanders, gently return to the breath"],
+    seedThought: "The breath is always here, waiting to bring you home",
+    visualType: "breathing-circle",
+    ambientSound: "forest"
+  },
+  {
+    title: "Zen Koan Contemplation",
+    subtitle: "Transcend ordinary thinking",
+    steps: ["Sit quietly and center yourself", "Contemplate: 'What is the sound of one hand clapping?'", "Don't try to solve it logically", "Let the question sit in your awareness", "Notice what arises without grasping", "The koan bypasses the rational mind"],
+    seedThought: "Not all questions need answers; some are doorways",
+    visualType: "ripple",
+    ambientSound: "rain"
+  },
+  {
+    title: "Walking Meditation",
+    subtitle: "Mindfulness in motion",
+    steps: ["Stand and feel your feet on the ground", "Walk very slowly, feeling each step", "Notice: lifting, moving, placing each foot", "Coordinate breath with steps naturally", "When mind wanders, return to the feet"],
+    seedThought: "Every step is an arrival",
+    visualType: "footsteps",
+    ambientSound: "ocean"
+  },
+  {
+    title: "Open Awareness Practice",
+    subtitle: "Choiceless attention",
+    steps: ["Sit comfortably and relax", "Rather than focus on one thing, open your awareness", "Notice whatever arises: sounds, sensations, thoughts", "Don't follow or push away anything", "Be like the sky - let everything pass through"],
+    seedThought: "You are the sky, not the clouds",
+    visualType: "sky-clouds",
+    ambientSound: "wind"
+  },
+  {
+    title: "Mental Noting Practice",
+    subtitle: "Mahasi Sayadaw technique",
+    steps: ["Sit and begin observing your breath", "When anything arises, silently note it: 'thinking', 'feeling', 'hearing'", "Note sensations: 'tingling', 'pressure', 'warmth'", "Note emotions: 'joy', 'sadness', 'anxiety'", "Keep labels simple and objective", "Return to breath between notes"],
+    seedThought: "Name it to see it clearly, then let it pass",
+    visualType: "labels-fade",
+    ambientSound: "forest"
+  },
+  {
+    title: "Just Sitting (Shikantaza)",
+    subtitle: "Zen practice of pure presence",
+    steps: ["Sit upright with dignity", "Don't focus on anything in particular", "Don't try to achieve anything", "Simply be completely present", "When thoughts arise, don't follow them", "Rest in the clarity of this moment"],
+    seedThought: "Nothing to do, nowhere to go, already complete",
+    visualType: "stillness",
+    ambientSound: "silence"
+  },
+  {
+    title: "Breath Counting",
+    subtitle: "Zen concentration practice",
+    steps: ["Sit and bring attention to your breath", "Count 'one' on the exhale", "Count 'two' on the next exhale", "Continue counting up to ten", "When you reach ten, start over at one", "If you lose count, gently return to one"],
+    seedThought: "One breath, one count, one moment of peace",
+    visualType: "counting-stones",
+    ambientSound: "rain"
+  },
+  {
+    title: "Sound Meditation",
+    subtitle: "Listen without labeling",
+    steps: ["Sit quietly and close your eyes", "Let your ears open to all sounds", "Don't name the sounds - just hear them", "Notice sound as pure vibration", "Near sounds, far sounds, silence between", "Your awareness is the space sounds appear in"],
+    seedThought: "Silence is not the absence of sound, but the space that holds it",
+    visualType: "sound-waves",
+    ambientSound: "forest"
+  },
+  {
+    title: "Watching Thoughts",
+    subtitle: "Observe the mind like clouds",
+    steps: ["Sit comfortably and settle in", "Notice thoughts arising like clouds in the sky", "Don't engage with thoughts - just watch them", "Observe: thoughts come, thoughts go", "You are the sky, not the clouds", "Some clouds are dark, some bright - all pass"],
+    seedThought: "Thoughts are weather passing through; you are the sky",
+    visualType: "thought-clouds",
+    ambientSound: "wind"
+  },
+  {
+    title: "Four Elements Meditation",
+    subtitle: "Traditional contemplation",
+    steps: ["Feel the solidity in your body (earth element)", "Notice fluidity, moisture, circulation (water element)", "Sense warmth and temperature (fire element)", "Feel movement, breath, space (wind element)", "Your body is made of these elements", "They arise and pass away naturally"],
+    seedThought: "You are not in nature, you ARE nature",
+    visualType: "four-elements",
+    ambientSound: "ocean"
+  },
+  {
+    title: "Impermanence Reflection",
+    subtitle: "Wisdom through observation",
+    steps: ["Sit and observe your breath", "Notice: each breath is unique and unrepeatable", "Observe sensations - they change constantly", "Watch thoughts - they appear and vanish", "Nothing stays the same even for a moment", "This is the nature of all things"],
+    seedThought: "Everything changes, and that's why everything is precious",
+    visualType: "flowing-water",
+    ambientSound: "stream"
+  },
+  {
+    title: "Spacious Awareness",
+    subtitle: "Rest in the vast mind",
+    steps: ["Close your eyes and feel your body", "Now expand awareness to the room around you", "Expand further to include the building, the street", "Keep expanding to the city, the country, the planet", "Feel yourself as vast, spacious awareness", "Everything arises in this space"],
+    seedThought: "You are vast enough to hold the whole universe",
+    visualType: "expanding-universe",
+    ambientSound: "cosmos"
+  },
+  {
+    title: "Mindful Listening",
+    subtitle: "Deep presence with sound",
+    steps: ["Choose a piece of music or natural sound", "Listen with complete attention", "Notice layers, textures, spaces between sounds", "Feel how sound affects your body", "Don't judge or analyze - just receive", "When mind wanders, return to listening"],
+    seedThought: "To truly listen is to disappear into the listening",
+    visualType: "listening-ripples",
+    ambientSound: "singing-bowl"
+  },
+  {
+    title: "Gap Between Thoughts",
+    subtitle: "Recognize natural peace",
+    steps: ["Sit quietly and watch your thoughts", "Notice the tiny gap between two thoughts", "That gap is naturally peaceful and aware", "Don't try to create gaps - just notice them", "These gaps are always there", "This is your natural mind before thinking"],
+    seedThought: "Peace lives in the pause between thoughts",
+    visualType: "gap-light",
+    ambientSound: "silence"
+  },
+  {
+    title: "Present Moment Check-In",
+    subtitle: "Quick mindfulness reset",
+    steps: ["Pause whatever you're doing", "Ask: What's happening right now?", "Notice your body, breath, emotions", "Notice sounds, sights, sensations", "No need to change anything", "This moment is already complete"],
+    seedThought: "This moment is already complete",
+    visualType: "present-pulse",
+    ambientSound: "heartbeat"
+  },
+  {
+    title: "Progressive Muscle Relaxation",
+    subtitle: "Release physical tension",
+    steps: ["Sit or lie down comfortably", "Tense your toes for 5 seconds, then release", "Move up: calves, thighs, belly, chest", "Tense and release hands, arms, shoulders", "Finish with jaw and face muscles"],
+    seedThought: "Tension held creates pain; tension released creates peace",
+    visualType: "body-glow",
+    ambientSound: "forest"
+  },
+  {
+    title: "Savoring Exercise",
+    subtitle: "Amplify positive moments",
+    steps: ["Find something pleasant happening now", "Close other tabs in your mind", "Notice every detail - sight, sound, feeling", "Let yourself fully enjoy this moment", "Store this memory for later"],
+    seedThought: "Joy noticed is joy doubled",
+    visualType: "golden-glow",
+    ambientSound: "birds"
+  },
+  {
+    title: "Gratitude Visualization",
+    subtitle: "Shift to abundance",
+    steps: ["Close eyes, take 3 deep breaths", "Picture someone you love smiling", "Feel warmth in your chest", "Think of 3 things you're grateful for", "Let a gentle smile form"],
+    seedThought: "Gratitude turns what we have into enough",
+    visualType: "warm-heart",
+    ambientSound: "heartbeat"
+  },
+  {
+    title: "Loving-Kindness Meditation",
+    subtitle: "Buddhist practice for joy",
+    steps: ["Place hand on heart", "Say: May I be happy, healthy, safe", "Wish the same to someone you love", "Extend to a neutral person", "Extend to someone difficult", "Finally, wish this for all beings"],
+    seedThought: "Love given freely returns multiplied",
+    visualType: "radiating-love",
+    ambientSound: "singing-bowl"
+  },
+  {
+    title: "Body Scan Release",
+    subtitle: "Release hidden tension",
+    steps: ["Start at top of head", "Notice tension in forehead, jaw", "With each exhale, let it melt", "Move down: neck, chest, belly, legs", "End at feet, feeling grounded"],
+    seedThought: "Your body remembers to relax when you remember to listen",
+    visualType: "body-scan",
+    ambientSound: "rain"
+  },
+  {
+    title: "Safe Place Visualization",
+    subtitle: "Create inner sanctuary",
+    steps: ["Close your eyes and breathe deeply", "Imagine a place where you feel completely safe", "It can be real or imaginary", "Notice the colors, sounds, temperature", "Feel the peace of this place", "Know you can return here anytime"],
+    seedThought: "Peace is always one breath away",
+    visualType: "sanctuary",
+    ambientSound: "ocean"
+  },
+  {
+    title: "Mindful Minute",
+    subtitle: "Quick reset anywhere",
+    steps: ["Stop and close your eyes", "Take 5 slow, deep breaths", "Notice 3 things you can hear", "Notice 2 things you can feel", "Notice 1 thing you're grateful for"],
+    seedThought: "One minute can change everything",
+    visualType: "timer-glow",
+    ambientSound: "heartbeat"
+  },
+  {
+    title: "Joy Recall",
+    subtitle: "Relive your happiest moments",
+    steps: ["Close your eyes and relax", "Remember a moment of pure joy", "Where were you? Who was there?", "Feel the emotions fully again", "Let a smile spread across your face"],
+    seedThought: "Joy remembered is joy relived",
+    visualType: "memory-glow",
+    ambientSound: "birds"
+  },
+  {
+    title: "Smile Meditation",
+    subtitle: "The happiness feedback loop",
+    steps: ["Sit comfortably and close your eyes", "Gently smile — even if you don't feel it", "Notice how your face muscles feel", "Let the smile soften your eyes", "Feel warmth spreading through you"],
+    seedThought: "A smile is a curve that sets everything straight",
+    visualType: "smile-ripple",
+    ambientSound: "singing-bowl"
+  },
+  {
+    title: "GLAD Technique",
+    subtitle: "Find four daily wins",
+    steps: ["G — One GOOD thing today", "L — One thing you LEARNED", "A — One small ACCOMPLISHMENT", "D — One thing that DELIGHTED you"],
+    seedThought: "What you appreciate, appreciates",
+    visualType: "four-petals",
+    ambientSound: "forest"
+  },
+  {
+    title: "Three Good Things",
+    subtitle: "Rewire your brain for positivity",
+    steps: ["Think of three good things from today", "They can be tiny: a warm cup of tea, a kind word", "For each one, ask: Why did this happen?", "This trains your brain to notice more good"],
+    seedThought: "Where attention goes, happiness grows",
+    visualType: "three-stars",
+    ambientSound: "wind"
+  },
+  {
+    title: "Acts of Kindness Practice",
+    subtitle: "Boost happiness through giving",
+    steps: ["Think of one small kind act you can do today", "It can be tiny: hold a door, send a text, smile", "Do it without expecting anything back", "Notice how it feels in your body"],
+    seedThought: "Kindness is a spark that lights two hearts",
+    visualType: "kindness-ripple",
+    ambientSound: "heartbeat"
+  },
 ];
 
 // Breathwork patterns for stress relief and emotional regulation
