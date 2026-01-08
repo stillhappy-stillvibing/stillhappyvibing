@@ -23,6 +23,13 @@ const POINTS = {
   BREATHWORK_BOOST: 15,
   CBT_BOOST: 20,
 
+  // Sharing points (spreading joy!)
+  SHARE_QUOTE: 20,
+  SHARE_EXERCISE: 20,
+  SHARE_SMILE: 30,
+  SHARE_ACHIEVEMENT: 25,
+  SHARE_PATTERNS: 25,
+
   // Daily bonuses
   FIRST_CHECKIN: 25,
   MORNING_RITUAL: 15,
@@ -724,7 +731,7 @@ function Toast({ message, emoji, isVisible, onClose }) {
 }
 
 // Milestone Celebration Modal
-function MilestoneCelebration({ isOpen, onClose, streak, badge, onShare, onChallenge }) {
+function MilestoneCelebration({ isOpen, onClose, streak, badge, onShare, onChallenge, addPoints }) {
   if (!isOpen) return null;
 
   const shareText = `🎉 I just hit a ${streak}-day happiness streak!\n\n${badge?.icon} ${badge?.name}\n\nLet's make happiness addictively fun! 🎮✨\n\n${APP_URL}`;
@@ -736,10 +743,15 @@ function MilestoneCelebration({ isOpen, onClose, streak, badge, onShare, onChall
         <h2 className="text-2xl font-bold mb-2">Amazing!</h2>
         <p className="text-yellow-400 text-lg font-semibold mb-1">{streak} Day Streak!</p>
         <p className="text-slate-400 mb-6">{badge?.name || 'Keep it going!'}</p>
-        
+
         <div className="space-y-3">
           <button
-            onClick={() => { shareContent(shareText); onShare?.(); }}
+            onClick={() => {
+              shareContent(shareText, 'Copied to clipboard! 📋', () => {
+                if (addPoints) addPoints(POINTS.SHARE_ACHIEVEMENT);
+              });
+              onShare?.();
+            }}
             className="w-full bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-900 font-bold py-3 rounded-xl hover:scale-105 transition"
           >
             📤 Share Achievement
@@ -809,7 +821,7 @@ function ChallengeModal({ isOpen, onClose }) {
 }
 
 // Happiness Insights - Pattern Discovery Modal
-function HappinessInsights({ isOpen, onClose, checkins, streak }) {
+function HappinessInsights({ isOpen, onClose, checkins, streak, addPoints }) {
   if (!isOpen) return null;
 
   // Analyze time of day pattern
@@ -900,7 +912,11 @@ function HappinessInsights({ isOpen, onClose, checkins, streak }) {
 
         <div className="space-y-3">
           <button
-            onClick={() => { shareContent(shareText); }}
+            onClick={() => {
+              shareContent(shareText, 'Copied to clipboard! 📋', () => {
+                if (addPoints) addPoints(POINTS.SHARE_PATTERNS);
+              });
+            }}
             className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-3 rounded-xl hover:scale-105 transition"
           >
             📤 Share My Patterns
@@ -1052,27 +1068,31 @@ const getRandomItem = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
 const APP_URL = typeof window !== 'undefined' ? window.location.origin : 'https://smileswithyou.com';
 
-const shareContent = async (text, fallbackMessage = 'Copied to clipboard! 📋') => {
+const shareContent = async (text, fallbackMessage = 'Copied to clipboard! 📋', onSuccess = null) => {
   if (navigator.share) {
-    try { 
-      await navigator.share({ text }); 
+    try {
+      await navigator.share({ text });
+      if (onSuccess) onSuccess();
       return true;
     } catch { return false; }
   } else {
     try {
       await navigator.clipboard.writeText(text);
       alert(fallbackMessage);
+      if (onSuccess) onSuccess();
       return true;
     } catch { return false; }
   }
 };
 
-const shareQuote = (quote) => {
+const shareQuote = (quote, addPoints) => {
   const text = `📖 A moment of wisdom:\n\n"${quote.text}"\n— ${quote.author}\n\n${APP_URL}`;
-  return shareContent(text);
+  return shareContent(text, 'Copied to clipboard! 📋', () => {
+    if (addPoints) addPoints(POINTS.SHARE_QUOTE);
+  });
 };
 
-const shareExercise = (exercise) => {
+const shareExercise = (exercise, addPoints) => {
   let text = `🧘 Try this when you need calm:\n\n${exercise.title}\n${exercise.subtitle}\n\n`;
   if (exercise.pattern) {
     text += `Inhale ${exercise.pattern.inhale}s`;
@@ -1082,7 +1102,9 @@ const shareExercise = (exercise) => {
     text += '\n\n';
   }
   text += APP_URL;
-  return shareContent(text);
+  return shareContent(text, 'Copied to clipboard! 📋', () => {
+    if (addPoints) addPoints(POINTS.SHARE_EXERCISE);
+  });
 };
 
 // Global Counter Component - Shows worldwide users + micro-moment
@@ -1240,7 +1262,7 @@ const heartfeltMessages = [
 ];
 
 // Share A Smile Card Modal - generates shareable heartfelt message card
-function ShareSmileCard({ isOpen, onClose }) {
+function ShareSmileCard({ isOpen, onClose, addPoints }) {
   const cardRef = useRef(null);
   const [generating, setGenerating] = useState(false);
   const [message, setMessage] = useState(() =>
@@ -1258,6 +1280,7 @@ function ShareSmileCard({ isOpen, onClose }) {
       });
 
       canvas.toBlob(async (blob) => {
+        let shareSuccessful = false;
         if (navigator.share && navigator.canShare?.({ files: [new File([blob], 'smile.png', { type: 'image/png' })] })) {
           try {
             await navigator.share({
@@ -1265,6 +1288,7 @@ function ShareSmileCard({ isOpen, onClose }) {
               title: 'A Smile For You',
               text: message
             });
+            shareSuccessful = true;
           } catch (e) {
             // User cancelled or error
           }
@@ -1276,6 +1300,11 @@ function ShareSmileCard({ isOpen, onClose }) {
           a.download = 'smile.png';
           a.click();
           URL.revokeObjectURL(url);
+          shareSuccessful = true;
+        }
+
+        if (shareSuccessful && addPoints) {
+          addPoints(POINTS.SHARE_SMILE);
         }
         setGenerating(false);
       }, 'image/png');
@@ -2919,7 +2948,7 @@ function InlineCheckin({ onSave }) {
             </div>
             <div className="flex gap-2 mb-5">
               <button
-                onClick={() => shareQuote(quote)}
+                onClick={() => shareQuote(quote, addPoints)}
                 className="flex-1 py-2 rounded-lg bg-purple-500/20 border border-purple-500/30 text-purple-400 text-sm flex items-center justify-center gap-2 hover:bg-purple-500/30 transition"
               >
                 📤 Share Text
@@ -2981,7 +3010,7 @@ function InlineCheckin({ onSave }) {
             </div>
             <div className="flex gap-2 mb-5">
               <button
-                onClick={() => shareExercise(exercise)}
+                onClick={() => shareExercise(exercise, addPoints)}
                 className="flex-1 py-2 rounded-lg bg-blue-500/20 border border-blue-500/30 text-blue-400 text-sm flex items-center justify-center gap-2 hover:bg-blue-500/30 transition"
               >
                 📤 Share Text
@@ -3047,7 +3076,7 @@ function InlineCheckin({ onSave }) {
             </div>
             <div className="flex gap-2 mb-5">
               <button
-                onClick={() => shareExercise(exercise)}
+                onClick={() => shareExercise(exercise, addPoints)}
                 className="flex-1 py-2 rounded-lg bg-blue-500/20 border border-blue-500/30 text-blue-400 text-sm flex items-center justify-center gap-2 hover:bg-blue-500/30 transition"
               >
                 📤 Share Text
@@ -3114,7 +3143,7 @@ function InlineCheckin({ onSave }) {
             </div>
             <div className="flex gap-2 mb-5">
               <button
-                onClick={() => shareExercise(regularExercise)}
+                onClick={() => shareExercise(regularExercise, addPoints)}
                 className="flex-1 py-2 rounded-lg bg-blue-500/20 border border-blue-500/30 text-blue-400 text-sm flex items-center justify-center gap-2 hover:bg-blue-500/30 transition"
               >
                 📤 Share Text
@@ -4321,16 +4350,19 @@ export default function App() {
         streak={milestoneData?.streak}
         badge={milestoneData?.badge}
         onChallenge={() => { setShowMilestone(false); setShowChallengeModal(true); }}
+        addPoints={addPoints}
       />
       <HappinessInsights
         isOpen={showInsights}
         onClose={() => setShowInsights(false)}
         checkins={checkins}
         streak={milestoneData?.streak || checkinStreak}
+        addPoints={addPoints}
       />
       <ShareSmileCard
         isOpen={showShareSmile}
         onClose={() => setShowShareSmile(false)}
+        addPoints={addPoints}
       />
       <Confetti active={showConfetti} />
       <Toast
