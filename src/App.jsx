@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '4.7.3';
+const APP_VERSION = '4.8.0';
 const BUILD_DATE = '2026-01-08';
 
 // Gamification: Point Values
@@ -798,6 +798,112 @@ function ChallengeModal({ isOpen, onClose }) {
         <button onClick={onClose} className="w-full text-slate-400 text-sm">
           Cancel
         </button>
+      </div>
+    </div>
+  );
+}
+
+// Happiness Insights - Pattern Discovery Modal
+function HappinessInsights({ isOpen, onClose, checkins, streak }) {
+  if (!isOpen) return null;
+
+  // Analyze time of day pattern
+  const timePatterns = checkins.reduce((acc, c) => {
+    const hour = new Date(c.timestamp).getHours();
+    if (hour >= 5 && hour < 12) acc.morning++;
+    else if (hour >= 12 && hour < 17) acc.midday++;
+    else if (hour >= 17 && hour < 22) acc.evening++;
+    else acc.night++;
+    return acc;
+  }, { morning: 0, midday: 0, evening: 0, night: 0 });
+
+  const totalCheckins = Object.values(timePatterns).reduce((a, b) => a + b, 0);
+  const dominantTime = Object.entries(timePatterns).sort((a, b) => b[1] - a[1])[0];
+
+  const timeInsights = {
+    morning: { icon: '🌅', name: 'Morning Person', desc: 'You shine brightest with the sunrise', color: 'from-yellow-400 to-orange-500' },
+    midday: { icon: '☀️', name: 'Midday Maven', desc: 'Peak happiness in the afternoon glow', color: 'from-orange-400 to-amber-500' },
+    evening: { icon: '🌆', name: 'Evening Enthusiast', desc: 'You bloom as the day winds down', color: 'from-purple-400 to-pink-500' },
+    night: { icon: '🌙', name: 'Night Owl', desc: 'Happiness finds you in the quiet hours', color: 'from-indigo-400 to-purple-500' }
+  };
+
+  const timeInsight = timeInsights[dominantTime[0]];
+  const timePercentage = Math.round((dominantTime[1] / totalCheckins) * 100);
+
+  // Analyze top happiness source
+  const sourceCounts = checkins.reduce((acc, c) => {
+    const sources = c.sources || (c.source ? [c.source] : []);
+    sources.forEach(s => {
+      if (s !== 'nothing' && s !== 'recovery') acc[s] = (acc[s] || 0) + 1;
+    });
+    return acc;
+  }, {});
+
+  const topSource = Object.entries(sourceCounts).sort((a, b) => b[1] - a[1])[0];
+  const topSourceLabel = topSource ? (sourceLabels[topSource[0]] || topSource[0]) : 'moments of joy';
+  const topSourceCount = topSource ? topSource[1] : 0;
+
+  // Analyze check-in rhythm
+  const dailyCounts = checkins.reduce((acc, c) => {
+    const day = getDayKey(c.timestamp);
+    acc[day] = (acc[day] || 0) + 1;
+    return acc;
+  }, {});
+
+  const avgPerDay = Object.values(dailyCounts).reduce((a, b) => a + b, 0) / Object.keys(dailyCounts).length;
+  const rhythmInsight = avgPerDay > 2.5
+    ? { icon: '⚡', name: 'Burst of Joy', desc: 'You celebrate happiness in waves' }
+    : { icon: '🎯', name: 'Steady Presence', desc: 'You build happiness with consistency' };
+
+  const shareText = `✨ My ${streak}-Day Happiness Patterns\n\n${timeInsight.icon} ${timeInsight.name}\n${timePercentage}% of check-ins during ${dominantTime[0]} time\n\n💛 Top Source: ${topSourceLabel}\n${topSourceCount} moments of pure joy\n\n${rhythmInsight.icon} ${rhythmInsight.name}\n\nLet's make happiness addictively fun! ${APP_URL}`;
+
+  return (
+    <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50" onClick={onClose}>
+      <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-md w-full p-6 border border-purple-400/30 text-center animate-fade-in max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <div className="text-5xl mb-3">🔮</div>
+        <h2 className="text-2xl font-bold mb-2">Your Happiness Patterns</h2>
+        <p className="text-slate-400 text-sm mb-6">{streak} days of insights unlocked</p>
+
+        {/* Time Pattern */}
+        <div className={`bg-gradient-to-r ${timeInsight.color} bg-opacity-10 border border-white/20 rounded-2xl p-5 mb-4`}>
+          <div className="text-4xl mb-2">{timeInsight.icon}</div>
+          <h3 className="text-xl font-bold mb-1">{timeInsight.name}</h3>
+          <p className="text-slate-300 text-sm mb-3">{timeInsight.desc}</p>
+          <div className="bg-white/10 rounded-full h-2 overflow-hidden">
+            <div
+              className="bg-gradient-to-r from-white to-white/80 h-full rounded-full transition-all duration-1000"
+              style={{ width: `${timePercentage}%` }}
+            />
+          </div>
+          <p className="text-xs text-slate-400 mt-2">{timePercentage}% of your check-ins</p>
+        </div>
+
+        {/* Top Source */}
+        <div className="bg-pink-500/10 border border-pink-400/30 rounded-2xl p-5 mb-4">
+          <div className="text-3xl mb-2">💛</div>
+          <h3 className="text-lg font-bold mb-1">Your Joy Magnet</h3>
+          <p className="text-pink-300 text-xl font-semibold mb-1">{topSourceLabel}</p>
+          <p className="text-slate-400 text-sm">{topSourceCount} beautiful moments</p>
+        </div>
+
+        {/* Rhythm */}
+        <div className="bg-green-500/10 border border-green-400/30 rounded-2xl p-5 mb-6">
+          <div className="text-3xl mb-2">{rhythmInsight.icon}</div>
+          <h3 className="text-lg font-bold mb-1">{rhythmInsight.name}</h3>
+          <p className="text-slate-300 text-sm">{rhythmInsight.desc}</p>
+        </div>
+
+        <div className="space-y-3">
+          <button
+            onClick={() => { shareContent(shareText); }}
+            className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-3 rounded-xl hover:scale-105 transition"
+          >
+            📤 Share My Patterns
+          </button>
+          <button onClick={onClose} className="w-full text-slate-400 py-2">
+            Continue →
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -3327,6 +3433,7 @@ export default function App() {
   const [showWeeklyReflection, setShowWeeklyReflection] = useState(false);
   const [showMilestone, setShowMilestone] = useState(false);
   const [milestoneData, setMilestoneData] = useState(null);
+  const [showInsights, setShowInsights] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showShareSmile, setShowShareSmile] = useState(false);
   const [activeTab, setActiveTab] = useState('timer');
@@ -4167,10 +4274,23 @@ export default function App() {
       />
       <MilestoneCelebration
         isOpen={showMilestone}
-        onClose={() => setShowMilestone(false)}
+        onClose={() => {
+          setShowMilestone(false);
+          // Show insights for key milestones
+          const insightMilestones = [7, 14, 30, 60, 100];
+          if (milestoneData?.streak && insightMilestones.includes(milestoneData.streak)) {
+            setTimeout(() => setShowInsights(true), 300);
+          }
+        }}
         streak={milestoneData?.streak}
         badge={milestoneData?.badge}
         onChallenge={() => { setShowMilestone(false); setShowChallengeModal(true); }}
+      />
+      <HappinessInsights
+        isOpen={showInsights}
+        onClose={() => setShowInsights(false)}
+        checkins={checkins}
+        streak={milestoneData?.streak || checkinStreak}
       />
       <ShareSmileCard
         isOpen={showShareSmile}
