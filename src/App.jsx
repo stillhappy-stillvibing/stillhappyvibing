@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '4.9.3';
+const APP_VERSION = '4.9.4';
 const BUILD_DATE = '2026-01-08';
 
 // Gamification: Point Values
@@ -1508,6 +1508,13 @@ function QuoteBrowser({ isOpen, onClose, addPoints, onBoost }) {
     setCurrentIndex(newIndex);
   };
 
+  // Randomize on open for variety
+  useEffect(() => {
+    if (isOpen) {
+      randomQuote();
+    }
+  }, [isOpen]);
+
   const handleBoost = () => {
     addPoints(POINTS.QUOTE_BOOST);
     onBoost?.();
@@ -1584,6 +1591,13 @@ function ExerciseBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
     } while (newIndex === currentIndex && allExercises.length > 1);
     setCurrentIndex(newIndex);
   };
+
+  // Randomize on open for variety
+  useEffect(() => {
+    if (isOpen) {
+      randomExercise();
+    }
+  }, [isOpen]);
 
   const handleBoost = () => {
     addPoints(POINTS.EXERCISE_BOOST);
@@ -1673,6 +1687,13 @@ function CBTBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
     } while (newIndex === currentIndex && cbtExercises.length > 1);
     setCurrentIndex(newIndex);
   };
+
+  // Randomize on open for variety
+  useEffect(() => {
+    if (isOpen) {
+      randomExercise();
+    }
+  }, [isOpen]);
 
   const handleBoost = () => {
     addPoints(POINTS.CBT_BOOST);
@@ -1768,6 +1789,13 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
     setCycles(0);
     setShowCompletion(false);
   };
+
+  // Randomize on open for variety
+  useEffect(() => {
+    if (isOpen) {
+      randomPattern();
+    }
+  }, [isOpen]);
 
   const handleStart = () => {
     setIsActive(true);
