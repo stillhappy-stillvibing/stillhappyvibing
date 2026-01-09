@@ -6,8 +6,8 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '4.12.5';
-const BUILD_DATE = '2026-01-08';
+const APP_VERSION = '4.13.0';
+const BUILD_DATE = '2026-01-09';
 
 // Gamification: Point Values
 const POINTS = {
@@ -277,217 +277,218 @@ const exercises = [
     title: "Anapana Breath Awareness",
     subtitle: "Ancient Vipassana technique",
     steps: ["Sit comfortably with a straight spine", "Close your eyes gently", "Bring attention to the area below your nostrils", "Simply observe the natural breath - don't control it", "Notice the sensation of air entering and leaving", "When mind wanders, gently return to the breath"],
-    seedThought: "The breath is always here, waiting to bring you home",
-    visualType: "breathing-circle",
-    ambientSound: "forest"
+    practiceInstruction: "Feel the breath entering and leaving your nostrils. Is it entering your left, right, or both?",
+    seedThought: "The breath is always here, waiting to bring you home"
   },
   {
     title: "Zen Koan Contemplation",
     subtitle: "Transcend ordinary thinking",
     steps: ["Sit quietly and center yourself", "Contemplate: 'What is the sound of one hand clapping?'", "Don't try to solve it logically", "Let the question sit in your awareness", "Notice what arises without grasping", "The koan bypasses the rational mind"],
-    seedThought: "Not all questions need answers; some are doorways",
-    visualType: "ripple",
-    ambientSound: "rain"
+    practiceInstruction: "Contemplate: What is the sound of one hand clapping?",
+    seedThought: "Not all questions need answers; some are doorways"
   },
   {
-    title: "Walking Meditation",
-    subtitle: "Mindfulness in motion",
-    steps: ["Stand and feel your feet on the ground", "Walk very slowly, feeling each step", "Notice: lifting, moving, placing each foot", "Coordinate breath with steps naturally", "When mind wanders, return to the feet"],
-    seedThought: "Every step is an arrival",
-    visualType: "footsteps",
-    ambientSound: "ocean"
+    title: "Mountain Meditation",
+    subtitle: "Jon Kabat-Zinn inspired",
+    steps: ["Sit or stand with dignity", "Feel your connection to the earth below", "Imagine yourself as a mountain - solid, stable, grounded", "Storms may come and go, seasons change", "The mountain remains unmoved", "You are the mountain, not the weather passing over it"],
+    practiceInstruction: "Feel yourself grounded and unshakeable like a mountain",
+    seedThought: "Storms pass, seasons change, the mountain remains"
+  },
+  {
+    title: "Lotus Blooming Meditation",
+    subtitle: "Transformation visualization",
+    steps: ["Close your eyes and breathe deeply", "Visualize yourself as a lotus bud in the mud", "Feel yourself rising through murky water", "Moving toward the light above", "Breaking the surface", "Opening your petals to the sun"],
+    practiceInstruction: "Close your eyes. Visualize yourself as a lotus rising from mud, through water, blooming into light",
+    seedThought: "From darkness to light, you are always blooming"
   },
   {
     title: "Open Awareness Practice",
     subtitle: "Choiceless attention",
     steps: ["Sit comfortably and relax", "Rather than focus on one thing, open your awareness", "Notice whatever arises: sounds, sensations, thoughts", "Don't follow or push away anything", "Be like the sky - let everything pass through"],
-    seedThought: "You are the sky, not the clouds",
-    visualType: "sky-clouds",
-    ambientSound: "wind"
+    practiceInstruction: "Let your awareness be open like the sky. Don't focus on anything - just notice whatever arises",
+    seedThought: "You are the sky, not the clouds"
   },
   {
     title: "Mental Noting Practice",
     subtitle: "Mahasi Sayadaw technique",
     steps: ["Sit and begin observing your breath", "When anything arises, silently note it: 'thinking', 'feeling', 'hearing'", "Note sensations: 'tingling', 'pressure', 'warmth'", "Note emotions: 'joy', 'sadness', 'anxiety'", "Keep labels simple and objective", "Return to breath between notes"],
-    seedThought: "Name it to see it clearly, then let it pass",
-    visualType: "labels-fade",
-    ambientSound: "forest"
+    practiceInstruction: "Silently label whatever arises: 'thinking', 'hearing', 'feeling', 'tingling', 'warmth'",
+    seedThought: "Name it to see it clearly, then let it pass"
   },
   {
     title: "Just Sitting (Shikantaza)",
     subtitle: "Zen practice of pure presence",
     steps: ["Sit upright with dignity", "Don't focus on anything in particular", "Don't try to achieve anything", "Simply be completely present", "When thoughts arise, don't follow them", "Rest in the clarity of this moment"],
-    seedThought: "Nothing to do, nowhere to go, already complete",
-    visualType: "stillness",
-    ambientSound: "silence"
+    practiceInstruction: "Sit with dignity, simply being present",
+    seedThought: "Nothing to do, nowhere to go, already complete"
   },
   {
     title: "Breath Counting",
     subtitle: "Zen concentration practice",
     steps: ["Sit and bring attention to your breath", "Count 'one' on the exhale", "Count 'two' on the next exhale", "Continue counting up to ten", "When you reach ten, start over at one", "If you lose count, gently return to one"],
-    seedThought: "One breath, one count, one moment of peace",
-    visualType: "counting-stones",
-    ambientSound: "rain"
+    practiceInstruction: "Count each exhale from one to ten. When you reach ten, start over at one",
+    seedThought: "One breath, one count, one moment of peace"
   },
   {
     title: "Sound Meditation",
     subtitle: "Listen without labeling",
     steps: ["Sit quietly and close your eyes", "Let your ears open to all sounds", "Don't name the sounds - just hear them", "Notice sound as pure vibration", "Near sounds, far sounds, silence between", "Your awareness is the space sounds appear in"],
-    seedThought: "Silence is not the absence of sound, but the space that holds it",
-    visualType: "sound-waves",
-    ambientSound: "forest"
+    practiceInstruction: "Close your eyes. Listen to all sounds - near and far - without naming or judging them",
+    seedThought: "Silence is not the absence of sound, but the space that holds it"
   },
   {
     title: "Watching Thoughts",
     subtitle: "Observe the mind like clouds",
     steps: ["Sit comfortably and settle in", "Notice thoughts arising like clouds in the sky", "Don't engage with thoughts - just watch them", "Observe: thoughts come, thoughts go", "You are the sky, not the clouds", "Some clouds are dark, some bright - all pass"],
-    seedThought: "Thoughts are weather passing through; you are the sky",
-    visualType: "thought-clouds",
-    ambientSound: "wind"
+    practiceInstruction: "Notice thoughts arising like clouds. Don't engage with them - just watch them come and go",
+    seedThought: "Thoughts are weather passing through; you are the sky"
   },
   {
     title: "Four Elements Meditation",
     subtitle: "Traditional contemplation",
     steps: ["Feel the solidity in your body (earth element)", "Notice fluidity, moisture, circulation (water element)", "Sense warmth and temperature (fire element)", "Feel movement, breath, space (wind element)", "Your body is made of these elements", "They arise and pass away naturally"],
-    seedThought: "You are not in nature, you ARE nature",
-    visualType: "four-elements",
-    ambientSound: "ocean"
+    practiceInstruction: "Feel the solidity (earth), fluidity (water), warmth (fire), and movement (wind) in your body",
+    seedThought: "You are not in nature, you ARE nature"
   },
   {
     title: "Impermanence Reflection",
     subtitle: "Wisdom through observation",
     steps: ["Sit and observe your breath", "Notice: each breath is unique and unrepeatable", "Observe sensations - they change constantly", "Watch thoughts - they appear and vanish", "Nothing stays the same even for a moment", "This is the nature of all things"],
-    seedThought: "Everything changes, and that's why everything is precious",
-    visualType: "flowing-water",
-    ambientSound: "stream"
+    practiceInstruction: "Observe your breath, sensations, thoughts - notice they're all constantly changing",
+    seedThought: "Everything changes, and that's why everything is precious"
   },
   {
     title: "Spacious Awareness",
     subtitle: "Rest in the vast mind",
     steps: ["Close your eyes and feel your body", "Now expand awareness to the room around you", "Expand further to include the building, the street", "Keep expanding to the city, the country, the planet", "Feel yourself as vast, spacious awareness", "Everything arises in this space"],
-    seedThought: "You are vast enough to hold the whole universe",
-    visualType: "expanding-universe",
-    ambientSound: "cosmos"
+    practiceInstruction: "Let your awareness expand outward - room, building, city, earth, space",
+    seedThought: "You are vast enough to hold the whole universe"
   },
   {
     title: "Mindful Listening",
     subtitle: "Deep presence with sound",
     steps: ["Choose a piece of music or natural sound", "Listen with complete attention", "Notice layers, textures, spaces between sounds", "Feel how sound affects your body", "Don't judge or analyze - just receive", "When mind wanders, return to listening"],
-    seedThought: "To truly listen is to disappear into the listening",
-    visualType: "listening-ripples",
-    ambientSound: "singing-bowl"
+    practiceInstruction: "Choose a sound - music, nature, or ambient noise. Listen with complete attention to every layer and texture",
+    seedThought: "To truly listen is to disappear into the listening"
   },
   {
     title: "Gap Between Thoughts",
     subtitle: "Recognize natural peace",
     steps: ["Sit quietly and watch your thoughts", "Notice the tiny gap between two thoughts", "That gap is naturally peaceful and aware", "Don't try to create gaps - just notice them", "These gaps are always there", "This is your natural mind before thinking"],
-    seedThought: "Peace lives in the pause between thoughts",
-    visualType: "gap-light",
-    ambientSound: "silence"
+    practiceInstruction: "Watch your thoughts. Notice the tiny peaceful gap between one thought and the next",
+    seedThought: "Peace lives in the pause between thoughts"
   },
   {
     title: "Present Moment Check-In",
     subtitle: "Quick mindfulness reset",
     steps: ["Pause whatever you're doing", "Ask: What's happening right now?", "Notice your body, breath, emotions", "Notice sounds, sights, sensations", "No need to change anything", "This moment is already complete"],
-    seedThought: "This moment is already complete",
-    visualType: "present-pulse",
-    ambientSound: "heartbeat"
+    practiceInstruction: "Stop and check in: What am I feeling? What do I hear? What's here right now?",
+    seedThought: "This moment is already complete"
   },
   {
     title: "Progressive Muscle Relaxation",
     subtitle: "Release physical tension",
     steps: ["Sit or lie down comfortably", "Tense your toes for 5 seconds, then release", "Move up: calves, thighs, belly, chest", "Tense and release hands, arms, shoulders", "Finish with jaw and face muscles"],
-    seedThought: "Tension held creates pain; tension released creates peace",
-    visualType: "body-glow",
-    ambientSound: "forest"
+    practiceInstruction: "Tense and release one part of your body: toes, legs, belly, arms, hands, face, or a choice of your own",
+    seedThought: "Tension held creates pain; tension released creates peace"
   },
   {
     title: "Savoring Exercise",
     subtitle: "Amplify positive moments",
     steps: ["Find something pleasant happening now", "Close other tabs in your mind", "Notice every detail - sight, sound, feeling", "Let yourself fully enjoy this moment", "Store this memory for later"],
-    seedThought: "Joy noticed is joy doubled",
-    visualType: "golden-glow",
-    ambientSound: "birds"
+    practiceInstruction: "Find something pleasant happening right now. Close your eyes and notice every detail - fully savor it",
+    seedThought: "Joy noticed is joy doubled"
   },
   {
     title: "Gratitude Visualization",
     subtitle: "Shift to abundance",
     steps: ["Close eyes, take 3 deep breaths", "Picture someone you love smiling", "Feel warmth in your chest", "Think of 3 things you're grateful for", "Let a gentle smile form"],
-    seedThought: "Gratitude turns what we have into enough",
-    visualType: "warm-heart",
-    ambientSound: "heartbeat"
+    practiceInstruction: "Close your eyes. Take 3 deep breaths. Think of three things you're grateful for right now",
+    seedThought: "Gratitude turns what we have into enough"
   },
   {
     title: "Loving-Kindness Meditation",
     subtitle: "Buddhist practice for joy",
     steps: ["Place hand on heart", "Say: May I be happy, healthy, safe", "Wish the same to someone you love", "Extend to a neutral person", "Extend to someone difficult", "Finally, wish this for all beings"],
-    seedThought: "Love given freely returns multiplied",
-    visualType: "radiating-love",
-    ambientSound: "singing-bowl"
+    practiceInstruction: "Place hand on heart. Say: May I be happy, healthy, safe. Then wish the same for someone you love",
+    seedThought: "Love given freely returns multiplied"
   },
   {
     title: "Body Scan Release",
     subtitle: "Release hidden tension",
     steps: ["Start at top of head", "Notice tension in forehead, jaw", "With each exhale, let it melt", "Move down: neck, chest, belly, legs", "End at feet, feeling grounded"],
-    seedThought: "Your body remembers to relax when you remember to listen",
-    visualType: "body-scan",
-    ambientSound: "rain"
+    practiceInstruction: "Scan your body. Where do you feel the most tension? Breathe into it and let it go",
+    seedThought: "Your body remembers to relax when you remember to listen"
   },
   {
     title: "Safe Place Visualization",
     subtitle: "Create inner sanctuary",
     steps: ["Close your eyes and breathe deeply", "Imagine a place where you feel completely safe", "It can be real or imaginary", "Notice the colors, sounds, temperature", "Feel the peace of this place", "Know you can return here anytime"],
-    seedThought: "Peace is always one breath away",
-    visualType: "sanctuary",
-    ambientSound: "ocean"
+    practiceInstruction: "Close your eyes. Imagine a place where you feel completely safe. Notice the colors, sounds, temperature",
+    seedThought: "Peace is always one breath away"
   },
   {
-    title: "Mindful Minute",
+    title: "Mindful Moment",
     subtitle: "Quick reset anywhere",
-    steps: ["Stop and close your eyes", "Take 5 slow, deep breaths", "Notice 3 things you can hear", "Notice 2 things you can feel", "Notice 1 thing you're grateful for"],
-    seedThought: "One minute can change everything",
-    visualType: "timer-glow",
-    ambientSound: "heartbeat"
+    steps: ["Stop and close your eyes", "Take 1 slow, full breath", "Notice 1 thing you can hear", "Notice 1 sensation on your body", "Notice 1 thing you're grateful for"],
+    practiceInstruction: "Take 1 slow, full breath. Notice 1 thing you hear. Notice 1 sensation on your body. Notice 1 thing you're grateful for",
+    seedThought: "This moment can change everything"
   },
   {
     title: "Joy Recall",
     subtitle: "Relive your happiest moments",
     steps: ["Close your eyes and relax", "Remember a moment of pure joy", "Where were you? Who was there?", "Feel the emotions fully again", "Let a smile spread across your face"],
-    seedThought: "Joy remembered is joy relived",
-    visualType: "memory-glow",
-    ambientSound: "birds"
+    practiceInstruction: "Recall your happiest memory. Let yourself feel it completely",
+    seedThought: "Joy remembered is joy relived"
   },
   {
     title: "Smile Meditation",
     subtitle: "The happiness feedback loop",
     steps: ["Sit comfortably and close your eyes", "Gently smile — even if you don't feel it", "Notice how your face muscles feel", "Let the smile soften your eyes", "Feel warmth spreading through you"],
-    seedThought: "A smile is a curve that sets everything straight",
-    visualType: "smile-ripple",
-    ambientSound: "singing-bowl"
+    practiceInstruction: "Smile softly. Let it reach your eyes. Feel what happens in your body",
+    seedThought: "A smile is a curve that sets everything straight"
   },
   {
     title: "GLAD Technique",
-    subtitle: "Find four daily wins",
+    subtitle: "Find daily wins",
     steps: ["G — One GOOD thing today", "L — One thing you LEARNED", "A — One small ACCOMPLISHMENT", "D — One thing that DELIGHTED you"],
-    seedThought: "What you appreciate, appreciates",
-    visualType: "four-petals",
-    ambientSound: "forest"
+    practiceInstruction: "Think of one thing today that was: Good, something you Learned, something you Accomplished, or something that Delighted you",
+    seedThought: "What you appreciate, appreciates"
   },
   {
     title: "Three Good Things",
     subtitle: "Rewire your brain for positivity",
-    steps: ["Think of three good things from today", "They can be tiny: a warm cup of tea, a kind word", "For each one, ask: Why did this happen?", "This trains your brain to notice more good"],
-    seedThought: "Where attention goes, happiness grows",
-    visualType: "three-stars",
-    ambientSound: "wind"
+    steps: ["Think of one good thing from today", "It can be tiny: a warm cup of tea, a kind word, a moment of sunshine", "Ask yourself: Why did this happen?", "This trains your brain to notice more good"],
+    practiceInstruction: "Think of one good thing from today. It can be tiny: a warm cup of tea, a kind word, a moment of sunshine",
+    seedThought: "Where attention goes, happiness grows"
   },
   {
     title: "Acts of Kindness Practice",
     subtitle: "Boost happiness through giving",
     steps: ["Think of one small kind act you can do today", "It can be tiny: hold a door, send a text, smile", "Do it without expecting anything back", "Notice how it feels in your body"],
-    seedThought: "Kindness is a spark that lights two hearts",
-    visualType: "kindness-ripple",
-    ambientSound: "heartbeat"
+    practiceInstruction: "Think of one small kind act you can do today. It can be tiny: hold a door, send a text, smile at someone",
+    seedThought: "Kindness is a spark that lights two hearts"
+  },
+  {
+    title: "Autogenic Training",
+    subtitle: "Mind-body relaxation technique",
+    steps: ["Sit or lie down comfortably", "Choose one body part: arm, leg, or belly", "Silently repeat: 'My [body part] is heavy'", "Feel the heaviness spreading", "Then repeat: 'My [body part] is warm'", "Feel the warmth flowing through"],
+    practiceInstruction: "Choose one body part. Silently repeat: 'My [arm/leg/belly] is heavy' or 'My [arm/leg/belly] is warm'",
+    seedThought: "What the mind suggests, the body follows"
+  },
+  {
+    title: "Inner Light Practice",
+    subtitle: "Prayer hands mudra",
+    steps: ["Bring your palms together at your heart", "Close your eyes and feel your heartbeat", "Raise your hands to the space between your eyebrows", "Feel your inner light gathering there", "Release your hands and open them", "Let that light flow out to the world"],
+    practiceInstruction: "Hold your hands in prayer. Bring them to the space between your eyebrows. Feel your inner light gather there. Release your hands and share that light with the world",
+    seedThought: "The light within you is meant to be shared"
+  },
+  {
+    title: "Relaxation Response",
+    subtitle: "Mantra meditation practice",
+    steps: ["Sit comfortably and close your eyes", "Choose your word of power: love, peace, joy, calm, or a sacred name", "Begin repeating it silently", "With each repetition, let it get softer", "Softer... quieter... dissolving", "Until the word plants itself in your consciousness"],
+    practiceInstruction: "Pick your word of power: love, peace, joy, or another meaningful word. Repeat it silently, each time softer and softer, until the word plants itself in your mind",
+    seedThought: "Words repeated softly with love will bloom in your soul"
   },
 ];
 
@@ -1777,30 +1778,23 @@ function QuoteBrowser({ isOpen, onClose, addPoints, onBoost }) {
 }
 
 // Mindfulness Visual Meditation Component - 30 second Tratak (circle gazing)
-function MindfulnessVisual({ exercise, isOpen, onComplete, onClose }) {
+// Mental Dojo - 30-second practice space
+function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare }) {
   const [timeLeft, setTimeLeft] = useState(30);
   const [isComplete, setIsComplete] = useState(false);
-  const [showSeedThought, setShowSeedThought] = useState(false);
-  const [showCloseEyes, setShowCloseEyes] = useState(false);
 
   useEffect(() => {
     if (!isOpen) {
       setTimeLeft(30);
       setIsComplete(false);
-      setShowSeedThought(false);
-      setShowCloseEyes(false);
       return;
     }
 
     const timer = setInterval(() => {
       setTimeLeft(prev => {
-        if (prev === 5) {
-          setShowCloseEyes(true);
-        }
         if (prev <= 1) {
           clearInterval(timer);
           setIsComplete(true);
-          setTimeout(() => setShowSeedThought(true), 1000);
           return 0;
         }
         return prev - 1;
@@ -1813,84 +1807,43 @@ function MindfulnessVisual({ exercise, isOpen, onComplete, onClose }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black flex items-center justify-center p-4 z-50" onClick={onClose}>
-      <div className="max-w-lg w-full" onClick={e => e.stopPropagation()}>
-        {!showSeedThought ? (
-          // During practice - Tratak candle meditation
-          <div className="text-center">
-            {!showCloseEyes ? (
-              <>
-                {/* Tratak Circle with Spark Text */}
-                <div className="relative mb-8 flex justify-center">
-                  <div className="relative w-80 h-80 flex items-center justify-center">
-                    {/* Outer glow */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-orange-500/0 via-orange-400/20 to-yellow-300/30 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '3s' }}></div>
+    <div className="fixed inset-0 bg-black flex items-center justify-center p-4 z-50">
+      <div className="max-w-2xl w-full" onClick={e => e.stopPropagation()}>
+        {!isComplete ? (
+          // During practice - 30 seconds
+          <div className="text-center animate-in fade-in duration-1000">
+            <h2 className="text-3xl font-bold mb-4 text-orange-400">Your Mental Dojo</h2>
+            <h3 className="text-xl font-medium mb-8 text-slate-300">{exercise.title}</h3>
 
-                    {/* Main circle */}
-                    <div className="relative w-64 h-64 rounded-full border-2 border-orange-400/60 flex items-center justify-center">
-                      {/* Seed thought text in circle */}
-                      <p className="text-orange-200/80 text-sm italic px-8 text-center leading-relaxed">
-                        {exercise.seedThought}
-                      </p>
-
-                      {/* Central point - the focus */}
-                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                        <div className="w-3 h-3 rounded-full bg-orange-400 animate-pulse" style={{ animationDuration: '2s' }}></div>
-                        <div className="absolute inset-0 w-3 h-3 rounded-full bg-orange-300/50 blur-sm animate-pulse" style={{ animationDuration: '1.5s' }}></div>
-                      </div>
-                    </div>
-
-                    {/* Pulsing rings */}
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-72 h-72 rounded-full border border-orange-400/20 animate-ping" style={{ animationDuration: '3s' }}></div>
-                    </div>
-                  </div>
-                </div>
-
-                <h3 className="text-xl font-bold mb-2">{exercise.title}</h3>
-                <p className="text-slate-400 text-sm mb-6">Gaze softly at the center point</p>
-
-                <div className="mb-6">
-                  <div className="text-5xl font-bold text-orange-400 mb-2">{timeLeft}</div>
-                  <div className="text-xs text-slate-500">Let the spark sink in</div>
-                </div>
-
-                <button
-                  onClick={onClose}
-                  className="px-6 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-sm transition"
-                >
-                  ✕ Exit
-                </button>
-              </>
-            ) : (
-              // Last 5 seconds - white screen with bounded square for afterimage effect
-              <div className="animate-in fade-in duration-500">
-                <div className="relative mb-8 flex justify-center">
-                  {/* White screen with bounded square - creates afterimage when you look away */}
-                  <div className="w-full h-96 bg-white rounded-3xl flex items-center justify-center relative overflow-hidden">
-                    {/* Bounded square */}
-                    <div className="w-64 h-64 border-4 border-black flex items-center justify-center">
-                      {/* Pulsing center point */}
-                      <div className="w-4 h-4 rounded-full bg-black animate-pulse" style={{ animationDuration: '2s' }}></div>
-                    </div>
-                  </div>
-                </div>
-
-                <p className="text-slate-400 mb-4 text-sm">Gaze at the square, then gently look away...</p>
-                <div className="text-3xl font-bold text-slate-400">{timeLeft}</div>
+            {/* Practice instruction - the kaizen one-liner */}
+            <div className="relative mb-12">
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-yellow-500/10 to-amber-500/10 blur-3xl rounded-2xl"></div>
+              <div className="relative bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-2 border-orange-400/40 rounded-2xl p-10">
+                <p className="text-2xl leading-relaxed text-orange-100">
+                  {exercise.practiceInstruction}
+                </p>
               </div>
-            )}
+            </div>
+
+            <p className="text-slate-400 text-sm mb-8">Take your time. Be present.</p>
+
+            <button
+              onClick={onClose}
+              className="px-6 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-sm transition"
+            >
+              ✕ Exit Dojo
+            </button>
           </div>
         ) : (
-          // After completion
+          // After 30 seconds - completion with seed thought
           <div className="text-center animate-in fade-in duration-1000">
-            <h3 className="text-2xl font-bold mb-8 text-orange-200">Plant this spark of joy in your mind</h3>
+            <h3 className="text-3xl font-bold mb-8 text-orange-300">Plant this spark of joy in your mind</h3>
 
             {/* The seed thought */}
-            <div className="relative mb-8">
+            <div className="relative mb-12">
               <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-yellow-500/10 to-amber-500/10 blur-2xl rounded-2xl"></div>
-              <div className="relative bg-gradient-to-br from-orange-500/20 to-yellow-500/20 border-2 border-orange-400/30 rounded-2xl p-8">
-                <p className="text-2xl font-medium leading-relaxed italic text-orange-100">
+              <div className="relative bg-gradient-to-br from-orange-500/20 to-yellow-500/20 border-2 border-orange-400/30 rounded-2xl p-10">
+                <p className="text-3xl font-medium leading-relaxed italic text-orange-100">
                   "{exercise.seedThought}"
                 </p>
               </div>
@@ -1898,18 +1851,26 @@ function MindfulnessVisual({ exercise, isOpen, onComplete, onClose }) {
 
             <div className="flex gap-3">
               <button
-                onClick={onClose}
+                onClick={() => {
+                  onShare();
+                }}
                 className="flex-1 py-4 bg-gradient-to-r from-orange-400 to-yellow-500 hover:from-orange-500 hover:to-yellow-600 text-slate-900 rounded-xl font-bold text-lg transition hover:scale-105"
               >
-                ✨ Keep This Spark
+                ✨ Share This Spark Of Joy
               </button>
               <button
                 onClick={() => {
                   onComplete();
                 }}
-                className="px-6 py-4 bg-white/10 hover:bg-white/20 rounded-xl font-semibold transition"
+                className="px-8 py-4 bg-white/10 hover:bg-white/20 rounded-xl font-semibold transition"
               >
-                Next →
+                Next Spark →
+              </button>
+              <button
+                onClick={onClose}
+                className="px-6 py-4 bg-white/10 hover:bg-white/20 rounded-xl text-sm transition"
+              >
+                ✕
               </button>
             </div>
           </div>
@@ -1924,7 +1885,7 @@ function ExerciseBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
   const allExercises = [...exercises, nightExercise];
   const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * allExercises.length));
   const [showShareModal, setShowShareModal] = useState(false);
-  const [showVisualMeditation, setShowVisualMeditation] = useState(false);
+  const [showMentalDojo, setShowMentalDojo] = useState(false);
 
   const currentExercise = allExercises[currentIndex];
 
@@ -1949,11 +1910,17 @@ function ExerciseBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
     randomExercise();
   };
 
-  const handleVisualComplete = () => {
+  const handleDojoComplete = () => {
     addPoints(POINTS.EXERCISE_BOOST);
     onBoost?.();
-    setShowVisualMeditation(false);
+    setShowMentalDojo(false);
     randomExercise();
+  };
+
+  const handleDojoShare = () => {
+    addPoints(POINTS.EXERCISE_BOOST);
+    setShowMentalDojo(false);
+    setShowShareModal(true);
   };
 
   const handleSkip = () => {
@@ -1966,7 +1933,7 @@ function ExerciseBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
     <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50 overflow-y-auto" onClick={onClose}>
       <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-lg w-full p-6 border border-green-400/20 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-xl font-bold flex items-center gap-2">🧘 Browse Exercises</h2>
+          <h2 className="text-xl font-bold flex items-center gap-2">✨ Sparks Of Joy</h2>
           <button onClick={onClose} className="text-slate-400 hover:text-white text-xl">✕</button>
         </div>
 
@@ -1990,26 +1957,20 @@ function ExerciseBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
             </ul>
           </div>
 
-          {/* Show visual meditation button for mindfulness exercises with seedThought */}
-          {currentExercise.seedThought ? (
+          {/* Mental Dojo button for sparks of joy exercises */}
+          {currentExercise.practiceInstruction ? (
             <>
               <button
-                onClick={() => setShowVisualMeditation(true)}
-                className="w-full py-5 mb-3 bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-slate-900 rounded-xl font-bold text-lg transition hover:scale-105"
+                onClick={() => setShowMentalDojo(true)}
+                className="w-full py-5 mb-3 bg-gradient-to-r from-orange-400 to-yellow-500 hover:from-orange-500 hover:to-yellow-600 text-slate-900 rounded-xl font-bold text-lg transition hover:scale-105"
               >
-                ✨ Begin 60-Second Practice
+                🥋 Enter Your Mental Dojo
               </button>
 
               <div className="flex gap-3 mb-4">
                 <button
-                  onClick={handleBoost}
-                  className="flex-1 py-3 bg-white/10 hover:bg-white/20 rounded-xl font-semibold transition text-sm"
-                >
-                  Skip to Next
-                </button>
-                <button
                   onClick={onClose}
-                  className="px-6 py-3 bg-white/5 hover:bg-white/10 rounded-xl font-semibold transition text-sm"
+                  className="flex-1 py-3 bg-white/10 hover:bg-white/20 rounded-xl font-semibold transition text-sm"
                 >
                   ✕ Close
                 </button>
@@ -2048,13 +2009,15 @@ function ExerciseBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
         data={currentExercise}
       />
 
-      {/* Visual Meditation Component */}
-      {currentExercise.seedThought && (
-        <MindfulnessVisual
+      {/* Mental Dojo Component */}
+      {currentExercise.practiceInstruction && (
+        <MentalDojo
           exercise={currentExercise}
-          isOpen={showVisualMeditation}
-          onComplete={handleVisualComplete}
-          onClose={() => setShowVisualMeditation(false)}
+          isOpen={showMentalDojo}
+          onComplete={handleDojoComplete}
+          onClose={() => setShowMentalDojo(false)}
+          addPoints={addPoints}
+          onShare={handleDojoShare}
         />
       )}
     </div>
@@ -4634,18 +4597,18 @@ export default function App() {
               </button>
             </div>
 
-            {/* Exercise Browser Section */}
+            {/* Sparks Of Joy Section */}
             <div className="bg-white/5 rounded-2xl p-5 mb-4 border border-white/10">
               <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                🧘 Mindfulness Exercises
+                ✨ Sparks Of Joy
               </h3>
               <button
                 onClick={() => setShowExerciseBrowser(true)}
-                className="w-full bg-gradient-to-r from-green-500/20 to-teal-500/20 border border-green-500/30 rounded-xl p-4 hover:from-green-500/30 hover:to-teal-500/30 transition"
+                className="w-full bg-gradient-to-r from-orange-500/20 to-yellow-500/20 border border-orange-500/30 rounded-xl p-4 hover:from-orange-500/30 hover:to-yellow-500/30 transition"
               >
-                <div className="text-3xl mb-2">🌿</div>
-                <div className="font-medium">Browse {exercises.length + 1} Exercises</div>
-                <div className="text-xs text-slate-400 mt-1">Breathing, meditation & mindfulness practices</div>
+                <div className="text-3xl mb-2">🥋</div>
+                <div className="font-medium">Enter Your Mental Dojo</div>
+                <div className="text-xs text-slate-400 mt-1">30-second practices to spark joy & train your mind</div>
               </button>
             </div>
 
