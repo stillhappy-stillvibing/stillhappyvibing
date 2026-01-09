@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '4.13.0';
+const APP_VERSION = '4.13.1';
 const BUILD_DATE = '2026-01-09';
 
 // Gamification: Point Values
@@ -1559,7 +1559,7 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
           try {
             await navigator.share({
               files: [new File([blob], filename, { type: 'image/png' })],
-              title: type === 'quote' ? 'Wisdom to Share' : type === 'exercise' ? 'Mindfulness Exercise' : 'Gratitude',
+              title: type === 'quote' ? 'Wisdom to Share' : type === 'exercise' ? 'Spark Of Joy' : 'Gratitude',
               text: `Smile, and the whole world smileswithyou.com ✨`
             });
           } catch (e) {
@@ -1608,29 +1608,24 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
           </div>
         )}
 
-        {/* Exercise Card */}
+        {/* Spark Of Joy Card */}
         {type === 'exercise' && data && (
           <div
             ref={cardRef}
-            className="bg-gradient-to-br from-teal-600 via-green-500 to-emerald-500 rounded-2xl p-6 mb-4"
+            className="bg-gradient-to-br from-orange-500 via-yellow-500 to-amber-400 rounded-2xl p-8 mb-4"
           >
-            <div className="text-center text-white">
-              <p className="text-4xl mb-3">{data.isNightOnly ? '🌙' : '🧘'}</p>
-              <p className="text-xl font-bold mb-1">{data.title}</p>
-              <p className="text-sm opacity-90 mb-4">{data.subtitle}</p>
+            <div className="text-center text-slate-900">
+              <p className="text-4xl mb-4">🥋</p>
+              <p className="text-lg font-bold mb-6">Join me in the Mental Dojo</p>
 
-              <div className="bg-white/20 rounded-xl p-3 mb-3 text-left">
-                <ul className={`space-y-1.5 ${data.steps.length > 6 ? 'text-xs' : 'text-sm'}`}>
-                  {data.steps.map((step, i) => (
-                    <li key={i} className="flex items-start gap-2">
-                      <span className="opacity-70 flex-shrink-0">{i + 1}.</span>
-                      <span className="leading-snug">{step}</span>
-                    </li>
-                  ))}
-                </ul>
+              {/* The seed thought - the spark to share */}
+              <div className="bg-white/30 rounded-xl p-5 mb-6">
+                <p className="text-2xl italic leading-relaxed font-medium">
+                  "{data.seedThought}"
+                </p>
               </div>
 
-              <p className="text-xs font-bold opacity-90">Smile, and the whole world smileswithyou.com</p>
+              <p className="text-sm font-bold opacity-90">✨ Smile, and the whole world smiles with you.com</p>
             </div>
           </div>
         )}
@@ -1783,6 +1778,10 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare 
   const [timeLeft, setTimeLeft] = useState(30);
   const [isComplete, setIsComplete] = useState(false);
 
+  // Calculate progress percentage for glow effect (0% to 100%)
+  const progress = ((30 - timeLeft) / 30) * 100;
+  const glowIntensity = progress / 100; // 0 to 1
+
   useEffect(() => {
     if (!isOpen) {
       setTimeLeft(30);
@@ -1810,15 +1809,27 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare 
     <div className="fixed inset-0 bg-black flex items-center justify-center p-4 z-50">
       <div className="max-w-2xl w-full" onClick={e => e.stopPropagation()}>
         {!isComplete ? (
-          // During practice - 30 seconds
+          // During practice - 30 seconds with growing glow
           <div className="text-center animate-in fade-in duration-1000">
             <h2 className="text-3xl font-bold mb-4 text-orange-400">Your Mental Dojo</h2>
             <h3 className="text-xl font-medium mb-8 text-slate-300">{exercise.title}</h3>
 
-            {/* Practice instruction - the kaizen one-liner */}
+            {/* Practice instruction - the kaizen one-liner with intensifying glow */}
             <div className="relative mb-12">
-              <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-yellow-500/10 to-amber-500/10 blur-3xl rounded-2xl"></div>
-              <div className="relative bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-2 border-orange-400/40 rounded-2xl p-10">
+              {/* Outer glow that intensifies */}
+              <div
+                className="absolute inset-0 bg-gradient-to-br from-orange-500 via-yellow-500 to-amber-500 blur-3xl rounded-2xl transition-opacity duration-1000"
+                style={{ opacity: 0.1 + (glowIntensity * 0.4) }}
+              ></div>
+              {/* Inner card with border that gets brighter */}
+              <div
+                className="relative bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-2xl p-10 transition-all duration-1000"
+                style={{
+                  borderWidth: '2px',
+                  borderStyle: 'solid',
+                  borderColor: `rgba(251, 146, 60, ${0.3 + (glowIntensity * 0.5)})`
+                }}
+              >
                 <p className="text-2xl leading-relaxed text-orange-100">
                   {exercise.practiceInstruction}
                 </p>
