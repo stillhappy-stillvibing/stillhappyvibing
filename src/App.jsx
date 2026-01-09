@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '4.13.2';
+const APP_VERSION = '4.13.3';
 const BUILD_DATE = '2026-01-09';
 
 // Gamification: Point Values
@@ -1615,8 +1615,9 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
             className="bg-gradient-to-br from-orange-500 via-yellow-500 to-amber-400 rounded-2xl p-8 mb-4"
           >
             <div className="text-center text-slate-900">
-              <p className="text-4xl mb-4">🥋</p>
-              <p className="text-lg font-bold mb-6">Join me in the Mental Dojo</p>
+              <p className="text-4xl mb-3">🥋</p>
+              <p className="text-lg font-bold mb-2">Join Me in My Mental Dojo</p>
+              <p className="text-base font-semibold mb-5">Let's Spark Joy Together!</p>
 
               {/* The seed thought - the spark to share */}
               <div className="bg-white/30 rounded-xl p-5 mb-6">
@@ -1625,7 +1626,10 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
                 </p>
               </div>
 
-              <p className="text-sm font-bold opacity-90">✨ Smile, and the whole world smiles with you.com</p>
+              <p className="text-sm opacity-90">
+                <span className="font-medium">Smile, and the whole world </span>
+                <span className="font-bold text-slate-800">smileswithyou.com</span>
+              </p>
             </div>
           </div>
         )}
@@ -1883,7 +1887,7 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare 
               </div>
             )}
 
-            <h3 className="text-3xl font-bold mb-8 text-orange-300">Plant this spark of joy in your mind</h3>
+            <h3 className="text-3xl font-bold mb-8 text-orange-300">You've planted the seed of joy. Watch it bloom.</h3>
 
             {/* The seed thought */}
             <div className="relative mb-12">
