@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '4.12.4';
+const APP_VERSION = '4.12.5';
 const BUILD_DATE = '2026-01-08';
 
 // Gamification: Point Values
@@ -1882,18 +1882,9 @@ function MindfulnessVisual({ exercise, isOpen, onComplete, onClose }) {
             )}
           </div>
         ) : (
-          // After completion - Blooming flower
+          // After completion
           <div className="text-center animate-in fade-in duration-1000">
-            <div className="mb-6">
-              {/* Blooming flower animation */}
-              <div className="relative flex justify-center mb-6">
-                <div className="text-9xl animate-in zoom-in duration-1000" style={{ animation: 'bloom 2s ease-out forwards' }}>
-                  🌸
-                </div>
-              </div>
-
-              <h3 className="text-2xl font-bold mb-4 text-orange-200">Plant this spark of joy in your mind</h3>
-            </div>
+            <h3 className="text-2xl font-bold mb-8 text-orange-200">Plant this spark of joy in your mind</h3>
 
             {/* The seed thought */}
             <div className="relative mb-8">
@@ -1924,21 +1915,6 @@ function MindfulnessVisual({ exercise, isOpen, onComplete, onClose }) {
           </div>
         )}
       </div>
-      <style>{`
-        @keyframes bloom {
-          0% {
-            transform: scale(0.3) rotate(0deg);
-            opacity: 0;
-          }
-          50% {
-            transform: scale(1.1) rotate(10deg);
-          }
-          100% {
-            transform: scale(1) rotate(0deg);
-            opacity: 1;
-          }
-        }
-      `}</style>
     </div>
   );
 }
