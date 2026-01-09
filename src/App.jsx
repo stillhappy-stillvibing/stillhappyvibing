@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '4.13.1';
+const APP_VERSION = '4.13.2';
 const BUILD_DATE = '2026-01-09';
 
 // Gamification: Point Values
@@ -1396,7 +1396,7 @@ const sourceLabels = {
   fun: '🎉 Fun', rest: '😴 Rest', anticipation: '✨ Looking forward',
   gratitude: '🙏 Gratitude', coffee: '☕ Morning ritual', food: '🍽️ Food',
   progress: '📈 Progress', accomplishment: '✅ Accomplishment',
-  growth: '📚 Growth', comfort: '🛏️ Comfort', reflection: '💭 Reflection',
+  growth: '📚 Growth', comfort: '🛏️ Comfort', 'spark-joy': '✨ Spark of Joy',
   tomorrow: '✨ Tomorrow', 'letting-go': '🍃 Letting go'
 };
 
@@ -1560,7 +1560,7 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
             await navigator.share({
               files: [new File([blob], filename, { type: 'image/png' })],
               title: type === 'quote' ? 'Wisdom to Share' : type === 'exercise' ? 'Spark Of Joy' : 'Gratitude',
-              text: `Smile, and the whole world smileswithyou.com ✨`
+              text: `Smile, and the whole world smileswithyou.com. ✨`
             });
           } catch (e) {
             // User cancelled or error
@@ -1603,7 +1603,7 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
               <p className="text-lg italic mb-4 leading-relaxed">"{data.text}"</p>
               <p className="text-sm font-semibold mb-1">— {data.author}</p>
               <p className="text-xs opacity-80 mb-4">{data.tradition}</p>
-              <p className="text-xs font-bold opacity-90">Smile, and the whole world smileswithyou.com</p>
+              <p className="text-xs font-bold opacity-90">Smile, and the whole world smileswithyou.com.</p>
             </div>
           </div>
         )}
@@ -1671,7 +1671,7 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
                 <p className="text-xs font-semibold">🏆 {data.earnedMilestones}/{data.totalMilestones} milestones unlocked</p>
               </div>
 
-              <p className="text-xs font-bold opacity-90 mt-4">Smile, and the whole world smileswithyou.com</p>
+              <p className="text-xs font-bold opacity-90 mt-4">Smile, and the whole world smileswithyou.com.</p>
             </div>
           </div>
         )}
@@ -1777,6 +1777,7 @@ function QuoteBrowser({ isOpen, onClose, addPoints, onBoost }) {
 function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare }) {
   const [timeLeft, setTimeLeft] = useState(30);
   const [isComplete, setIsComplete] = useState(false);
+  const [showSparks, setShowSparks] = useState(false);
 
   // Calculate progress percentage for glow effect (0% to 100%)
   const progress = ((30 - timeLeft) / 30) * 100;
@@ -1786,6 +1787,7 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare 
     if (!isOpen) {
       setTimeLeft(30);
       setIsComplete(false);
+      setShowSparks(false);
       return;
     }
 
@@ -1794,6 +1796,9 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare 
         if (prev <= 1) {
           clearInterval(timer);
           setIsComplete(true);
+          setShowSparks(true);
+          // Hide sparks after 2 seconds
+          setTimeout(() => setShowSparks(false), 2000);
           return 0;
         }
         return prev - 1;
@@ -1809,8 +1814,8 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare 
     <div className="fixed inset-0 bg-black flex items-center justify-center p-4 z-50">
       <div className="max-w-2xl w-full" onClick={e => e.stopPropagation()}>
         {!isComplete ? (
-          // During practice - 30 seconds with growing glow
-          <div className="text-center animate-in fade-in duration-1000">
+          // During practice - 30 seconds with growing glow and progress bar
+          <div className="text-center animate-in fade-in duration-1000 relative">
             <h2 className="text-3xl font-bold mb-4 text-orange-400">Your Mental Dojo</h2>
             <h3 className="text-xl font-medium mb-8 text-slate-300">{exercise.title}</h3>
 
@@ -1838,6 +1843,14 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare 
 
             <p className="text-slate-400 text-sm mb-8">Take your time. Be present.</p>
 
+            {/* Progress bar at bottom */}
+            <div className="w-full bg-slate-800/50 rounded-full h-2 overflow-hidden mb-6">
+              <div
+                className="h-full bg-gradient-to-r from-orange-400 via-yellow-400 to-amber-400 transition-all duration-1000 ease-linear"
+                style={{ width: `${progress}%` }}
+              ></div>
+            </div>
+
             <button
               onClick={onClose}
               className="px-6 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-sm transition"
@@ -1846,8 +1859,30 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare 
             </button>
           </div>
         ) : (
-          // After 30 seconds - completion with seed thought
-          <div className="text-center animate-in fade-in duration-1000">
+          // After 30 seconds - completion with seed thought and sparks
+          <div className="text-center animate-in fade-in duration-1000 relative">
+            {/* Sparks animation */}
+            {showSparks && (
+              <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                {[...Array(20)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="absolute animate-ping"
+                    style={{
+                      left: `${20 + Math.random() * 60}%`,
+                      top: `${20 + Math.random() * 60}%`,
+                      animationDuration: `${0.5 + Math.random() * 1}s`,
+                      animationDelay: `${Math.random() * 0.3}s`,
+                    }}
+                  >
+                    <div className={`text-${['orange', 'yellow', 'amber'][Math.floor(Math.random() * 3)]}-400`}>
+                      ✨
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
             <h3 className="text-3xl font-bold mb-8 text-orange-300">Plant this spark of joy in your mind</h3>
 
             {/* The seed thought */}
@@ -1860,12 +1895,12 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare 
               </div>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-3 flex-wrap justify-center">
               <button
                 onClick={() => {
                   onShare();
                 }}
-                className="flex-1 py-4 bg-gradient-to-r from-orange-400 to-yellow-500 hover:from-orange-500 hover:to-yellow-600 text-slate-900 rounded-xl font-bold text-lg transition hover:scale-105"
+                className="flex-1 min-w-[200px] py-4 bg-gradient-to-r from-orange-400 to-yellow-500 hover:from-orange-500 hover:to-yellow-600 text-slate-900 rounded-xl font-bold text-lg transition hover:scale-105"
               >
                 ✨ Share This Spark Of Joy
               </button>
@@ -1873,15 +1908,15 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare 
                 onClick={() => {
                   onComplete();
                 }}
-                className="px-8 py-4 bg-white/10 hover:bg-white/20 rounded-xl font-semibold transition"
+                className="flex-1 min-w-[200px] py-4 bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-slate-900 rounded-xl font-bold text-lg transition hover:scale-105"
               >
-                Next Spark →
+                💫 +{POINTS.EXERCISE_BOOST} Next Spark
               </button>
               <button
                 onClick={onClose}
-                className="px-6 py-4 bg-white/10 hover:bg-white/20 rounded-xl text-sm transition"
+                className="px-6 py-4 bg-white/10 hover:bg-white/20 rounded-xl font-semibold transition"
               >
-                ✕
+                ✕ Close
               </button>
             </div>
           </div>
@@ -3698,7 +3733,7 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats, ch
           <p className="text-sm text-slate-300 mb-3">Help someone you love have a happier {CURRENT_YEAR}</p>
           <button
             onClick={() => {
-              const shareText = `Happiness Tracker: Let's make happiness addictively fun!\n\n💫 Earn joy points for every boost\n🏆 Level up your happiness rank\n🎮 Discover quotes, exercises & CBT tools\n🔥 Build your daily streak\n\nSmile, and the whole world smileswithyou.com`;
+              const shareText = `Happiness Tracker: Let's make happiness addictively fun!\n\n💫 Earn joy points for every boost\n🏆 Level up your happiness rank\n🎮 Discover quotes, exercises & CBT tools\n🔥 Build your daily streak\n\nSmile, and the whole world smileswithyou.com.`;
               shareContent(shareText, 'Shared to clipboard!');
             }}
             className="w-full py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold hover:scale-105 transition"
