@@ -2188,14 +2188,14 @@ function CBTBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
     <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50 overflow-y-auto" onClick={onClose}>
       <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-lg w-full p-6 border border-blue-400/20 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-xl font-bold flex items-center gap-2">💙 CBT Tools</h2>
+          <h2 className="text-xl font-bold flex items-center gap-2">🧠 Tools Of Thought</h2>
           <button onClick={onClose} className="text-slate-400 hover:text-white text-xl">✕</button>
         </div>
 
         <div className="mb-4">
           <div className="bg-blue-400/10 border-blue-400/30 border rounded-xl p-4 mb-6">
             <h3 className="text-blue-400 font-semibold text-lg mb-1">
-              💙 {currentExercise.title}
+              🧠 {currentExercise.title}
             </h3>
             <p className="text-slate-400 text-sm mb-3">{currentExercise.subtitle}</p>
             {currentExercise.description && (
@@ -4478,6 +4478,28 @@ export default function App() {
     localStorage.setItem('lastRecoveryCheckDay', today);
   }, [checkins]); // Run when checkins change (new check-in triggers day check)
 
+  // Auto-check-in on site visit
+  useEffect(() => {
+    const today = getDayKey(new Date());
+    const hasCheckedInToday = checkins.some(c => getDayKey(c.timestamp) === today);
+
+    // Only auto-check-in if user hasn't checked in today
+    if (!hasCheckedInToday && checkins.length >= 0) {
+      // Create a simple auto check-in (silent, no points/confetti)
+      const autoCheckin = {
+        id: Date.now(),
+        sources: ['peace'], // simple default source
+        quote: null,
+        timestamp: new Date().toISOString(),
+        auto: true // mark as auto so we can track it
+      };
+
+      setCheckins(prev => [...prev, autoCheckin]);
+      incrementCheckins();
+      incrementHappinessSource('peace');
+    }
+  }, []); // Run once on mount
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white p-4">
       {/* Version Update Notification */}
@@ -4524,36 +4546,106 @@ export default function App() {
               <GlobalCounter />
             </div>
 
-            {/* Inline Check-In - Primary Focus */}
-            {recoveryActive ? (
-              <RecoveryQuest
-                brokenStreak={brokenStreak}
-                progress={recoveryProgress}
-                activeQuest={recoveryQuest}
-                onSelectQuest={(quest) => setRecoveryQuest(quest)}
-                onSkip={() => {
-                  setRecoveryActive(false);
-                  setRecoveryQuest(null);
-                  setBrokenStreak(0);
-                  const today = getDayKey(new Date());
-                  localStorage.setItem(`recoveryUsed_${today}`, 'true');
-                  setRecoveryUsedToday(true);
+            {/* Tools Grid - Main Navigation */}
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              {/* Seeds Of Thought */}
+              <button
+                onClick={() => setShowQuoteBrowser(true)}
+                className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl p-5 hover:from-purple-500/30 hover:to-pink-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
+              >
+                <div className="text-4xl">🌱</div>
+                <div className="font-semibold text-sm">Seeds Of Thought</div>
+                <div className="text-xs text-slate-400 text-center">Wisdom to plant</div>
+              </button>
+
+              {/* Sparks Of Joy */}
+              <button
+                onClick={() => setShowExerciseBrowser(true)}
+                className="bg-gradient-to-br from-orange-500/20 to-yellow-500/20 border border-orange-500/30 rounded-xl p-5 hover:from-orange-500/30 hover:to-yellow-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
+              >
+                <div className="text-4xl">✨</div>
+                <div className="font-semibold text-sm">Sparks Of Joy</div>
+                <div className="text-xs text-slate-400 text-center">Mental Dojo</div>
+              </button>
+
+              {/* Breath Of Fresh Air */}
+              <button
+                onClick={() => setShowBreathworkBrowser(true)}
+                className="bg-gradient-to-br from-teal-500/20 to-cyan-500/20 border border-teal-500/30 rounded-xl p-5 hover:from-teal-500/30 hover:to-cyan-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
+              >
+                <div className="text-4xl">🌬️</div>
+                <div className="font-semibold text-sm">Breath Of Fresh Air</div>
+                <div className="text-xs text-slate-400 text-center">1-minute calm</div>
+              </button>
+
+              {/* Tools Of Thought */}
+              <button
+                onClick={() => setShowCBTBrowser(true)}
+                className="bg-gradient-to-br from-blue-500/20 to-indigo-500/20 border border-blue-500/30 rounded-xl p-5 hover:from-blue-500/30 hover:to-indigo-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
+              >
+                <div className="text-4xl">🧠</div>
+                <div className="font-semibold text-sm">Tools Of Thought</div>
+                <div className="text-xs text-slate-400 text-center">Mindset shifts</div>
+              </button>
+
+              {/* Share A Smile */}
+              <button
+                onClick={() => setShowShareSmile(true)}
+                className="bg-gradient-to-br from-amber-500/20 to-pink-500/20 border border-amber-500/30 rounded-xl p-5 hover:from-amber-500/30 hover:to-pink-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
+              >
+                <div className="text-4xl">💛</div>
+                <div className="font-semibold text-sm">Share A Smile</div>
+                <div className="text-xs text-slate-400 text-center">Send joy</div>
+              </button>
+
+              {/* Ripples Of Joy - Coming Soon */}
+              <button
+                onClick={() => {
+                  setToastMessage('Coming soon! 🌊');
+                  setToastEmoji('🌊');
+                  setShowToast(true);
                 }}
-              />
-            ) : showPowerBoost ? (
-              <PowerBoost
-                onSkip={handlePowerBoostSkip}
-                onSelectTool={handlePowerBoostSelect}
-              />
-            ) : cooldownRemaining > 0 ? (
-              <div className="bg-white/5 backdrop-blur rounded-2xl p-6 mb-4 border border-white/10 text-center">
-                <p className="text-slate-400 text-sm mb-2">Taking a happiness break...</p>
-                <p className="text-2xl font-bold text-purple-400">{Math.ceil(cooldownRemaining / 1000)}s</p>
-                <p className="text-xs text-slate-500 mt-2">Next check-in available soon</p>
-              </div>
-            ) : (
-              <InlineCheckin onSave={handleCheckinSave} />
-            )}
+                className="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 rounded-xl p-5 transition hover:scale-105 flex flex-col items-center gap-2 relative"
+              >
+                <div className="text-4xl opacity-50">🌊</div>
+                <div className="font-semibold text-sm text-slate-400">Ripples Of Joy</div>
+                <div className="text-xs text-slate-500 text-center">Coming soon</div>
+                <div className="absolute top-2 right-2 text-xs bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded-full">Soon</div>
+              </button>
+            </div>
+
+            {/* Hidden: Inline Check-In - kept for backend logic */}
+            <div style={{ display: 'none' }}>
+              {recoveryActive ? (
+                <RecoveryQuest
+                  brokenStreak={brokenStreak}
+                  progress={recoveryProgress}
+                  activeQuest={recoveryQuest}
+                  onSelectQuest={(quest) => setRecoveryQuest(quest)}
+                  onSkip={() => {
+                    setRecoveryActive(false);
+                    setRecoveryQuest(null);
+                    setBrokenStreak(0);
+                    const today = getDayKey(new Date());
+                    localStorage.setItem(`recoveryUsed_${today}`, 'true');
+                    setRecoveryUsedToday(true);
+                  }}
+                />
+              ) : showPowerBoost ? (
+                <PowerBoost
+                  onSkip={handlePowerBoostSkip}
+                  onSelectTool={handlePowerBoostSelect}
+                />
+              ) : cooldownRemaining > 0 ? (
+                <div className="bg-white/5 backdrop-blur rounded-2xl p-6 mb-4 border border-white/10 text-center">
+                  <p className="text-slate-400 text-sm mb-2">Taking a happiness break...</p>
+                  <p className="text-2xl font-bold text-purple-400">{Math.ceil(cooldownRemaining / 1000)}s</p>
+                  <p className="text-xs text-slate-500 mt-2">Next check-in available soon</p>
+                </div>
+              ) : (
+                <InlineCheckin onSave={handleCheckinSave} />
+              )}
+            </div>
             
             <div className="bg-white/5 backdrop-blur rounded-2xl p-5 mb-4 border border-white/10 relative overflow-hidden">
               {/* Points Animation */}
@@ -4643,25 +4735,8 @@ export default function App() {
               )}
             </div>
 
-            {/* Quick Actions */}
-            <div className="mt-3 grid grid-cols-1 gap-2">
-              <button
-                onClick={() => setShowShareSmile(true)}
-                className="bg-gradient-to-r from-amber-500/20 to-pink-500/20 border border-amber-500/30 rounded-xl p-4 flex flex-col items-center gap-2 hover:from-amber-500/30 hover:to-pink-500/30 transition"
-              >
-                <span className="text-2xl">💛</span>
-                <span className="text-sm font-medium">Share A Smile</span>
-                <span className="text-xs text-slate-400">Send someone a heartfelt message</span>
-              </button>
-            </div>
-            <div className="mt-2 grid grid-cols-2 gap-2">
-              <button
-                onClick={() => setShowChallengeModal(true)}
-                className="bg-white/5 border border-white/10 rounded-xl p-3 flex flex-col items-center gap-1 hover:bg-white/10 transition"
-              >
-                <span className="text-xl">😊</span>
-                <span className="text-xs font-medium">Smile with a Friend</span>
-              </button>
+            {/* Quick Actions - Hidden for simplification */}
+            <div className="mt-2 grid grid-cols-1 gap-2">
               <button
                 onClick={() => setShowWeeklyReflection(true)}
                 className="bg-white/5 border border-white/10 rounded-xl p-3 flex flex-col items-center gap-1 hover:bg-white/10 transition"
@@ -4747,18 +4822,18 @@ export default function App() {
               </button>
             </div>
 
-            {/* CBT Tools Section */}
+            {/* Tools Of Thought Section */}
             <div className="bg-white/5 rounded-2xl p-5 mb-4 border border-white/10">
               <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                💙 When You Need a Lift
+                🧠 Tools Of Thought
               </h3>
               <button
                 onClick={() => setShowCBTBrowser(true)}
-                className="w-full bg-gradient-to-r from-blue-500/20 to-teal-500/20 border border-blue-500/30 rounded-xl p-4 hover:from-blue-500/30 hover:to-teal-500/30 transition"
+                className="w-full bg-gradient-to-r from-blue-500/20 to-indigo-500/20 border border-blue-500/30 rounded-xl p-4 hover:from-blue-500/30 hover:to-indigo-500/30 transition"
               >
-                <div className="text-3xl mb-2">💙</div>
-                <div className="font-medium">Browse {cbtExercises.length} CBT Exercises</div>
-                <div className="text-xs text-slate-400 mt-1">Tools to help you feel better</div>
+                <div className="text-3xl mb-2">🧠</div>
+                <div className="font-medium">Browse {cbtExercises.length} Mindset Exercises</div>
+                <div className="text-xs text-slate-400 mt-1">Shift your thinking, shift your world</div>
               </button>
             </div>
           </>
