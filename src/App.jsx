@@ -6,8 +6,8 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '4.13.6';
-const BUILD_DATE = '2026-01-10';
+const APP_VERSION = '4.13.7';
+const BUILD_DATE = '2026-01-11';
 
 // Gamification: Point Values
 const POINTS = {
@@ -490,6 +490,27 @@ const exercises = [
     practiceInstruction: "Pick your word of power: love, peace, joy, or another meaningful word. Repeat it silently, each time softer and softer, until the word plants itself in your mind",
     seedThought: "Words repeated softly with love will bloom in your soul"
   },
+  {
+    title: "Dream Garden",
+    subtitle: "Plant seeds of joy in your mind",
+    steps: ["Close your eyes and take three slow breaths", "Imagine a beautiful garden in your mind", "Think of one thing that would bring you joy", "Visualize it as a seed of light", "Gently plant it in the garden of your mind", "Watch it take root with warmth and care", "Carry this seed with you throughout your day"],
+    practiceInstruction: "Close your eyes. Visualize a beautiful garden. Plant one seed of something that would bring you joy. Watch it gently take root in your mind.",
+    seedThought: "The dreams you plant today bloom into tomorrow's reality"
+  },
+  {
+    title: "Seeds Of Tomorrow",
+    subtitle: "Dream your joy into being",
+    steps: ["Sit comfortably and close your eyes", "Take a deep breath and smile gently", "Picture one joyful moment you'd love to experience", "See it clearly - colors, feelings, details", "Imagine planting this vision as a glowing seed", "Feel it settling into your heart", "Open your eyes, carrying this seed of possibility"],
+    practiceInstruction: "Close your eyes. Picture something that would bring you joy tomorrow. Plant that vision like a seed, trusting it will grow.",
+    seedThought: "What you dream with intention becomes what you live with grace"
+  },
+  {
+    title: "Dreamweaver",
+    subtitle: "Weave joy into your tomorrow",
+    steps: ["Close your eyes and breathe softly", "Let yourself drift into a peaceful state", "Imagine your ideal tomorrow - one joyful moment", "See it, feel it, breathe it in", "Let this dream weave itself into your consciousness", "Release any attachment, just hold it lightly", "Trust that what you dream with love takes root"],
+    practiceInstruction: "Close your eyes. See yourself in a moment of pure joy. Hold that vision gently, like a dream taking shape. Let it settle into your being.",
+    seedThought: "You are the dreamer and the dream, planting joy one vision at a time"
+  },
 ];
 
 // Breathwork patterns for stress relief and emotional regulation
@@ -575,24 +596,6 @@ const cbtExercises = [
   { title: "Value-Based Action", subtitle: "One small step aligned with who you want to be", steps: ["Think of one value important to you", "Examples: kindness, courage, connection", "Do ONE tiny action aligned with that value", "Even when you don't feel like it", "Values create meaning when motivation is low"], pattern: null },
 ];
 
-// Night-only exercise for hypnagogia/dream problem-solving
-const nightExercise = {
-  title: "Dream Insight",
-  subtitle: "Let your sleeping mind solve problems",
-  description: "Edison, Dalí, and Einstein used the hypnagogic state — the twilight between waking and sleep — to unlock creative breakthroughs. Your dreaming mind sees connections your waking mind misses.",
-  steps: [
-    "Think of a question or problem you want insight on",
-    "Write it down or say it clearly in your mind",
-    "Read/repeat it slowly three times",
-    "Close your eyes and visualize the question as an image",
-    "Take slow breaths and release any need for an answer",
-    "As you drift off, stay curious but not grasping",
-    "Keep a notepad nearby for morning insights",
-    "Upon waking, immediately capture any thoughts"
-  ],
-  pattern: null,
-  isNightOnly: true
-};
 
 // CBT Tools matched to end-streak reasons
 const cbtTools = {
@@ -1612,9 +1615,9 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
         {type === 'exercise' && data && (
           <div
             ref={cardRef}
-            className="bg-gradient-to-br from-orange-500 via-yellow-500 to-amber-400 rounded-2xl p-6 mb-4"
+            className="bg-gradient-to-br from-blue-200 via-purple-200 to-indigo-200 rounded-2xl p-6 mb-4"
           >
-            <div className="text-slate-900">
+            <div className="text-indigo-900">
               <div className="text-center mb-4">
                 <p className="text-3xl mb-2">🥋</p>
                 <p className="text-xl font-bold mb-1">{data.title}</p>
@@ -1622,7 +1625,7 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
               </div>
 
               {/* All steps */}
-              <div className="bg-white/30 rounded-xl p-4 mb-3">
+              <div className="bg-white/10 rounded-xl p-4 mb-3">
                 <ol className="text-left space-y-2">
                   {data.steps.map((step, index) => (
                     <li key={index} className="text-sm leading-relaxed">
@@ -1634,7 +1637,7 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
 
               <p className="text-xs text-center opacity-90">
                 <span className="font-medium">Smile, and the whole world </span>
-                <span className="font-bold text-slate-800">smileswithyou.com</span>
+                <span className="font-bold">smileswithyou.com</span>
               </p>
             </div>
           </div>
@@ -1644,23 +1647,23 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
         {type === 'spark' && data && (
           <div
             ref={cardRef}
-            className="bg-gradient-to-br from-orange-500 via-yellow-500 to-amber-400 rounded-2xl p-8 mb-4 relative overflow-hidden"
+            className="bg-gradient-to-br from-blue-200 via-purple-200 to-indigo-200 rounded-2xl p-8 mb-4 relative overflow-hidden"
           >
-            {/* Decorative sparks */}
-            <div className="absolute top-2 left-2 text-2xl opacity-60">✨</div>
-            <div className="absolute top-4 right-4 text-xl opacity-70">✨</div>
-            <div className="absolute bottom-3 left-4 text-xl opacity-60">✨</div>
-            <div className="absolute bottom-2 right-3 text-2xl opacity-70">✨</div>
-            <div className="absolute top-1/2 left-2 text-lg opacity-50">✨</div>
-            <div className="absolute top-1/3 right-2 text-lg opacity-50">✨</div>
+            {/* Decorative sparks - gold to stand out on cool tones */}
+            <div className="absolute top-2 left-2 text-2xl opacity-80" style={{filter: 'drop-shadow(0 0 4px #fbbf24)'}}>✨</div>
+            <div className="absolute top-4 right-4 text-xl opacity-90" style={{filter: 'drop-shadow(0 0 4px #fbbf24)'}}>✨</div>
+            <div className="absolute bottom-3 left-4 text-xl opacity-80" style={{filter: 'drop-shadow(0 0 4px #fbbf24)'}}>✨</div>
+            <div className="absolute bottom-2 right-3 text-2xl opacity-90" style={{filter: 'drop-shadow(0 0 4px #fbbf24)'}}>✨</div>
+            <div className="absolute top-1/2 left-2 text-lg opacity-70" style={{filter: 'drop-shadow(0 0 4px #fbbf24)'}}>✨</div>
+            <div className="absolute top-1/3 right-2 text-lg opacity-70" style={{filter: 'drop-shadow(0 0 4px #fbbf24)'}}>✨</div>
 
-            <div className="text-center text-slate-900 relative z-10">
+            <div className="text-center text-indigo-900 relative z-10">
               <p className="text-4xl mb-3">🥋</p>
               <p className="text-xl font-bold mb-1">{data.title}</p>
               <p className="text-sm opacity-80 mb-4">{data.subtitle}</p>
 
               {/* Practice instruction */}
-              <div className="bg-white/30 rounded-xl p-5 mb-3">
+              <div className="bg-white/10 rounded-xl p-5 mb-3">
                 <p className="font-semibold mb-2">Practice:</p>
                 <p className="text-base leading-relaxed">
                   {data.practiceInstruction}
@@ -1676,7 +1679,7 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
 
               <p className="text-sm opacity-90">
                 <span className="font-medium">Smile, and the whole world </span>
-                <span className="font-bold text-slate-800">smileswithyou.com</span>
+                <span className="font-bold">smileswithyou.com</span>
               </p>
             </div>
           </div>
@@ -1980,7 +1983,7 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare 
 
 // Exercise Browser/Carousel Component
 function ExerciseBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
-  const allExercises = [...exercises, nightExercise];
+  const allExercises = exercises;
   const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * allExercises.length));
   const [showShareModal, setShowShareModal] = useState(false);
   const [showDojoShareModal, setShowDojoShareModal] = useState(false);
@@ -2664,7 +2667,7 @@ function TheWorldTab() {
     .filter(item => item.quote); // Filter out any invalid indices
 
   // Sort all favorite exercises by count (most favorited first)
-  const allExercises = [...exercises, nightExercise];
+  const allExercises = exercises;
   const topExercises = Object.entries(globalFavoriteExercises)
     .sort((a, b) => b[1] - a[1])
     .map(([index, count]) => ({
@@ -3123,24 +3126,18 @@ function InlineCheckin({ onSave }) {
 
   // Carousel for exercises - use CBT exercises when "nothing" is selected
   const isNothing = sources.includes('nothing');
-  const exercisesToShow = isNothing ? cbtExercises : [...exercises, nightExercise];
+  const exercisesToShow = isNothing ? cbtExercises : exercises;
   const [exerciseIndex, setExerciseIndex] = useState(() => {
-    if (isRitual && timeOfDay === 'night' && !isNothing) {
-      return exercises.length; // nightExercise is last in allExercises
-    }
     return Math.floor(Math.random() * (isNothing ? cbtExercises.length : exercises.length));
   });
 
   // For "nothing" flow, we need separate index for regular exercises
   const [regularExerciseIndex, setRegularExerciseIndex] = useState(() => {
-    if (isRitual && timeOfDay === 'night') {
-      return exercises.length; // nightExercise is last
-    }
     return Math.floor(Math.random() * exercises.length);
   });
 
   const exercise = exercisesToShow[exerciseIndex % exercisesToShow.length];
-  const regularExercise = [...exercises, nightExercise][regularExerciseIndex % (exercises.length + 1)];
+  const regularExercise = exercises[regularExerciseIndex % exercises.length];
 
   const nextExercise = () => {
     setExerciseIndex((exerciseIndex + 1) % exercisesToShow.length);
