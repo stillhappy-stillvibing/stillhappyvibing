@@ -1618,20 +1618,18 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
               <div className="text-center mb-4">
                 <p className="text-3xl mb-2">🥋</p>
                 <p className="text-xl font-bold mb-1">{data.title}</p>
-                <p className="text-sm opacity-80">{data.subtitle}</p>
+                <p className="text-sm opacity-80 mb-2">{data.subtitle}</p>
               </div>
 
-              <div className="bg-white/30 rounded-xl p-4 mb-4">
-                <p className="font-semibold mb-2 text-center">Practice:</p>
-                <p className="text-base leading-relaxed text-center">
-                  {data.practiceInstruction}
-                </p>
-              </div>
-
-              <div className="bg-white/20 rounded-xl p-3 mb-4">
-                <p className="text-sm italic text-center">
-                  "{data.seedThought}"
-                </p>
+              {/* All steps */}
+              <div className="bg-white/30 rounded-xl p-4 mb-3">
+                <ol className="text-left space-y-2">
+                  {data.steps.map((step, index) => (
+                    <li key={index} className="text-sm leading-relaxed">
+                      <span className="font-semibold">{index + 1}.</span> {step}
+                    </li>
+                  ))}
+                </ol>
               </div>
 
               <p className="text-xs text-center opacity-90">
