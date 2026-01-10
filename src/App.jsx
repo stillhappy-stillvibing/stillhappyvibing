@@ -6,8 +6,8 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '4.13.3';
-const BUILD_DATE = '2026-01-09';
+const APP_VERSION = '4.13.4';
+const BUILD_DATE = '2026-01-10';
 
 // Gamification: Point Values
 const POINTS = {
