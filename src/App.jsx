@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '4.13.7';
+const APP_VERSION = '4.13.8';
 const BUILD_DATE = '2026-01-11';
 
 // Gamification: Point Values
@@ -1871,8 +1871,7 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare 
         {!isComplete ? (
           // During practice - 30 seconds with growing glow and progress bar
           <div className="text-center animate-in fade-in duration-1000 relative">
-            <h2 className="text-3xl font-bold mb-4 text-orange-400">Your Mental Dojo</h2>
-            <h3 className="text-xl font-medium mb-8 text-slate-300">{exercise.title}</h3>
+            <div className="text-6xl mb-8">🥋</div>
 
             {/* Practice instruction - the kaizen one-liner with intensifying glow */}
             <div className="relative mb-12">
@@ -1938,7 +1937,7 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare 
               </div>
             )}
 
-            <h3 className="text-3xl font-bold mb-8 text-orange-300">You've planted the seed of joy. Watch it bloom.</h3>
+            <h3 className="text-3xl font-bold mb-8 text-orange-300">A spark of joy ignited within you.</h3>
 
             {/* The seed thought */}
             <div className="relative mb-12">
