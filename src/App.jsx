@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '5.0.0';
+const APP_VERSION = '5.1.0';
 const BUILD_DATE = '2026-01-11';
 
 // Gamification: Point Values
@@ -1291,7 +1291,7 @@ const shareContent = async (text, fallbackMessage = 'Copied to clipboard! 📋',
 };
 
 const shareQuote = (quote, addPoints) => {
-  const text = `📖 A moment of wisdom:\n\n"${quote.text}"\n— ${quote.author}\n\n${APP_URL}`;
+  const text = `🌱 A seed of thought:\n\n"${quote.text}"\n— ${quote.author}\n\n${APP_URL}`;
   return shareContent(text, 'Copied to clipboard! 📋', () => {
     if (addPoints) addPoints(POINTS.SHARE_QUOTE);
   });
@@ -1602,7 +1602,7 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
             className="bg-gradient-to-br from-indigo-600 via-purple-500 to-pink-500 rounded-2xl p-6 mb-4"
           >
             <div className="text-center text-white">
-              <p className="text-4xl mb-4">📖</p>
+              <p className="text-4xl mb-4">🌱</p>
               <p className="text-lg italic mb-4 leading-relaxed">"{data.text}"</p>
               <p className="text-sm font-semibold mb-1">— {data.author}</p>
               <p className="text-xs opacity-80 mb-4">{data.tradition}</p>
@@ -1782,7 +1782,7 @@ function QuoteBrowser({ isOpen, onClose, addPoints, onBoost }) {
     <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50" onClick={onClose}>
       <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-lg w-full p-6 border border-purple-400/20" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-xl font-bold flex items-center gap-2">📖 Browse Wisdom</h2>
+          <h2 className="text-xl font-bold flex items-center gap-2">🌱 Seeds Of Thought</h2>
           <button onClick={onClose} className="text-slate-400 hover:text-white text-xl">✕</button>
         </div>
 
@@ -2303,7 +2303,7 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
     <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50 overflow-y-auto" onClick={onClose}>
       <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-lg w-full p-6 border border-teal-400/20 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-xl font-bold flex items-center gap-2">🌬️ Breathwork</h2>
+          <h2 className="text-xl font-bold flex items-center gap-2">🌬️ Breath Of Fresh Air</h2>
           <button onClick={onClose} className="text-slate-400 hover:text-white text-xl">✕</button>
         </div>
 
@@ -2935,8 +2935,8 @@ function PowerBoost({ onSkip, onSelectTool }) {
           onClick={() => onSelectTool('quotes')}
           className="bg-gradient-to-br from-purple-500/30 to-pink-500/30 hover:from-purple-500/40 hover:to-pink-500/40 border border-purple-400/30 rounded-xl p-4 transition hover:scale-105"
         >
-          <div className="text-3xl mb-2">📖</div>
-          <div className="font-semibold text-sm">Wisdom Quotes</div>
+          <div className="text-3xl mb-2">🌱</div>
+          <div className="font-semibold text-sm">Seeds Of Thought</div>
           <div className="text-xs text-purple-300 mt-1">+10 pts</div>
         </button>
 
@@ -2954,7 +2954,7 @@ function PowerBoost({ onSkip, onSelectTool }) {
           className="bg-gradient-to-br from-teal-500/30 to-cyan-500/30 hover:from-teal-500/40 hover:to-cyan-500/40 border border-teal-400/30 rounded-xl p-4 transition hover:scale-105"
         >
           <div className="text-3xl mb-2">🌬️</div>
-          <div className="font-semibold text-sm">Breathwork</div>
+          <div className="font-semibold text-sm">Breath Of Fresh Air</div>
           <div className="text-xs text-teal-300 mt-1">+15 pts</div>
         </button>
 
@@ -3660,8 +3660,8 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats, ch
       localStorage.setItem(`happinessNotificationSettings${CURRENT_YEAR}`, JSON.stringify(updatedSettings));
 
       // Show test notification
-      new Notification('Happiness Tracker 🌟', {
-        body: 'Notifications enabled! We\'ll remind you throughout the day.',
+      new Notification('Seeds of Joy 🌱', {
+        body: 'Notifications enabled! We\'ll remind you to plant seeds of joy throughout the day.',
         icon: '/pwa-512x512.svg'
       });
     }
@@ -3796,7 +3796,7 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats, ch
           <p className="text-sm text-slate-300 mb-3">Help someone you love have a happier {CURRENT_YEAR}</p>
           <button
             onClick={() => {
-              const shareText = `Happiness Tracker: Let's make happiness addictively fun!\n\n💫 Earn joy points for every boost\n🏆 Level up your happiness rank\n🎮 Discover quotes, exercises & CBT tools\n🔥 Build your daily streak\n\nSmile, and the whole world smileswithyou.com.`;
+              const shareText = `Seeds of Joy 🌱\n\nPlant joy, watch it bloom, share it with the world.\n\n✨ Sparks Of Joy - Mental Dojo practices\n🌱 Seeds Of Thought - Wisdom to plant in your mind\n🌬️ Breath Of Fresh Air - Calming patterns\n💙 CBT Tools - Mindset shifts\n\nSmile, and the whole world smileswithyou.com.`;
               shareContent(shareText, 'Shared to clipboard!');
             }}
             className="w-full py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold hover:scale-105 transition"
@@ -3826,7 +3826,7 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats, ch
 
         {/* Version Info */}
         <div className="mt-6 pt-4 border-t border-white/10 text-center">
-          <p className="text-xs text-slate-500">Happiness Tracker v{APP_VERSION}</p>
+          <p className="text-xs text-slate-500">Seeds of Joy v{APP_VERSION}</p>
           <p className="text-xs text-slate-600">Build {BUILD_DATE}</p>
         </div>
       </div>
@@ -4481,10 +4481,10 @@ export default function App() {
         <header className="text-center py-3">
           <div className="flex items-center justify-between mb-1">
             <div className="w-8" />
-            <h1 className="text-xl font-bold bg-gradient-to-r from-yellow-400 via-pink-400 to-yellow-400 bg-clip-text text-transparent">✨ Happiness Tracker ✨</h1>
+            <h1 className="text-xl font-bold bg-gradient-to-r from-green-400 via-yellow-400 to-orange-400 bg-clip-text text-transparent">🌱 Seeds of Joy ✨</h1>
             <button onClick={() => setShowSettingsModal(true)} className="text-slate-400 hover:text-white text-xl">⚙️</button>
           </div>
-          <p className="text-slate-400 text-xs mb-2">Let's make happiness addictively fun!</p>
+          <p className="text-slate-400 text-xs mb-2">Plant joy, watch it bloom, share it with the world</p>
           <span className="inline-block px-4 py-1 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-900 font-bold rounded-full text-sm">🎉 {CURRENT_YEAR} 🎉</span>
         </header>
 
@@ -4687,22 +4687,22 @@ export default function App() {
         {activeTab === 'tools' && (
           <>
             <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold mb-2">🧘 Tools For Happiness</h2>
-              <p className="text-slate-400 text-sm">Quotes, exercises, and practices to lift your spirits</p>
+              <h2 className="text-2xl font-bold mb-2">🌱 Joy Toolkit</h2>
+              <p className="text-slate-400 text-sm">Seeds of thought, sparks of joy, and breath to grow your garden</p>
             </div>
 
-            {/* Quote Browser Section */}
+            {/* Seeds Of Thought Section */}
             <div className="bg-white/5 rounded-2xl p-5 mb-4 border border-white/10">
               <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                💬 Wisdom Quotes
+                🌱 Seeds Of Thought
               </h3>
               <button
                 onClick={() => setShowQuoteBrowser(true)}
                 className="w-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl p-4 hover:from-purple-500/30 hover:to-pink-500/30 transition"
               >
-                <div className="text-3xl mb-2">📚</div>
-                <div className="font-medium">Browse {wisdomQuotes.length} Wisdom Quotes</div>
-                <div className="text-xs text-slate-400 mt-1">Inspiration from world traditions</div>
+                <div className="text-3xl mb-2">🌱</div>
+                <div className="font-medium">Browse {wisdomQuotes.length} Seeds Of Thought</div>
+                <div className="text-xs text-slate-400 mt-1">Wisdom to plant in your mind</div>
               </button>
             </div>
 
@@ -4721,18 +4721,18 @@ export default function App() {
               </button>
             </div>
 
-            {/* Breathwork Section */}
+            {/* Breath Of Fresh Air Section */}
             <div className="bg-white/5 rounded-2xl p-5 mb-4 border border-white/10">
               <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                🌬️ Breathwork Patterns
+                🌬️ Breath Of Fresh Air
               </h3>
               <button
                 onClick={() => setShowBreathworkBrowser(true)}
                 className="w-full bg-gradient-to-r from-teal-500/20 to-cyan-500/20 border border-teal-500/30 rounded-xl p-4 hover:from-teal-500/30 hover:to-cyan-500/30 transition"
               >
-                <div className="text-3xl mb-2">🧘</div>
+                <div className="text-3xl mb-2">🌬️</div>
                 <div className="font-medium">Browse {breathworkPatterns.length} Breathing Patterns</div>
-                <div className="text-xs text-slate-400 mt-1">1-minute zen for stress relief</div>
+                <div className="text-xs text-slate-400 mt-1">1-minute calm for body & mind</div>
               </button>
             </div>
 
