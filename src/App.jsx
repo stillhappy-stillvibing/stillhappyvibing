@@ -2598,209 +2598,36 @@ function WorldExerciseCarousel({ topExercises }) {
   );
 }
 
-// The World Tab Component - Global happiness data only
+// The World Tab Component - Coming Soon
 function TheWorldTab() {
-  const [globalSources, setGlobalSources] = useState({});
-  const [globalFavoriteQuotes, setGlobalFavoriteQuotes] = useState({});
-  const [globalFavoriteExercises, setGlobalFavoriteExercises] = useState({});
-  const [globalFavoriteCBT, setGlobalFavoriteCBT] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [showWorldShare, setShowWorldShare] = useState(false);
-
-  useEffect(() => {
-    const unsubscribe = onValue(globalHappinessSourcesRef, (snapshot) => {
-      const data = snapshot.val() || {};
-      setGlobalSources(data);
-      setLoading(false);
-    }, (error) => {
-      console.log('Firebase read error:', error);
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  // Fetch global favorite quotes
-  useEffect(() => {
-    const unsubscribe = onValue(globalFavoriteQuotesRef, (snapshot) => {
-      const data = snapshot.val() || {};
-      setGlobalFavoriteQuotes(data);
-    }, (error) => {
-      console.log('Firebase read error (quotes):', error);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  // Fetch global favorite exercises
-  useEffect(() => {
-    const unsubscribe = onValue(globalFavoriteExercisesRef, (snapshot) => {
-      const data = snapshot.val() || {};
-      setGlobalFavoriteExercises(data);
-    }, (error) => {
-      console.log('Firebase read error (exercises):', error);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  // Fetch global favorite CBT exercises
-  useEffect(() => {
-    const unsubscribe = onValue(globalFavoriteCBTRef, (snapshot) => {
-      const data = snapshot.val() || {};
-      setGlobalFavoriteCBT(data);
-    }, (error) => {
-      console.log('Firebase read error (CBT exercises):', error);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  const formatNumber = (num) => num.toLocaleString();
-
-  // Sort global sources by count
-  const sortedGlobal = Object.entries(globalSources)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 10);
-
-  const maxGlobal = sortedGlobal.length > 0 ? sortedGlobal[0][1] : 1;
-  const totalSmiles = Object.values(globalSources).reduce((a, b) => a + b, 0);
-
-  // Sort all favorite quotes by count (most favorited first)
-  const topQuotes = Object.entries(globalFavoriteQuotes)
-    .sort((a, b) => b[1] - a[1])
-    .map(([index, count]) => ({
-      index: parseInt(index),
-      count,
-      quote: wisdomQuotes[parseInt(index)]
-    }))
-    .filter(item => item.quote); // Filter out any invalid indices
-
-  // Sort all favorite exercises by count (most favorited first)
-  const allExercises = exercises;
-  const topExercises = Object.entries(globalFavoriteExercises)
-    .sort((a, b) => b[1] - a[1])
-    .map(([index, count]) => ({
-      index: parseInt(index),
-      count,
-      exercise: allExercises[parseInt(index)]
-    }))
-    .filter(item => item.exercise); // Filter out any invalid indices
-
-  // Sort all favorite CBT exercises by count (most favorited first)
-  const topCBTExercises = Object.entries(globalFavoriteCBT)
-    .sort((a, b) => b[1] - a[1])
-    .map(([index, count]) => ({
-      index: parseInt(index),
-      count,
-      exercise: cbtExercises[parseInt(index)]
-    }))
-    .filter(item => item.exercise); // Filter out any invalid indices
-
-  // Calculate earned global milestones
-  const earnedMilestones = globalMilestones.filter(m => totalSmiles >= m.threshold);
-  const nextMilestone = globalMilestones.find(m => totalSmiles < m.threshold);
-
   return (
-    <>
-      {/* Global Stats Header */}
-      <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 backdrop-blur rounded-2xl p-5 mb-4 border border-purple-500/20 text-center">
-        <div className="text-4xl mb-2">🌍</div>
-        <h2 className="text-xl font-bold mb-1">The World is Smiling</h2>
-        <p className="text-3xl font-bold text-purple-300">{formatNumber(totalSmiles)}</p>
-        <p className="text-sm text-slate-400 mb-1">smiles shared globally</p>
-        <p className="text-xs text-purple-300/80 italic mb-3">Smile, and the whole world smiles with you!</p>
-
-        <button
-          onClick={() => setShowWorldShare(true)}
-          className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30 text-purple-300 text-sm font-medium hover:from-purple-500/30 hover:to-pink-500/30 transition flex items-center justify-center gap-2 mx-auto"
-        >
-          📸 Share the joy
-        </button>
-
-        {nextMilestone && (
-          <div className="mt-3 pt-3 border-t border-white/10">
-            <p className="text-xs text-slate-400">
-              {formatNumber(nextMilestone.threshold - totalSmiles)} more to reach {nextMilestone.icon} {nextMilestone.label}!
-            </p>
-            <div className="mt-2 h-2 bg-white/10 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-gradient-to-r from-purple-400 to-pink-500 rounded-full transition-all"
-                style={{ width: `${(totalSmiles / nextMilestone.threshold) * 100}%` }}
-              />
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Global Happiness Sources */}
-      <div className="bg-white/5 backdrop-blur rounded-2xl p-4 mb-4 border border-white/10">
-        <h3 className="font-semibold mb-4 flex items-center gap-2">✨ What's Making the World Happy</h3>
-        {loading ? (
-          <div className="space-y-3 animate-pulse">
-            {[1,2,3,4,5].map(i => (
-              <div key={i} className="h-6 bg-white/10 rounded"></div>
-            ))}
-          </div>
-        ) : sortedGlobal.length === 0 ? (
-          <div className="text-center py-8 text-slate-400">
-            <p className="text-3xl mb-2">🌱</p>
-            <p>Be the first to share what makes you happy!</p>
-            <p className="text-sm">Your check-in will appear here</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {sortedGlobal.map(([source, count], index) => (
-              <div key={source} className="flex items-center gap-2">
-                <span className="text-lg w-6">{index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : ''}</span>
-                <span className="text-sm w-28 truncate">{sourceLabels[source] || source}</span>
-                <div className="flex-1 h-5 bg-white/10 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-gradient-to-r from-purple-400 to-pink-500 rounded-full transition-all"
-                    style={{ width: `${(count / maxGlobal) * 100}%` }}
-                  />
-                </div>
-                <span className="text-xs text-purple-300 w-14 text-right">{formatNumber(count)}</span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Global Milestones */}
-      <div className="bg-white/5 backdrop-blur rounded-2xl p-4 border border-white/10">
-        <h3 className="font-semibold mb-3 flex items-center justify-center gap-2 text-sm">
-          🏆 Global Milestones
-          <span className="font-normal text-slate-400">
-            ({earnedMilestones.length}/{globalMilestones.length})
-          </span>
-        </h3>
-        <div className="flex flex-wrap gap-2 justify-center">
-          {globalMilestones.map(m => {
-            const earned = totalSmiles >= m.threshold;
-            return (
-              <div key={m.threshold} className={`flex flex-col items-center p-2 rounded-lg transition ${earned ? 'bg-purple-400/20' : 'bg-white/5 opacity-40'}`}>
-                <span className="text-xl">{m.icon}</span>
-                <span className="text-[8px] mt-1">{m.label}</span>
-              </div>
-            );
-          })}
+    <div className="flex flex-col items-center justify-center py-20">
+      <div className="relative mb-8">
+        {/* Rotating Earth */}
+        <div className="text-[120px] animate-spin-slow">
+          🌍
         </div>
       </div>
+      <h2 className="text-2xl font-bold mb-2">Coming Soon</h2>
+      <p className="text-slate-400 text-center max-w-md">
+        We're building something special to connect joy across the world
+      </p>
 
-      {/* Share World Stats Modal */}
-      <ShareImageCard
-        isOpen={showWorldShare}
-        onClose={() => setShowWorldShare(false)}
-        type="world"
-        data={{
-          totalSmiles,
-          topSources: sortedGlobal.slice(0, 3),
-          earnedMilestones: earnedMilestones.length,
-          totalMilestones: globalMilestones.length
-        }}
-      />
-    </>
+      {/* Add the animation to the page */}
+      <style>{`
+        @keyframes spin-slow {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
+        }
+        .animate-spin-slow {
+          animation: spin-slow 20s linear infinite;
+        }
+      `}</style>
+    </div>
   );
 }
 
@@ -4518,14 +4345,12 @@ export default function App() {
             <button onClick={() => setShowSettingsModal(true)} className="text-slate-400 hover:text-white text-xl">⚙️</button>
           </div>
           <p className="text-slate-400 text-xs mb-2">Plant joy, watch it bloom, share it with the world</p>
-          <span className="inline-block px-4 py-1 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-900 font-bold rounded-full text-sm">🎉 {CURRENT_YEAR} 🎉</span>
         </header>
 
         {/* Tab Navigation */}
         <div className="flex bg-white/5 rounded-xl p-1 mb-4">
           {[
             { id: 'timer', label: '😊 Home' },
-            { id: 'tools', label: '🧘 Tools' },
             { id: 'world', label: '🌍 World' },
           ].map(tab => (
             <button
@@ -4699,51 +4524,6 @@ export default function App() {
                   </>
                 )}
               </div>
-              
-              {/* What Makes YOU Happy - Visual Reminder */}
-              {checkins.length > 0 && (
-                <div className="mb-4 pt-4 border-t border-white/10">
-                  <p className="text-xs text-slate-400 uppercase tracking-wider text-center mb-3">What Makes You Happy</p>
-                  <div className="space-y-2">
-                    {(() => {
-                      const counts = checkins.reduce((acc, c) => {
-                        // Handle both old (source) and new (sources) format
-                        const sourcesArray = c.sources || (c.source ? [c.source] : []);
-                        sourcesArray.forEach(source => {
-                          if (source) acc[source] = (acc[source] || 0) + 1;
-                        });
-                        return acc;
-                      }, {});
-                      const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 4);
-                      const maxCount = sorted.length > 0 ? sorted[0][1] : 1;
-                      
-                      return sorted.map(([source, count]) => (
-                        <div key={source} className="flex items-center gap-2">
-                          <span className="text-sm w-28 truncate">{sourceLabels[source] || source}</span>
-                          <div className="flex-1 h-4 bg-white/5 rounded-full overflow-hidden">
-                            <div 
-                              className="h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full"
-                              style={{ width: `${(count / maxCount) * 100}%` }}
-                            />
-                          </div>
-                          <span className="text-xs text-slate-400 w-5 text-right">{count}</span>
-                        </div>
-                      ));
-                    })()}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Quick Actions - Hidden for simplification */}
-            <div className="mt-2 grid grid-cols-1 gap-2">
-              <button
-                onClick={() => setShowWeeklyReflection(true)}
-                className="bg-white/5 border border-white/10 rounded-xl p-3 flex flex-col items-center gap-1 hover:bg-white/10 transition"
-              >
-                <span className="text-xl">📊</span>
-                <span className="text-xs font-medium">Share Weekly Update</span>
-              </button>
             </div>
 
             {/* Your Badges */}
