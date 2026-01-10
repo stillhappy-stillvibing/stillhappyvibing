@@ -2604,6 +2604,7 @@ function TheWorldTab() {
   const [sparkCount, setSparkCount] = useState(0);
   const [showGiveMessage, setShowGiveMessage] = useState(false);
   const [isTouching, setIsTouching] = useState(false);
+  const [touchPosition, setTouchPosition] = useState({ x: 50, y: 50 });
   const imageRef = useRef(null);
   const continuousSparkInterval = useRef(null);
 
@@ -2661,6 +2662,9 @@ function TheWorldTab() {
           const centerX = ((touch1.clientX + touch2.clientX) / 2 - rect.left) / rect.width * 100;
           const centerY = ((touch1.clientY + touch2.clientY) / 2 - rect.top) / rect.height * 100;
 
+          // Store touch position for ripple circles
+          setTouchPosition({ x: centerX, y: centerY });
+
           // Add initial spark
           addSpark(centerX, centerY, true);
           setShowGiveMessage(true);
@@ -2711,7 +2715,13 @@ function TheWorldTab() {
       {/* Header */}
       <div className="text-center mb-8 max-w-2xl">
         <h2 className="text-2xl font-bold mb-3">🌊 Ripples of Joy</h2>
-        <p className="text-amber-300 text-lg leading-relaxed mb-4">
+        <p className="text-slate-300 text-base leading-relaxed mb-2">
+          Give and you shall receive.
+        </p>
+        <p className="text-slate-400 text-sm mb-3">
+          Smile, and the whole world smiles with you.
+        </p>
+        <p className="text-amber-300 text-lg leading-relaxed">
           Smile because someone in the world has sparked joy!
         </p>
       </div>
@@ -2728,6 +2738,48 @@ function TheWorldTab() {
             className="w-full h-auto"
             style={{ minHeight: '300px', maxHeight: '500px', objectFit: 'contain' }}
           />
+
+          {/* Concentric Ripple Circles - shown when touching */}
+          {isTouching && (
+            <div className="absolute inset-0 pointer-events-none">
+              <div
+                className="absolute animate-ripple-1"
+                style={{
+                  left: `${touchPosition.x}%`,
+                  top: `${touchPosition.y}%`,
+                  transform: 'translate(-50%, -50%)',
+                  width: '40px',
+                  height: '40px',
+                  border: '2px solid rgba(251, 191, 36, 0.6)',
+                  borderRadius: '50%'
+                }}
+              />
+              <div
+                className="absolute animate-ripple-2"
+                style={{
+                  left: `${touchPosition.x}%`,
+                  top: `${touchPosition.y}%`,
+                  transform: 'translate(-50%, -50%)',
+                  width: '40px',
+                  height: '40px',
+                  border: '2px solid rgba(251, 191, 36, 0.5)',
+                  borderRadius: '50%'
+                }}
+              />
+              <div
+                className="absolute animate-ripple-3"
+                style={{
+                  left: `${touchPosition.x}%`,
+                  top: `${touchPosition.y}%`,
+                  transform: 'translate(-50%, -50%)',
+                  width: '40px',
+                  height: '40px',
+                  border: '2px solid rgba(251, 191, 36, 0.4)',
+                  borderRadius: '50%'
+                }}
+              />
+            </div>
+          )}
 
           {/* Sparks overlay */}
           <div className="absolute inset-0 pointer-events-none">
@@ -2750,7 +2802,7 @@ function TheWorldTab() {
 
           {/* Give Message Overlay */}
           {showGiveMessage && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+            <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm pointer-events-none">
               <div className="text-center">
                 <div className="text-6xl mb-3 animate-pulse">🌊</div>
                 <p className="text-yellow-300 text-xl font-semibold">Creating ripples of joy...</p>
@@ -2812,6 +2864,29 @@ function TheWorldTab() {
         }
         .animate-fade-in {
           animation: fade-in 1s ease-in;
+        }
+        @keyframes ripple {
+          0% {
+            width: 40px;
+            height: 40px;
+            opacity: 1;
+          }
+          100% {
+            width: 200px;
+            height: 200px;
+            opacity: 0;
+          }
+        }
+        .animate-ripple-1 {
+          animation: ripple 2s ease-out infinite;
+        }
+        .animate-ripple-2 {
+          animation: ripple 2s ease-out infinite;
+          animation-delay: 0.4s;
+        }
+        .animate-ripple-3 {
+          animation: ripple 2s ease-out infinite;
+          animation-delay: 0.8s;
         }
       `}</style>
     </div>
