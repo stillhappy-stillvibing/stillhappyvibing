@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '4.13.4';
+const APP_VERSION = '4.13.5';
 const BUILD_DATE = '2026-01-10';
 
 // Gamification: Point Values
@@ -2052,8 +2052,14 @@ function ExerciseBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
 
               <div className="flex gap-3 mb-4">
                 <button
+                  onClick={handleSkip}
+                  className="flex-1 py-3 bg-gradient-to-r from-purple-400 to-pink-400 hover:from-purple-500 hover:to-pink-500 text-slate-900 rounded-xl font-semibold transition"
+                >
+                  🔀 Next Exercise
+                </button>
+                <button
                   onClick={onClose}
-                  className="flex-1 py-3 bg-white/10 hover:bg-white/20 rounded-xl font-semibold transition text-sm"
+                  className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-xl font-semibold transition text-sm"
                 >
                   ✕ Close
                 </button>
