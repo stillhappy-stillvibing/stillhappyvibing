@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '5.2.0';
+const APP_VERSION = '5.3.0';
 const BUILD_DATE = '2026-01-11';
 
 // Gamification: Point Values
@@ -2188,14 +2188,14 @@ function CBTBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
     <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50 overflow-y-auto" onClick={onClose}>
       <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-lg w-full p-6 border border-blue-400/20 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-xl font-bold flex items-center gap-2">💙 CBT Tools</h2>
+          <h2 className="text-xl font-bold flex items-center gap-2">🧠 Tools Of Thought</h2>
           <button onClick={onClose} className="text-slate-400 hover:text-white text-xl">✕</button>
         </div>
 
         <div className="mb-4">
           <div className="bg-blue-400/10 border-blue-400/30 border rounded-xl p-4 mb-6">
             <h3 className="text-blue-400 font-semibold text-lg mb-1">
-              💙 {currentExercise.title}
+              🧠 {currentExercise.title}
             </h3>
             <p className="text-slate-400 text-sm mb-3">{currentExercise.subtitle}</p>
             {currentExercise.description && (
@@ -2598,209 +2598,36 @@ function WorldExerciseCarousel({ topExercises }) {
   );
 }
 
-// The World Tab Component - Global happiness data only
+// The World Tab Component - Coming Soon
 function TheWorldTab() {
-  const [globalSources, setGlobalSources] = useState({});
-  const [globalFavoriteQuotes, setGlobalFavoriteQuotes] = useState({});
-  const [globalFavoriteExercises, setGlobalFavoriteExercises] = useState({});
-  const [globalFavoriteCBT, setGlobalFavoriteCBT] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [showWorldShare, setShowWorldShare] = useState(false);
-
-  useEffect(() => {
-    const unsubscribe = onValue(globalHappinessSourcesRef, (snapshot) => {
-      const data = snapshot.val() || {};
-      setGlobalSources(data);
-      setLoading(false);
-    }, (error) => {
-      console.log('Firebase read error:', error);
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  // Fetch global favorite quotes
-  useEffect(() => {
-    const unsubscribe = onValue(globalFavoriteQuotesRef, (snapshot) => {
-      const data = snapshot.val() || {};
-      setGlobalFavoriteQuotes(data);
-    }, (error) => {
-      console.log('Firebase read error (quotes):', error);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  // Fetch global favorite exercises
-  useEffect(() => {
-    const unsubscribe = onValue(globalFavoriteExercisesRef, (snapshot) => {
-      const data = snapshot.val() || {};
-      setGlobalFavoriteExercises(data);
-    }, (error) => {
-      console.log('Firebase read error (exercises):', error);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  // Fetch global favorite CBT exercises
-  useEffect(() => {
-    const unsubscribe = onValue(globalFavoriteCBTRef, (snapshot) => {
-      const data = snapshot.val() || {};
-      setGlobalFavoriteCBT(data);
-    }, (error) => {
-      console.log('Firebase read error (CBT exercises):', error);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  const formatNumber = (num) => num.toLocaleString();
-
-  // Sort global sources by count
-  const sortedGlobal = Object.entries(globalSources)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 10);
-
-  const maxGlobal = sortedGlobal.length > 0 ? sortedGlobal[0][1] : 1;
-  const totalSmiles = Object.values(globalSources).reduce((a, b) => a + b, 0);
-
-  // Sort all favorite quotes by count (most favorited first)
-  const topQuotes = Object.entries(globalFavoriteQuotes)
-    .sort((a, b) => b[1] - a[1])
-    .map(([index, count]) => ({
-      index: parseInt(index),
-      count,
-      quote: wisdomQuotes[parseInt(index)]
-    }))
-    .filter(item => item.quote); // Filter out any invalid indices
-
-  // Sort all favorite exercises by count (most favorited first)
-  const allExercises = exercises;
-  const topExercises = Object.entries(globalFavoriteExercises)
-    .sort((a, b) => b[1] - a[1])
-    .map(([index, count]) => ({
-      index: parseInt(index),
-      count,
-      exercise: allExercises[parseInt(index)]
-    }))
-    .filter(item => item.exercise); // Filter out any invalid indices
-
-  // Sort all favorite CBT exercises by count (most favorited first)
-  const topCBTExercises = Object.entries(globalFavoriteCBT)
-    .sort((a, b) => b[1] - a[1])
-    .map(([index, count]) => ({
-      index: parseInt(index),
-      count,
-      exercise: cbtExercises[parseInt(index)]
-    }))
-    .filter(item => item.exercise); // Filter out any invalid indices
-
-  // Calculate earned global milestones
-  const earnedMilestones = globalMilestones.filter(m => totalSmiles >= m.threshold);
-  const nextMilestone = globalMilestones.find(m => totalSmiles < m.threshold);
-
   return (
-    <>
-      {/* Global Stats Header */}
-      <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 backdrop-blur rounded-2xl p-5 mb-4 border border-purple-500/20 text-center">
-        <div className="text-4xl mb-2">🌍</div>
-        <h2 className="text-xl font-bold mb-1">The World is Smiling</h2>
-        <p className="text-3xl font-bold text-purple-300">{formatNumber(totalSmiles)}</p>
-        <p className="text-sm text-slate-400 mb-1">smiles shared globally</p>
-        <p className="text-xs text-purple-300/80 italic mb-3">Smile, and the whole world smiles with you!</p>
-
-        <button
-          onClick={() => setShowWorldShare(true)}
-          className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30 text-purple-300 text-sm font-medium hover:from-purple-500/30 hover:to-pink-500/30 transition flex items-center justify-center gap-2 mx-auto"
-        >
-          📸 Share the joy
-        </button>
-
-        {nextMilestone && (
-          <div className="mt-3 pt-3 border-t border-white/10">
-            <p className="text-xs text-slate-400">
-              {formatNumber(nextMilestone.threshold - totalSmiles)} more to reach {nextMilestone.icon} {nextMilestone.label}!
-            </p>
-            <div className="mt-2 h-2 bg-white/10 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-gradient-to-r from-purple-400 to-pink-500 rounded-full transition-all"
-                style={{ width: `${(totalSmiles / nextMilestone.threshold) * 100}%` }}
-              />
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Global Happiness Sources */}
-      <div className="bg-white/5 backdrop-blur rounded-2xl p-4 mb-4 border border-white/10">
-        <h3 className="font-semibold mb-4 flex items-center gap-2">✨ What's Making the World Happy</h3>
-        {loading ? (
-          <div className="space-y-3 animate-pulse">
-            {[1,2,3,4,5].map(i => (
-              <div key={i} className="h-6 bg-white/10 rounded"></div>
-            ))}
-          </div>
-        ) : sortedGlobal.length === 0 ? (
-          <div className="text-center py-8 text-slate-400">
-            <p className="text-3xl mb-2">🌱</p>
-            <p>Be the first to share what makes you happy!</p>
-            <p className="text-sm">Your check-in will appear here</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {sortedGlobal.map(([source, count], index) => (
-              <div key={source} className="flex items-center gap-2">
-                <span className="text-lg w-6">{index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : ''}</span>
-                <span className="text-sm w-28 truncate">{sourceLabels[source] || source}</span>
-                <div className="flex-1 h-5 bg-white/10 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-gradient-to-r from-purple-400 to-pink-500 rounded-full transition-all"
-                    style={{ width: `${(count / maxGlobal) * 100}%` }}
-                  />
-                </div>
-                <span className="text-xs text-purple-300 w-14 text-right">{formatNumber(count)}</span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Global Milestones */}
-      <div className="bg-white/5 backdrop-blur rounded-2xl p-4 border border-white/10">
-        <h3 className="font-semibold mb-3 flex items-center justify-center gap-2 text-sm">
-          🏆 Global Milestones
-          <span className="font-normal text-slate-400">
-            ({earnedMilestones.length}/{globalMilestones.length})
-          </span>
-        </h3>
-        <div className="flex flex-wrap gap-2 justify-center">
-          {globalMilestones.map(m => {
-            const earned = totalSmiles >= m.threshold;
-            return (
-              <div key={m.threshold} className={`flex flex-col items-center p-2 rounded-lg transition ${earned ? 'bg-purple-400/20' : 'bg-white/5 opacity-40'}`}>
-                <span className="text-xl">{m.icon}</span>
-                <span className="text-[8px] mt-1">{m.label}</span>
-              </div>
-            );
-          })}
+    <div className="flex flex-col items-center justify-center py-20">
+      <div className="relative mb-8">
+        {/* Rotating Earth */}
+        <div className="text-[120px] animate-spin-slow">
+          🌍
         </div>
       </div>
+      <h2 className="text-2xl font-bold mb-2">Coming Soon</h2>
+      <p className="text-slate-400 text-center max-w-md">
+        We're building something special to connect joy across the world
+      </p>
 
-      {/* Share World Stats Modal */}
-      <ShareImageCard
-        isOpen={showWorldShare}
-        onClose={() => setShowWorldShare(false)}
-        type="world"
-        data={{
-          totalSmiles,
-          topSources: sortedGlobal.slice(0, 3),
-          earnedMilestones: earnedMilestones.length,
-          totalMilestones: globalMilestones.length
-        }}
-      />
-    </>
+      {/* Add the animation to the page */}
+      <style>{`
+        @keyframes spin-slow {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
+        }
+        .animate-spin-slow {
+          animation: spin-slow 20s linear infinite;
+        }
+      `}</style>
+    </div>
   );
 }
 
@@ -4478,6 +4305,28 @@ export default function App() {
     localStorage.setItem('lastRecoveryCheckDay', today);
   }, [checkins]); // Run when checkins change (new check-in triggers day check)
 
+  // Auto-check-in on site visit
+  useEffect(() => {
+    const today = getDayKey(new Date());
+    const hasCheckedInToday = checkins.some(c => getDayKey(c.timestamp) === today);
+
+    // Only auto-check-in if user hasn't checked in today
+    if (!hasCheckedInToday && checkins.length >= 0) {
+      // Create a simple auto check-in (silent, no points/confetti)
+      const autoCheckin = {
+        id: Date.now(),
+        sources: ['peace'], // simple default source
+        quote: null,
+        timestamp: new Date().toISOString(),
+        auto: true // mark as auto so we can track it
+      };
+
+      setCheckins(prev => [...prev, autoCheckin]);
+      incrementCheckins();
+      incrementHappinessSource('peace');
+    }
+  }, []); // Run once on mount
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white p-4">
       {/* Version Update Notification */}
@@ -4496,14 +4345,12 @@ export default function App() {
             <button onClick={() => setShowSettingsModal(true)} className="text-slate-400 hover:text-white text-xl">⚙️</button>
           </div>
           <p className="text-slate-400 text-xs mb-2">Plant joy, watch it bloom, share it with the world</p>
-          <span className="inline-block px-4 py-1 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-900 font-bold rounded-full text-sm">🎉 {CURRENT_YEAR} 🎉</span>
         </header>
 
         {/* Tab Navigation */}
         <div className="flex bg-white/5 rounded-xl p-1 mb-4">
           {[
             { id: 'timer', label: '😊 Home' },
-            { id: 'tools', label: '🧘 Tools' },
             { id: 'world', label: '🌍 World' },
           ].map(tab => (
             <button
@@ -4524,36 +4371,106 @@ export default function App() {
               <GlobalCounter />
             </div>
 
-            {/* Inline Check-In - Primary Focus */}
-            {recoveryActive ? (
-              <RecoveryQuest
-                brokenStreak={brokenStreak}
-                progress={recoveryProgress}
-                activeQuest={recoveryQuest}
-                onSelectQuest={(quest) => setRecoveryQuest(quest)}
-                onSkip={() => {
-                  setRecoveryActive(false);
-                  setRecoveryQuest(null);
-                  setBrokenStreak(0);
-                  const today = getDayKey(new Date());
-                  localStorage.setItem(`recoveryUsed_${today}`, 'true');
-                  setRecoveryUsedToday(true);
+            {/* Tools Grid - Main Navigation */}
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              {/* Seeds Of Thought */}
+              <button
+                onClick={() => setShowQuoteBrowser(true)}
+                className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl p-5 hover:from-purple-500/30 hover:to-pink-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
+              >
+                <div className="text-4xl">🌱</div>
+                <div className="font-semibold text-sm">Seeds Of Thought</div>
+                <div className="text-xs text-slate-400 text-center">Wisdom to plant</div>
+              </button>
+
+              {/* Sparks Of Joy */}
+              <button
+                onClick={() => setShowExerciseBrowser(true)}
+                className="bg-gradient-to-br from-orange-500/20 to-yellow-500/20 border border-orange-500/30 rounded-xl p-5 hover:from-orange-500/30 hover:to-yellow-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
+              >
+                <div className="text-4xl">✨</div>
+                <div className="font-semibold text-sm">Sparks Of Joy</div>
+                <div className="text-xs text-slate-400 text-center">Mental Dojo</div>
+              </button>
+
+              {/* Breath Of Fresh Air */}
+              <button
+                onClick={() => setShowBreathworkBrowser(true)}
+                className="bg-gradient-to-br from-teal-500/20 to-cyan-500/20 border border-teal-500/30 rounded-xl p-5 hover:from-teal-500/30 hover:to-cyan-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
+              >
+                <div className="text-4xl">🌬️</div>
+                <div className="font-semibold text-sm">Breath Of Fresh Air</div>
+                <div className="text-xs text-slate-400 text-center">1-minute calm</div>
+              </button>
+
+              {/* Tools Of Thought */}
+              <button
+                onClick={() => setShowCBTBrowser(true)}
+                className="bg-gradient-to-br from-blue-500/20 to-indigo-500/20 border border-blue-500/30 rounded-xl p-5 hover:from-blue-500/30 hover:to-indigo-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
+              >
+                <div className="text-4xl">🧠</div>
+                <div className="font-semibold text-sm">Tools Of Thought</div>
+                <div className="text-xs text-slate-400 text-center">Mindset shifts</div>
+              </button>
+
+              {/* Share A Smile */}
+              <button
+                onClick={() => setShowShareSmile(true)}
+                className="bg-gradient-to-br from-amber-500/20 to-pink-500/20 border border-amber-500/30 rounded-xl p-5 hover:from-amber-500/30 hover:to-pink-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
+              >
+                <div className="text-4xl">💛</div>
+                <div className="font-semibold text-sm">Share A Smile</div>
+                <div className="text-xs text-slate-400 text-center">Send joy</div>
+              </button>
+
+              {/* Ripples Of Joy - Coming Soon */}
+              <button
+                onClick={() => {
+                  setToastMessage('Coming soon! 🌊');
+                  setToastEmoji('🌊');
+                  setShowToast(true);
                 }}
-              />
-            ) : showPowerBoost ? (
-              <PowerBoost
-                onSkip={handlePowerBoostSkip}
-                onSelectTool={handlePowerBoostSelect}
-              />
-            ) : cooldownRemaining > 0 ? (
-              <div className="bg-white/5 backdrop-blur rounded-2xl p-6 mb-4 border border-white/10 text-center">
-                <p className="text-slate-400 text-sm mb-2">Taking a happiness break...</p>
-                <p className="text-2xl font-bold text-purple-400">{Math.ceil(cooldownRemaining / 1000)}s</p>
-                <p className="text-xs text-slate-500 mt-2">Next check-in available soon</p>
-              </div>
-            ) : (
-              <InlineCheckin onSave={handleCheckinSave} />
-            )}
+                className="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 rounded-xl p-5 transition hover:scale-105 flex flex-col items-center gap-2 relative"
+              >
+                <div className="text-4xl opacity-50">🌊</div>
+                <div className="font-semibold text-sm text-slate-400">Ripples Of Joy</div>
+                <div className="text-xs text-slate-500 text-center">Coming soon</div>
+                <div className="absolute top-2 right-2 text-xs bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded-full">Soon</div>
+              </button>
+            </div>
+
+            {/* Hidden: Inline Check-In - kept for backend logic */}
+            <div style={{ display: 'none' }}>
+              {recoveryActive ? (
+                <RecoveryQuest
+                  brokenStreak={brokenStreak}
+                  progress={recoveryProgress}
+                  activeQuest={recoveryQuest}
+                  onSelectQuest={(quest) => setRecoveryQuest(quest)}
+                  onSkip={() => {
+                    setRecoveryActive(false);
+                    setRecoveryQuest(null);
+                    setBrokenStreak(0);
+                    const today = getDayKey(new Date());
+                    localStorage.setItem(`recoveryUsed_${today}`, 'true');
+                    setRecoveryUsedToday(true);
+                  }}
+                />
+              ) : showPowerBoost ? (
+                <PowerBoost
+                  onSkip={handlePowerBoostSkip}
+                  onSelectTool={handlePowerBoostSelect}
+                />
+              ) : cooldownRemaining > 0 ? (
+                <div className="bg-white/5 backdrop-blur rounded-2xl p-6 mb-4 border border-white/10 text-center">
+                  <p className="text-slate-400 text-sm mb-2">Taking a happiness break...</p>
+                  <p className="text-2xl font-bold text-purple-400">{Math.ceil(cooldownRemaining / 1000)}s</p>
+                  <p className="text-xs text-slate-500 mt-2">Next check-in available soon</p>
+                </div>
+              ) : (
+                <InlineCheckin onSave={handleCheckinSave} />
+              )}
+            </div>
             
             <div className="bg-white/5 backdrop-blur rounded-2xl p-5 mb-4 border border-white/10 relative overflow-hidden">
               {/* Points Animation */}
@@ -4607,68 +4524,6 @@ export default function App() {
                   </>
                 )}
               </div>
-              
-              {/* What Makes YOU Happy - Visual Reminder */}
-              {checkins.length > 0 && (
-                <div className="mb-4 pt-4 border-t border-white/10">
-                  <p className="text-xs text-slate-400 uppercase tracking-wider text-center mb-3">What Makes You Happy</p>
-                  <div className="space-y-2">
-                    {(() => {
-                      const counts = checkins.reduce((acc, c) => {
-                        // Handle both old (source) and new (sources) format
-                        const sourcesArray = c.sources || (c.source ? [c.source] : []);
-                        sourcesArray.forEach(source => {
-                          if (source) acc[source] = (acc[source] || 0) + 1;
-                        });
-                        return acc;
-                      }, {});
-                      const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 4);
-                      const maxCount = sorted.length > 0 ? sorted[0][1] : 1;
-                      
-                      return sorted.map(([source, count]) => (
-                        <div key={source} className="flex items-center gap-2">
-                          <span className="text-sm w-28 truncate">{sourceLabels[source] || source}</span>
-                          <div className="flex-1 h-4 bg-white/5 rounded-full overflow-hidden">
-                            <div 
-                              className="h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full"
-                              style={{ width: `${(count / maxCount) * 100}%` }}
-                            />
-                          </div>
-                          <span className="text-xs text-slate-400 w-5 text-right">{count}</span>
-                        </div>
-                      ));
-                    })()}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Quick Actions */}
-            <div className="mt-3 grid grid-cols-1 gap-2">
-              <button
-                onClick={() => setShowShareSmile(true)}
-                className="bg-gradient-to-r from-amber-500/20 to-pink-500/20 border border-amber-500/30 rounded-xl p-4 flex flex-col items-center gap-2 hover:from-amber-500/30 hover:to-pink-500/30 transition"
-              >
-                <span className="text-2xl">💛</span>
-                <span className="text-sm font-medium">Share A Smile</span>
-                <span className="text-xs text-slate-400">Send someone a heartfelt message</span>
-              </button>
-            </div>
-            <div className="mt-2 grid grid-cols-2 gap-2">
-              <button
-                onClick={() => setShowChallengeModal(true)}
-                className="bg-white/5 border border-white/10 rounded-xl p-3 flex flex-col items-center gap-1 hover:bg-white/10 transition"
-              >
-                <span className="text-xl">😊</span>
-                <span className="text-xs font-medium">Smile with a Friend</span>
-              </button>
-              <button
-                onClick={() => setShowWeeklyReflection(true)}
-                className="bg-white/5 border border-white/10 rounded-xl p-3 flex flex-col items-center gap-1 hover:bg-white/10 transition"
-              >
-                <span className="text-xl">📊</span>
-                <span className="text-xs font-medium">Share Weekly Update</span>
-              </button>
             </div>
 
             {/* Your Badges */}
@@ -4747,18 +4602,18 @@ export default function App() {
               </button>
             </div>
 
-            {/* CBT Tools Section */}
+            {/* Tools Of Thought Section */}
             <div className="bg-white/5 rounded-2xl p-5 mb-4 border border-white/10">
               <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                💙 When You Need a Lift
+                🧠 Tools Of Thought
               </h3>
               <button
                 onClick={() => setShowCBTBrowser(true)}
-                className="w-full bg-gradient-to-r from-blue-500/20 to-teal-500/20 border border-blue-500/30 rounded-xl p-4 hover:from-blue-500/30 hover:to-teal-500/30 transition"
+                className="w-full bg-gradient-to-r from-blue-500/20 to-indigo-500/20 border border-blue-500/30 rounded-xl p-4 hover:from-blue-500/30 hover:to-indigo-500/30 transition"
               >
-                <div className="text-3xl mb-2">💙</div>
-                <div className="font-medium">Browse {cbtExercises.length} CBT Exercises</div>
-                <div className="text-xs text-slate-400 mt-1">Tools to help you feel better</div>
+                <div className="text-3xl mb-2">🧠</div>
+                <div className="font-medium">Browse {cbtExercises.length} Mindset Exercises</div>
+                <div className="text-xs text-slate-400 mt-1">Shift your thinking, shift your world</div>
               </button>
             </div>
           </>
