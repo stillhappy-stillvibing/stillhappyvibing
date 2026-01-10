@@ -2598,33 +2598,114 @@ function WorldExerciseCarousel({ topExercises }) {
   );
 }
 
-// The World Tab Component - Coming Soon
+// The World Tab Component - Ripples of Joy
 function TheWorldTab() {
+  const [sparks, setSparks] = useState([]);
+  const [sparkCount, setSparkCount] = useState(0);
+
+  // Generate sparks at random intervals
+  useEffect(() => {
+    const addSpark = () => {
+      const newSpark = {
+        id: Date.now() + Math.random(),
+        left: Math.random() * 80 + 10, // 10-90% to keep sparks on image
+        top: Math.random() * 80 + 10,
+        delay: Math.random() * 0.5
+      };
+
+      setSparks(prev => [...prev, newSpark]);
+      setSparkCount(prev => prev + 1);
+
+      // Remove spark after animation completes
+      setTimeout(() => {
+        setSparks(prev => prev.filter(s => s.id !== newSpark.id));
+      }, 3000);
+    };
+
+    // Add sparks every 1-3 seconds
+    const interval = setInterval(() => {
+      addSpark();
+    }, 1000 + Math.random() * 2000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <div className="flex flex-col items-center justify-center py-20">
-      <div className="relative mb-8">
-        {/* Rotating Earth */}
-        <div className="text-[120px] animate-spin-slow">
-          🌍
+    <div className="flex flex-col items-center py-8 px-4">
+      {/* Header */}
+      <div className="text-center mb-8 max-w-2xl">
+        <h2 className="text-2xl font-bold mb-2">🌊 Ripples of Joy</h2>
+        <p className="text-slate-300 text-sm leading-relaxed mb-2">
+          Every moment, someone somewhere experiences a spark of joy.
+        </p>
+        <p className="text-slate-400 text-sm italic">
+          Tune into these sparks. Smile with them.
+        </p>
+      </div>
+
+      {/* Pale Blue Dot with Sparks */}
+      <div className="relative mb-8 max-w-lg w-full">
+        <div className="relative rounded-2xl overflow-hidden border-2 border-white/10 bg-black">
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/7/73/Pale_Blue_Dot.png"
+            alt="Pale Blue Dot - Earth from Voyager 1"
+            className="w-full h-auto"
+            style={{ minHeight: '300px', objectFit: 'contain' }}
+          />
+
+          {/* Sparks overlay */}
+          <div className="absolute inset-0">
+            {sparks.map(spark => (
+              <div
+                key={spark.id}
+                className="absolute animate-spark"
+                style={{
+                  left: `${spark.left}%`,
+                  top: `${spark.top}%`,
+                  animationDelay: `${spark.delay}s`
+                }}
+              >
+                <div className="text-2xl">✨</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Spark Counter */}
+        <div className="text-center mt-4">
+          <p className="text-slate-400 text-sm">
+            You've witnessed <span className="text-yellow-400 font-semibold">{sparkCount}</span> sparks of joy
+          </p>
         </div>
       </div>
-      <h2 className="text-2xl font-bold mb-2">Coming Soon</h2>
-      <p className="text-slate-400 text-center max-w-md">
-        We're building something special to connect joy across the world
-      </p>
 
-      {/* Add the animation to the page */}
+      {/* Carl Sagan Quote */}
+      <div className="bg-white/5 backdrop-blur rounded-2xl p-6 border border-white/10 max-w-2xl">
+        <p className="text-slate-300 text-sm leading-relaxed italic mb-3">
+          "Look again at that dot. That's here. That's home. That's us. On it everyone you love, everyone you know, everyone you ever heard of, every human being who ever was, lived out their lives...
+          on a mote of dust suspended in a sunbeam."
+        </p>
+        <p className="text-slate-400 text-xs text-right">— Carl Sagan</p>
+      </div>
+
+      {/* CSS Animations */}
       <style>{`
-        @keyframes spin-slow {
-          from {
-            transform: rotate(0deg);
+        @keyframes spark {
+          0% {
+            opacity: 0;
+            transform: scale(0) translateY(0);
           }
-          to {
-            transform: rotate(360deg);
+          30% {
+            opacity: 1;
+            transform: scale(1.2) translateY(-10px);
+          }
+          100% {
+            opacity: 0;
+            transform: scale(0.8) translateY(-40px);
           }
         }
-        .animate-spin-slow {
-          animation: spin-slow 20s linear infinite;
+        .animate-spark {
+          animation: spark 3s ease-out forwards;
         }
       `}</style>
     </div>
