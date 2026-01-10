@@ -2633,7 +2633,7 @@ function TheWorldTab() {
   // Earth images carousel - different views to try
   const earthImages = [
     {
-      url: 'https://upload.wikimedia.org/wikipedia/commons/7/73/Pale_Blue_Dot.png',
+      url: 'https://upload.wikimedia.org/wikipedia/commons/b/b8/Pale_Blue_Dot_-_animated.gif',
       title: 'Pale Blue Dot (Voyager 1)'
     },
     {
@@ -2645,7 +2645,7 @@ function TheWorldTab() {
       title: 'Earthrise (Apollo 8)'
     },
     {
-      url: 'https://cdn.mos.cms.futurecdn.net/v5n22xGyNNHLhYhkBQTZQP-1920-80.jpg.webp',
+      url: 'https://upload.wikimedia.org/wikipedia/commons/e/ea/Earth_from_International_Space_Station.jpg',
       title: 'Earth from ISS'
     }
   ];
