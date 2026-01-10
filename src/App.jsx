@@ -2602,17 +2602,10 @@ function WorldExerciseCarousel({ topExercises }) {
 function TheWorldTab() {
   const [sparks, setSparks] = useState([]);
   const [sparkCount, setSparkCount] = useState(0);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showGiveMessage, setShowGiveMessage] = useState(false);
-  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
+  const [isTouching, setIsTouching] = useState(false);
   const imageRef = useRef(null);
-
-  // Inspirational messages that rotate
-  const inspirationalMessages = [
-    "Smile because someone in the World is smiling!",
-    "Rejoice because someone has sparked joy in the world!",
-    "The flame of hope and happiness has been lit by another—rejoice in their joy."
-  ];
+  const continuousSparkInterval = useRef(null);
 
   // Thank you in different languages
   const thankYouMessages = [
@@ -2622,70 +2615,11 @@ function TheWorldTab() {
     'Dhanyavaad', 'Toda', 'Terima kasih', 'Cảm ơn', 'Ευχαριστώ'
   ];
 
-  // Rotate inspirational messages every 8 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentMessageIndex(prev => (prev + 1) % inspirationalMessages.length);
-    }, 8000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Earth images carousel - different views to try
-  const earthImages = [
-    {
-      url: 'https://upload.wikimedia.org/wikipedia/commons/b/b8/Pale_Blue_Dot_-_animated.gif',
-      title: 'Pale Blue Dot (Voyager 1)'
-    },
-    {
-      url: 'https://upload.wikimedia.org/wikipedia/commons/9/97/The_Earth_seen_from_Apollo_17.jpg',
-      title: 'Blue Marble (Apollo 17)'
-    },
-    {
-      url: 'https://upload.wikimedia.org/wikipedia/commons/a/aa/Earthrise_%28Apollo_8%29.jpeg',
-      title: 'Earthrise (Apollo 8)'
-    },
-    {
-      url: 'https://upload.wikimedia.org/wikipedia/commons/e/ea/Earth_from_International_Space_Station.jpg',
-      title: 'Earth from ISS'
-    }
-  ];
-
-  // Detect two-finger touch
-  useEffect(() => {
-    const handleTouchStart = (e) => {
-      if (e.touches.length === 2 && imageRef.current?.contains(e.target)) {
-        e.preventDefault();
-        // User is giving their spark!
-        const rect = imageRef.current.getBoundingClientRect();
-        const touch1 = e.touches[0];
-        const touch2 = e.touches[1];
-        const centerX = ((touch1.clientX + touch2.clientX) / 2 - rect.left) / rect.width * 100;
-        const centerY = ((touch1.clientY + touch2.clientY) / 2 - rect.top) / rect.height * 100;
-
-        addSpark(centerX, centerY, true); // true = user-created spark
-        setShowGiveMessage(true);
-        setTimeout(() => setShowGiveMessage(false), 2000);
-      }
-    };
-
-    document.addEventListener('touchstart', handleTouchStart, { passive: false });
-    return () => document.removeEventListener('touchstart', handleTouchStart);
-  }, []);
-
-  // Generate sparks at random intervals
-  useEffect(() => {
-    const interval = setInterval(() => {
-      addSpark();
-    }, 1000 + Math.random() * 2000);
-
-    return () => clearInterval(interval);
-  }, []);
-
   const addSpark = (x, y, isUserSpark = false) => {
     const newSpark = {
       id: Date.now() + Math.random(),
-      left: x || Math.random() * 80 + 10,
-      top: y || Math.random() * 80 + 10,
+      left: x !== undefined ? x : Math.random() * 80 + 10,
+      top: y !== undefined ? y : Math.random() * 80 + 10,
       delay: Math.random() * 0.5,
       message: thankYouMessages[Math.floor(Math.random() * thankYouMessages.length)],
       isUserSpark
@@ -2699,42 +2633,98 @@ function TheWorldTab() {
     }, 3000);
   };
 
-  const nextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % earthImages.length);
-  };
+  // Detect two-finger touch (ring + middle finger)
+  useEffect(() => {
+    const handleTouchStart = (e) => {
+      if (e.touches.length === 2 && imageRef.current?.contains(e.target)) {
+        e.preventDefault();
 
-  const prevImage = () => {
-    setCurrentImageIndex((prev) => (prev - 1 + earthImages.length) % earthImages.length);
-  };
+        // Check if fingers are close together (ring + middle finger)
+        const touch1 = e.touches[0];
+        const touch2 = e.touches[1];
+        const distance = Math.sqrt(
+          Math.pow(touch2.clientX - touch1.clientX, 2) +
+          Math.pow(touch2.clientY - touch1.clientY, 2)
+        );
+
+        // If fingers are reasonably close (within 100px), consider it ring+middle
+        if (distance < 100) {
+          // Haptic feedback - create ripple effect
+          if (navigator.vibrate) {
+            navigator.vibrate([50, 30, 50, 30, 50]); // Ripple pattern
+          }
+
+          setIsTouching(true);
+
+          // Calculate center position
+          const rect = imageRef.current.getBoundingClientRect();
+          const centerX = ((touch1.clientX + touch2.clientX) / 2 - rect.left) / rect.width * 100;
+          const centerY = ((touch1.clientY + touch2.clientY) / 2 - rect.top) / rect.height * 100;
+
+          // Add initial spark
+          addSpark(centerX, centerY, true);
+          setShowGiveMessage(true);
+
+          // Start continuous sparks while holding
+          continuousSparkInterval.current = setInterval(() => {
+            const offsetX = centerX + (Math.random() - 0.5) * 20;
+            const offsetY = centerY + (Math.random() - 0.5) * 20;
+            addSpark(offsetX, offsetY, true);
+          }, 300);
+        }
+      }
+    };
+
+    const handleTouchEnd = (e) => {
+      if (e.touches.length < 2) {
+        setIsTouching(false);
+        setShowGiveMessage(false);
+        if (continuousSparkInterval.current) {
+          clearInterval(continuousSparkInterval.current);
+          continuousSparkInterval.current = null;
+        }
+      }
+    };
+
+    document.addEventListener('touchstart', handleTouchStart, { passive: false });
+    document.addEventListener('touchend', handleTouchEnd, { passive: false });
+    return () => {
+      document.removeEventListener('touchstart', handleTouchStart);
+      document.removeEventListener('touchend', handleTouchEnd);
+      if (continuousSparkInterval.current) {
+        clearInterval(continuousSparkInterval.current);
+      }
+    };
+  }, []);
+
+  // Generate sparks at random intervals
+  useEffect(() => {
+    const interval = setInterval(() => {
+      addSpark();
+    }, 1000 + Math.random() * 2000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="flex flex-col items-center py-8 px-4">
       {/* Header */}
       <div className="text-center mb-8 max-w-2xl">
         <h2 className="text-2xl font-bold mb-3">🌊 Ripples of Joy</h2>
-        <p className="text-slate-300 text-base leading-relaxed mb-2">
-          Give and you shall receive.
+        <p className="text-amber-300 text-lg leading-relaxed mb-4">
+          Smile because someone in the world has sparked joy!
         </p>
-        <p className="text-slate-400 text-sm mb-3">
-          Smile, and the whole world smiles with you.
-        </p>
-        {/* Rotating inspirational message */}
-        <div className="min-h-[60px] flex items-center justify-center">
-          <p className="text-amber-300 text-sm italic leading-relaxed transition-all duration-500 animate-fade-in">
-            {inspirationalMessages[currentMessageIndex]}
-          </p>
-        </div>
       </div>
 
-      {/* Earth Image Carousel with Sparks */}
+      {/* Earth Image with Sparks */}
       <div className="relative mb-8 max-w-lg w-full">
         <div
           ref={imageRef}
           className="relative rounded-2xl overflow-hidden border-2 border-white/20 bg-black"
         >
           <img
-            src={earthImages[currentImageIndex].url}
-            alt={earthImages[currentImageIndex].title}
+            src="https://upload.wikimedia.org/wikipedia/commons/9/97/The_Earth_seen_from_Apollo_17.jpg"
+            alt="Blue Marble (Apollo 17)"
             className="w-full h-auto"
             style={{ minHeight: '300px', maxHeight: '500px', objectFit: 'contain' }}
           />
@@ -2761,40 +2751,25 @@ function TheWorldTab() {
           {/* Give Message Overlay */}
           {showGiveMessage && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-              <div className="text-center animate-pulse">
-                <div className="text-4xl mb-2">✨</div>
-                <p className="text-yellow-300 text-lg font-semibold">Your spark added!</p>
+              <div className="text-center">
+                <div className="text-6xl mb-3 animate-pulse">🌊</div>
+                <p className="text-yellow-300 text-xl font-semibold">Creating ripples of joy...</p>
+                <p className="text-slate-300 text-sm mt-2">Hold to keep the ripples flowing</p>
               </div>
             </div>
           )}
         </div>
 
-        {/* Carousel Controls */}
-        <div className="flex items-center justify-between mt-4">
-          <button
-            onClick={prevImage}
-            className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl transition"
-          >
-            ← Prev
-          </button>
-          <p className="text-slate-400 text-xs text-center">
-            {earthImages[currentImageIndex].title}
-          </p>
-          <button
-            onClick={nextImage}
-            className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl transition"
-          >
-            Next →
-          </button>
-        </div>
-
         {/* Instructions */}
         <div className="text-center mt-4 p-4 bg-white/5 rounded-xl border border-white/10">
-          <p className="text-slate-300 text-sm mb-1">
-            👆👆 Place two fingers on Earth to share your spark
+          <p className="text-slate-300 text-sm mb-2">
+            🤞 Touch Earth with your ring & middle finger together
+          </p>
+          <p className="text-slate-400 text-xs mb-1">
+            Hold to create continuous ripples of joy
           </p>
           <p className="text-slate-400 text-xs">
-            You've witnessed <span className="text-yellow-400 font-semibold">{sparkCount}</span> sparks of gratitude
+            You've witnessed <span className="text-yellow-400 font-semibold">{sparkCount}</span> sparks around the world
           </p>
         </div>
       </div>
