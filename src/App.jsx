@@ -511,6 +511,13 @@ const exercises = [
     practiceInstruction: "Close your eyes. See yourself in a moment of pure joy. Hold that vision gently, like a dream taking shape. Let it settle into your being.",
     seedThought: "You are the dreamer and the dream, planting joy one vision at a time"
   },
+  {
+    title: "Find Your Spark",
+    subtitle: "Mirror meditation",
+    steps: ["Imagine you are looking into your own eyes in a mirror", "See past the face you know", "Find the light that's always been there", "That spark? That's you", "That's joy"],
+    practiceInstruction: "Imagine you are looking into your own eyes in a mirror. See past the face you know. Find the light that's always been there. That spark? That's you. That's joy.",
+    seedThought: "That spark was always there. Now you know where to find it"
+  },
 ];
 
 // Breathwork patterns for stress relief and emotional regulation
@@ -1905,12 +1912,24 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare 
               ></div>
             </div>
 
-            <button
-              onClick={onClose}
-              className="px-6 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-sm transition"
-            >
-              ✕ Exit Dojo
-            </button>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={() => {
+                  setIsComplete(true);
+                  setShowSparks(true);
+                  setTimeout(() => setShowSparks(false), 2000);
+                }}
+                className="px-8 py-3 bg-gradient-to-r from-orange-400 to-yellow-500 hover:from-orange-500 hover:to-yellow-600 text-slate-900 rounded-xl font-bold transition hover:scale-105"
+              >
+                🔥 Light It Up!
+              </button>
+              <button
+                onClick={onClose}
+                className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-xl text-sm transition"
+              >
+                ✕ Exit
+              </button>
+            </div>
           </div>
         ) : (
           // After 30 seconds - completion with seed thought and sparks
@@ -1937,7 +1956,8 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare 
               </div>
             )}
 
-            <h3 className="text-3xl font-bold mb-8 text-orange-300">A spark of joy ignited within you.</h3>
+            <h3 className="text-3xl font-bold mb-4 text-orange-300">✨ You Found It ✨</h3>
+            <p className="text-slate-300 text-lg mb-8">That spark was always there. Now you know where to find it.</p>
 
             {/* The seed thought */}
             <div className="relative mb-12">
@@ -2036,6 +2056,14 @@ function ExerciseBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-xl font-bold flex items-center gap-2">✨ Sparks Of Joy</h2>
           <button onClick={onClose} className="text-slate-400 hover:text-white text-xl">✕</button>
+        </div>
+
+        {/* Mental Dojo Philosophy */}
+        <div className="bg-gradient-to-r from-orange-500/10 to-yellow-500/10 border border-orange-400/20 rounded-xl p-4 mb-5">
+          <p className="text-sm text-orange-200 leading-relaxed">
+            <span className="font-semibold">A spark only takes a moment to ignite.</span><br/>
+            These practices aren't long meditations - they're quick moments to rekindle the flame within you.
+          </p>
         </div>
 
         <div className="mb-4">
