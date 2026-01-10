@@ -4740,11 +4740,9 @@ export default function App() {
               </div>
             </div>
           </>
-        )}
 
-        {/* Tools For Happiness Tab */}
-        {activeTab === 'tools' && (
-          <>
+        {/* Tools For Happiness Section */}
+        <>
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold mb-2">🌱 Joy Toolkit</h2>
               <p className="text-slate-400 text-sm">Seeds of thought, sparks of joy, and breath to grow your garden</p>
@@ -4809,14 +4807,14 @@ export default function App() {
                 <div className="text-xs text-slate-400 mt-1">Shift your thinking, shift your world</div>
               </button>
             </div>
-          </>
 
-        <div className="flex items-center justify-center gap-2 text-xs text-slate-500 mt-6">
-          <span>🔒</span>
-          <span>All data stays on your device</span>
-        </div>
+          <div className="flex items-center justify-center gap-2 text-xs text-slate-500 mt-6">
+            <span>🔒</span>
+            <span>All data stays on your device</span>
+          </div>
 
-        <footer className="text-center mt-4 text-slate-500 text-xs">Made with 💛 for a happier {CURRENT_YEAR}</footer>
+          <footer className="text-center mt-4 text-slate-500 text-xs">Made with 💛 for a happier {CURRENT_YEAR}</footer>
+        </>
       </div>
 
       {/* Modals */}
