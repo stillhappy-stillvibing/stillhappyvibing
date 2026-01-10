@@ -2602,27 +2602,62 @@ function WorldExerciseCarousel({ topExercises }) {
 function TheWorldTab() {
   const [sparks, setSparks] = useState([]);
   const [sparkCount, setSparkCount] = useState(0);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [showGiveMessage, setShowGiveMessage] = useState(false);
+  const imageRef = useRef(null);
+
+  // Thank you in different languages
+  const thankYouMessages = [
+    'Thank you', 'Merci', 'Gracias', 'Danke', 'Grazie',
+    'Obrigado', 'Спасибо', 'ありがとう', '谢谢', 'شكرا',
+    'Teşekkürler', 'Tack', 'Dziękuję', '감사합니다', 'Kiitos',
+    'Dhanyavaad', 'Toda', 'Terima kasih', 'Cảm ơn', 'Ευχαριστώ'
+  ];
+
+  // Earth images carousel - different views to try
+  const earthImages = [
+    {
+      url: 'https://upload.wikimedia.org/wikipedia/commons/7/73/Pale_Blue_Dot.png',
+      title: 'Pale Blue Dot (Voyager 1)'
+    },
+    {
+      url: 'https://upload.wikimedia.org/wikipedia/commons/9/97/The_Earth_seen_from_Apollo_17.jpg',
+      title: 'Blue Marble (Apollo 17)'
+    },
+    {
+      url: 'https://upload.wikimedia.org/wikipedia/commons/a/aa/Earthrise_%28Apollo_8%29.jpeg',
+      title: 'Earthrise (Apollo 8)'
+    },
+    {
+      url: 'https://cdn.mos.cms.futurecdn.net/v5n22xGyNNHLhYhkBQTZQP-1920-80.jpg.webp',
+      title: 'Earth from ISS'
+    }
+  ];
+
+  // Detect two-finger touch
+  useEffect(() => {
+    const handleTouchStart = (e) => {
+      if (e.touches.length === 2 && imageRef.current?.contains(e.target)) {
+        e.preventDefault();
+        // User is giving their spark!
+        const rect = imageRef.current.getBoundingClientRect();
+        const touch1 = e.touches[0];
+        const touch2 = e.touches[1];
+        const centerX = ((touch1.clientX + touch2.clientX) / 2 - rect.left) / rect.width * 100;
+        const centerY = ((touch1.clientY + touch2.clientY) / 2 - rect.top) / rect.height * 100;
+
+        addSpark(centerX, centerY, true); // true = user-created spark
+        setShowGiveMessage(true);
+        setTimeout(() => setShowGiveMessage(false), 2000);
+      }
+    };
+
+    document.addEventListener('touchstart', handleTouchStart, { passive: false });
+    return () => document.removeEventListener('touchstart', handleTouchStart);
+  }, []);
 
   // Generate sparks at random intervals
   useEffect(() => {
-    const addSpark = () => {
-      const newSpark = {
-        id: Date.now() + Math.random(),
-        left: Math.random() * 80 + 10, // 10-90% to keep sparks on image
-        top: Math.random() * 80 + 10,
-        delay: Math.random() * 0.5
-      };
-
-      setSparks(prev => [...prev, newSpark]);
-      setSparkCount(prev => prev + 1);
-
-      // Remove spark after animation completes
-      setTimeout(() => {
-        setSparks(prev => prev.filter(s => s.id !== newSpark.id));
-      }, 3000);
-    };
-
-    // Add sparks every 1-3 seconds
     const interval = setInterval(() => {
       addSpark();
     }, 1000 + Math.random() * 2000);
@@ -2630,51 +2665,114 @@ function TheWorldTab() {
     return () => clearInterval(interval);
   }, []);
 
+  const addSpark = (x, y, isUserSpark = false) => {
+    const newSpark = {
+      id: Date.now() + Math.random(),
+      left: x || Math.random() * 80 + 10,
+      top: y || Math.random() * 80 + 10,
+      delay: Math.random() * 0.5,
+      message: thankYouMessages[Math.floor(Math.random() * thankYouMessages.length)],
+      isUserSpark
+    };
+
+    setSparks(prev => [...prev, newSpark]);
+    setSparkCount(prev => prev + 1);
+
+    setTimeout(() => {
+      setSparks(prev => prev.filter(s => s.id !== newSpark.id));
+    }, 3000);
+  };
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % earthImages.length);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + earthImages.length) % earthImages.length);
+  };
+
   return (
     <div className="flex flex-col items-center py-8 px-4">
       {/* Header */}
       <div className="text-center mb-8 max-w-2xl">
-        <h2 className="text-2xl font-bold mb-2">🌊 Ripples of Joy</h2>
-        <p className="text-slate-300 text-sm leading-relaxed mb-2">
-          Every moment, someone somewhere experiences a spark of joy.
+        <h2 className="text-2xl font-bold mb-3">🌊 Ripples of Joy</h2>
+        <p className="text-slate-300 text-base leading-relaxed mb-2">
+          Give and you shall receive.
         </p>
-        <p className="text-slate-400 text-sm italic">
-          Tune into these sparks. Smile with them.
+        <p className="text-slate-400 text-sm">
+          Smile, and the whole world smiles with you.
         </p>
       </div>
 
-      {/* Pale Blue Dot with Sparks */}
+      {/* Earth Image Carousel with Sparks */}
       <div className="relative mb-8 max-w-lg w-full">
-        <div className="relative rounded-2xl overflow-hidden border-2 border-white/10 bg-black">
+        <div
+          ref={imageRef}
+          className="relative rounded-2xl overflow-hidden border-2 border-white/20 bg-black"
+        >
           <img
-            src="https://upload.wikimedia.org/wikipedia/commons/7/73/Pale_Blue_Dot.png"
-            alt="Pale Blue Dot - Earth from Voyager 1"
+            src={earthImages[currentImageIndex].url}
+            alt={earthImages[currentImageIndex].title}
             className="w-full h-auto"
-            style={{ minHeight: '300px', objectFit: 'contain' }}
+            style={{ minHeight: '300px', maxHeight: '500px', objectFit: 'contain' }}
           />
 
           {/* Sparks overlay */}
-          <div className="absolute inset-0">
+          <div className="absolute inset-0 pointer-events-none">
             {sparks.map(spark => (
               <div
                 key={spark.id}
-                className="absolute animate-spark"
+                className={`absolute animate-spark ${spark.isUserSpark ? 'text-yellow-300' : 'text-blue-300'}`}
                 style={{
                   left: `${spark.left}%`,
                   top: `${spark.top}%`,
                   animationDelay: `${spark.delay}s`
                 }}
               >
-                <div className="text-2xl">✨</div>
+                <div className="text-xs font-semibold whitespace-nowrap">
+                  ✨ {spark.message}
+                </div>
               </div>
             ))}
           </div>
+
+          {/* Give Message Overlay */}
+          {showGiveMessage && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+              <div className="text-center animate-pulse">
+                <div className="text-4xl mb-2">✨</div>
+                <p className="text-yellow-300 text-lg font-semibold">Your spark added!</p>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Spark Counter */}
-        <div className="text-center mt-4">
-          <p className="text-slate-400 text-sm">
-            You've witnessed <span className="text-yellow-400 font-semibold">{sparkCount}</span> sparks of joy
+        {/* Carousel Controls */}
+        <div className="flex items-center justify-between mt-4">
+          <button
+            onClick={prevImage}
+            className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl transition"
+          >
+            ← Prev
+          </button>
+          <p className="text-slate-400 text-xs text-center">
+            {earthImages[currentImageIndex].title}
+          </p>
+          <button
+            onClick={nextImage}
+            className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl transition"
+          >
+            Next →
+          </button>
+        </div>
+
+        {/* Instructions */}
+        <div className="text-center mt-4 p-4 bg-white/5 rounded-xl border border-white/10">
+          <p className="text-slate-300 text-sm mb-1">
+            👆👆 Place two fingers on Earth to share your spark
+          </p>
+          <p className="text-slate-400 text-xs">
+            You've witnessed <span className="text-yellow-400 font-semibold">{sparkCount}</span> sparks of gratitude
           </p>
         </div>
       </div>
@@ -2697,11 +2795,11 @@ function TheWorldTab() {
           }
           30% {
             opacity: 1;
-            transform: scale(1.2) translateY(-10px);
+            transform: scale(1) translateY(-10px);
           }
           100% {
             opacity: 0;
-            transform: scale(0.8) translateY(-40px);
+            transform: scale(0.8) translateY(-50px);
           }
         }
         .animate-spark {
