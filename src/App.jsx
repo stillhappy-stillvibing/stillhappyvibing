@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '4.13.8';
+const APP_VERSION = '4.13.9';
 const BUILD_DATE = '2026-01-11';
 
 // Gamification: Point Values
@@ -2944,8 +2944,8 @@ function PowerBoost({ onSkip, onSelectTool }) {
           onClick={() => onSelectTool('exercises')}
           className="bg-gradient-to-br from-green-500/30 to-teal-500/30 hover:from-green-500/40 hover:to-teal-500/40 border border-green-400/30 rounded-xl p-4 transition hover:scale-105"
         >
-          <div className="text-3xl mb-2">🧘</div>
-          <div className="font-semibold text-sm">Mindfulness</div>
+          <div className="text-3xl mb-2">✨</div>
+          <div className="font-semibold text-sm">Sparks Of Joy</div>
           <div className="text-xs text-green-300 mt-1">+15 pts</div>
         </button>
 
