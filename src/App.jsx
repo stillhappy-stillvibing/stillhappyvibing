@@ -4012,6 +4012,7 @@ export default function App() {
   const [showExerciseBrowser, setShowExerciseBrowser] = useState(false);
   const [showBreathworkBrowser, setShowBreathworkBrowser] = useState(false);
   const [showCBTBrowser, setShowCBTBrowser] = useState(false);
+  const [showRipplesModal, setShowRipplesModal] = useState(false);
   const [showPowerBoost, setShowPowerBoost] = useState(false);
   const [checkInCooldownUntil, setCheckInCooldownUntil] = useState(0);
   const [cooldownRemaining, setCooldownRemaining] = useState(0);
@@ -4559,26 +4560,11 @@ export default function App() {
           <p className="text-slate-400 text-xs mb-2">Plant joy, watch it bloom, share it with the world</p>
         </header>
 
-        {/* Tab Navigation */}
-        <div className="flex bg-white/5 rounded-xl p-1 mb-4">
-          {[
-            { id: 'timer', label: '😊 Home' },
-            { id: 'world', label: '🌍 World' },
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 py-2 rounded-lg text-sm font-medium transition ${activeTab === tab.id ? 'bg-white/10 text-white' : 'text-slate-400'}`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        {/* No tab navigation - single page interface */}
 
-        {/* Timer Tab */}
-        {activeTab === 'timer' && (
-          <>
-            {/* Global Counter */}
+        {/* Main Content */}
+        <>
+          {/* Global Counter */}
             <div className="mb-4">
               <GlobalCounter />
             </div>
@@ -4635,19 +4621,14 @@ export default function App() {
                 <div className="text-xs text-slate-400 text-center">Send joy</div>
               </button>
 
-              {/* Ripples Of Joy - Coming Soon */}
+              {/* Ripples Of Joy */}
               <button
-                onClick={() => {
-                  setToastMessage('Coming soon! 🌊');
-                  setToastEmoji('🌊');
-                  setShowToast(true);
-                }}
-                className="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 rounded-xl p-5 transition hover:scale-105 flex flex-col items-center gap-2 relative"
+                onClick={() => setShowRipplesModal(true)}
+                className="bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 rounded-xl p-5 hover:from-cyan-500/30 hover:to-blue-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
               >
-                <div className="text-4xl opacity-50">🌊</div>
-                <div className="font-semibold text-sm text-slate-400">Ripples Of Joy</div>
-                <div className="text-xs text-slate-500 text-center">Coming soon</div>
-                <div className="absolute top-2 right-2 text-xs bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded-full">Soon</div>
+                <div className="text-4xl">🌊</div>
+                <div className="font-semibold text-sm">Ripples Of Joy</div>
+                <div className="text-xs text-slate-400 text-center">Witness sparks</div>
               </button>
             </div>
 
@@ -4829,12 +4810,6 @@ export default function App() {
               </button>
             </div>
           </>
-        )}
-
-        {/* The World Tab */}
-        {activeTab === 'world' && (
-          <TheWorldTab />
-        )}
 
         <div className="flex items-center justify-center gap-2 text-xs text-slate-500 mt-6">
           <span>🔒</span>
@@ -4897,6 +4872,22 @@ export default function App() {
         onClose={() => setShowShareSmile(false)}
         addPoints={addPoints}
       />
+
+      {/* Ripples Of Joy Modal */}
+      {showRipplesModal && (
+        <div className="fixed inset-0 bg-black/95 z-50 overflow-y-auto">
+          <div className="min-h-screen">
+            <button
+              onClick={() => setShowRipplesModal(false)}
+              className="fixed top-4 right-4 z-10 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl transition"
+            >
+              ✕ Close
+            </button>
+            <TheWorldTab />
+          </div>
+        </div>
+      )}
+
       <Confetti active={showConfetti} />
       <Toast
         message={toastMessage}
