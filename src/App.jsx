@@ -1517,14 +1517,24 @@ function ShareSmileCard({ isOpen, onClose, addPoints }) {
         {/* The Card to be captured */}
         <div
           ref={cardRef}
-          className="bg-gradient-to-br from-amber-400 via-orange-400 to-pink-400 rounded-2xl p-8 mb-4 aspect-square flex items-center justify-center"
+          className="bg-gradient-to-br from-amber-400 via-orange-400 to-pink-400 rounded-2xl p-8 mb-4 aspect-square flex flex-col justify-between"
         >
-          <div className="text-center text-white">
-            <p className="text-6xl mb-6">💛</p>
-            <p className="text-lg font-medium leading-relaxed italic px-2">
-              "{message}"
+          {/* Top left header */}
+          <p className="text-white text-sm font-light italic self-start">
+            Thinking of you...
+          </p>
+
+          {/* Center message */}
+          <div className="flex items-center justify-center flex-1">
+            <p className="text-white text-lg font-medium leading-relaxed text-center px-2">
+              {message}
             </p>
           </div>
+
+          {/* Bottom right footer */}
+          <p className="text-white text-sm font-light italic self-end">
+            ... sparked joy in my mind.
+          </p>
         </div>
 
         <div className="flex gap-2 mb-2">
