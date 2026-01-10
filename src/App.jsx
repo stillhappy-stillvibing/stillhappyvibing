@@ -1559,7 +1559,7 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
           try {
             await navigator.share({
               files: [new File([blob], filename, { type: 'image/png' })],
-              title: type === 'quote' ? 'Wisdom to Share' : type === 'exercise' ? 'Spark Of Joy' : 'Gratitude',
+              title: type === 'quote' ? 'Wisdom to Share' : type === 'spark' ? 'Spark Of Joy' : type === 'exercise' ? 'Mental Dojo Practice' : 'Gratitude',
               text: `Smile, and the whole world smileswithyou.com. ✨`
             });
           } catch (e) {
@@ -1608,8 +1608,42 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
           </div>
         )}
 
-        {/* Spark Of Joy Card */}
+        {/* Full Exercise Card */}
         {type === 'exercise' && data && (
+          <div
+            ref={cardRef}
+            className="bg-gradient-to-br from-orange-500 via-yellow-500 to-amber-400 rounded-2xl p-6 mb-4"
+          >
+            <div className="text-slate-900">
+              <div className="text-center mb-4">
+                <p className="text-3xl mb-2">🥋</p>
+                <p className="text-xl font-bold mb-1">{data.title}</p>
+                <p className="text-sm opacity-80">{data.subtitle}</p>
+              </div>
+
+              <div className="bg-white/30 rounded-xl p-4 mb-4">
+                <p className="font-semibold mb-2 text-center">Practice:</p>
+                <p className="text-base leading-relaxed text-center">
+                  {data.practiceInstruction}
+                </p>
+              </div>
+
+              <div className="bg-white/20 rounded-xl p-3 mb-4">
+                <p className="text-sm italic text-center">
+                  "{data.seedThought}"
+                </p>
+              </div>
+
+              <p className="text-xs text-center opacity-90">
+                <span className="font-medium">Smile, and the whole world </span>
+                <span className="font-bold text-slate-800">smileswithyou.com</span>
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Spark Of Joy Card (Mystery - seed thought only) */}
+        {type === 'spark' && data && (
           <div
             ref={cardRef}
             className="bg-gradient-to-br from-orange-500 via-yellow-500 to-amber-400 rounded-2xl p-8 mb-4"
@@ -1935,6 +1969,7 @@ function ExerciseBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
   const allExercises = [...exercises, nightExercise];
   const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * allExercises.length));
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showDojoShareModal, setShowDojoShareModal] = useState(false);
   const [showMentalDojo, setShowMentalDojo] = useState(false);
 
   const currentExercise = allExercises[currentIndex];
@@ -1970,7 +2005,7 @@ function ExerciseBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
   const handleDojoShare = () => {
     addPoints(POINTS.EXERCISE_BOOST);
     setShowMentalDojo(false);
-    setShowShareModal(true);
+    setShowDojoShareModal(true);
   };
 
   const handleSkip = () => {
@@ -2056,6 +2091,14 @@ function ExerciseBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
         isOpen={showShareModal}
         onClose={() => setShowShareModal(false)}
         type="exercise"
+        data={currentExercise}
+      />
+
+      {/* Mental Dojo Share Modal - Spark Of Joy Card */}
+      <ShareImageCard
+        isOpen={showDojoShareModal}
+        onClose={() => setShowDojoShareModal(false)}
+        type="spark"
         data={currentExercise}
       />
 
