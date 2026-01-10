@@ -1640,20 +1640,36 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
           </div>
         )}
 
-        {/* Spark Of Joy Card (Mystery - seed thought only) */}
+        {/* Spark Of Joy Card (After Mental Dojo practice) */}
         {type === 'spark' && data && (
           <div
             ref={cardRef}
-            className="bg-gradient-to-br from-orange-500 via-yellow-500 to-amber-400 rounded-2xl p-8 mb-4"
+            className="bg-gradient-to-br from-orange-500 via-yellow-500 to-amber-400 rounded-2xl p-8 mb-4 relative overflow-hidden"
           >
-            <div className="text-center text-slate-900">
-              <p className="text-4xl mb-3">🥋</p>
-              <p className="text-lg font-bold mb-2">Join Me in My Mental Dojo</p>
-              <p className="text-base font-semibold mb-5">Let's Spark Joy Together!</p>
+            {/* Decorative sparks */}
+            <div className="absolute top-2 left-2 text-2xl opacity-60">✨</div>
+            <div className="absolute top-4 right-4 text-xl opacity-70">✨</div>
+            <div className="absolute bottom-3 left-4 text-xl opacity-60">✨</div>
+            <div className="absolute bottom-2 right-3 text-2xl opacity-70">✨</div>
+            <div className="absolute top-1/2 left-2 text-lg opacity-50">✨</div>
+            <div className="absolute top-1/3 right-2 text-lg opacity-50">✨</div>
 
-              {/* The seed thought - the spark to share */}
-              <div className="bg-white/30 rounded-xl p-5 mb-6">
-                <p className="text-2xl italic leading-relaxed font-medium">
+            <div className="text-center text-slate-900 relative z-10">
+              <p className="text-4xl mb-3">🥋</p>
+              <p className="text-xl font-bold mb-1">{data.title}</p>
+              <p className="text-sm opacity-80 mb-4">{data.subtitle}</p>
+
+              {/* Practice instruction */}
+              <div className="bg-white/30 rounded-xl p-5 mb-3">
+                <p className="font-semibold mb-2">Practice:</p>
+                <p className="text-base leading-relaxed">
+                  {data.practiceInstruction}
+                </p>
+              </div>
+
+              {/* Seed thought */}
+              <div className="bg-white/20 rounded-xl p-4 mb-4">
+                <p className="text-sm italic leading-relaxed">
                   "{data.seedThought}"
                 </p>
               </div>
