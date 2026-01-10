@@ -2604,7 +2604,15 @@ function TheWorldTab() {
   const [sparkCount, setSparkCount] = useState(0);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showGiveMessage, setShowGiveMessage] = useState(false);
+  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const imageRef = useRef(null);
+
+  // Inspirational messages that rotate
+  const inspirationalMessages = [
+    "Smile because someone in the World is smiling!",
+    "Rejoice because someone has sparked joy in the world!",
+    "The flame of hope and happiness has been lit by another—rejoice in their joy."
+  ];
 
   // Thank you in different languages
   const thankYouMessages = [
@@ -2613,6 +2621,14 @@ function TheWorldTab() {
     'Teşekkürler', 'Tack', 'Dziękuję', '감사합니다', 'Kiitos',
     'Dhanyavaad', 'Toda', 'Terima kasih', 'Cảm ơn', 'Ευχαριστώ'
   ];
+
+  // Rotate inspirational messages every 8 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentMessageIndex(prev => (prev + 1) % inspirationalMessages.length);
+    }, 8000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Earth images carousel - different views to try
   const earthImages = [
@@ -2699,9 +2715,15 @@ function TheWorldTab() {
         <p className="text-slate-300 text-base leading-relaxed mb-2">
           Give and you shall receive.
         </p>
-        <p className="text-slate-400 text-sm">
+        <p className="text-slate-400 text-sm mb-3">
           Smile, and the whole world smiles with you.
         </p>
+        {/* Rotating inspirational message */}
+        <div className="min-h-[60px] flex items-center justify-center">
+          <p className="text-amber-300 text-sm italic leading-relaxed transition-all duration-500 animate-fade-in">
+            {inspirationalMessages[currentMessageIndex]}
+          </p>
+        </div>
       </div>
 
       {/* Earth Image Carousel with Sparks */}
@@ -2804,6 +2826,17 @@ function TheWorldTab() {
         }
         .animate-spark {
           animation: spark 3s ease-out forwards;
+        }
+        @keyframes fade-in {
+          0% {
+            opacity: 0;
+          }
+          100% {
+            opacity: 1;
+          }
+        }
+        .animate-fade-in {
+          animation: fade-in 1s ease-in;
         }
       `}</style>
     </div>
