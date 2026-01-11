@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '8.7.1';
+const APP_VERSION = '8.8.0';
 const BUILD_DATE = '2026-01-11';
 
 // Gamification: Point Values
@@ -1803,7 +1803,7 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
 }
 
 // Quote Browser/Carousel Component
-function QuoteBrowser({ isOpen, onClose, addPoints, onBoost }) {
+function QuoteBrowser({ isOpen, onClose, addPoints, onBoost, onGlobalRipple }) {
   const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * wisdomQuotes.length));
   const [showShareModal, setShowShareModal] = useState(false);
 
@@ -1873,7 +1873,7 @@ function QuoteBrowser({ isOpen, onClose, addPoints, onBoost }) {
             📤 Share
           </button>
 
-          <RippleButton type="quote" data={currentQuote} compact onGlobalRipple={handleGlobalRipple} />
+          <RippleButton type="quote" data={currentQuote} compact onGlobalRipple={onGlobalRipple} />
         </div>
       </div>
 
@@ -1889,7 +1889,7 @@ function QuoteBrowser({ isOpen, onClose, addPoints, onBoost }) {
 
 // Mindfulness Visual Meditation Component - 30 second Tratak (circle gazing)
 // Mental Dojo - 30-second practice space
-function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare }) {
+function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare, onGlobalRipple }) {
   const [timeLeft, setTimeLeft] = useState(30);
   const [isComplete, setIsComplete] = useState(false);
   const [showSparks, setShowSparks] = useState(false);
@@ -2057,7 +2057,7 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare 
                   'Thank you', 'Merci', 'Gracias', 'Danke', 'Grazie',
                   'Obrigado', 'Спасибо', 'ありがとう', '谢谢', 'شكرا'
                 ]}
-                onGlobalRipple={handleGlobalRipple}
+                onGlobalRipple={onGlobalRipple}
               />
             </div>
 
@@ -2093,7 +2093,7 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare 
 }
 
 // Exercise Browser/Carousel Component
-function ExerciseBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
+function ExerciseBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onGlobalRipple }) {
   const allExercises = exercises;
   const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * allExercises.length));
   const [showShareModal, setShowShareModal] = useState(false);
@@ -2219,7 +2219,7 @@ function ExerciseBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
             📤 Share
           </button>
 
-          <RippleButton type="exercise" data={currentExercise} compact onGlobalRipple={handleGlobalRipple} />
+          <RippleButton type="exercise" data={currentExercise} compact onGlobalRipple={onGlobalRipple} />
         </div>
       </div>
 
@@ -2247,6 +2247,7 @@ function ExerciseBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
           onClose={() => setShowMentalDojo(false)}
           addPoints={addPoints}
           onShare={handleDojoShare}
+          onGlobalRipple={onGlobalRipple}
         />
       )}
     </div>
@@ -2254,7 +2255,7 @@ function ExerciseBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
 }
 
 // CBT Exercise Browser/Carousel Component
-function CBTBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
+function CBTBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onGlobalRipple }) {
   const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * cbtExercises.length));
   const [showShareModal, setShowShareModal] = useState(false);
 
@@ -2337,7 +2338,7 @@ function CBTBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
             📤 Share
           </button>
 
-          <RippleButton type="cbt" data={currentExercise} compact onGlobalRipple={handleGlobalRipple} />
+          <RippleButton type="cbt" data={currentExercise} compact onGlobalRipple={onGlobalRipple} />
         </div>
       </div>
 
@@ -2352,7 +2353,7 @@ function CBTBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
 }
 
 // Breathwork Browser Component - 1-minute breathing patterns
-function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
+function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onGlobalRipple }) {
   const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * breathworkPatterns.length));
   const [isActive, setIsActive] = useState(false);
   const [cycles, setCycles] = useState(0);
@@ -2531,7 +2532,7 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
                 </button>
               </div>
 
-              <RippleButton type="breathwork" data={currentPattern} onGlobalRipple={handleGlobalRipple} />
+              <RippleButton type="breathwork" data={currentPattern} onGlobalRipple={onGlobalRipple} />
             </>
           )}
         </div>
@@ -3224,6 +3225,7 @@ function TheWorldTab() {
   const [ripplePhase, setRipplePhase] = useState('outward'); // 'outward' or 'inward'
   const imageRef = useRef(null);
   const phaseInterval = useRef(null);
+  const fourElementsIndexRef = useRef(0); // Track position in Happy, Healthy, Wealthy, Wise sequence
 
   // Thank you in different languages
   const thankYouMessages = [
@@ -3233,13 +3235,41 @@ function TheWorldTab() {
     'Dhanyavaad', 'Toda', 'Terima kasih', 'Cảm ơn', 'Ευχαριστώ'
   ];
 
+  // The four elements in sequence - the drumbeat of repetition
+  const fourElements = [
+    { text: 'Happy', color: 'text-yellow-400' },
+    { text: 'Healthy', color: 'text-sky-400' },
+    { text: 'Wealthy', color: 'text-green-400' },
+    { text: 'Wise', color: 'text-purple-400' }
+  ];
+
   const addSpark = (x, y) => {
+    // The drumbeat of repetition - mix sequential four-element sparks with thank-you messages
+    const showFourElement = Math.random() < 0.6; // 60% chance for four-element spark
+
+    let sparkMessage, sparkColor;
+
+    if (showFourElement) {
+      // Get the next element in the sequence
+      const currentElement = fourElements[fourElementsIndexRef.current % 4];
+      sparkMessage = currentElement.text;
+      sparkColor = currentElement.color;
+
+      // Advance to next element in sequence
+      fourElementsIndexRef.current += 1;
+    } else {
+      // Random thank-you message
+      sparkMessage = thankYouMessages[Math.floor(Math.random() * thankYouMessages.length)];
+      sparkColor = 'text-cyan-300';
+    }
+
     const newSpark = {
       id: Date.now() + Math.random(),
       left: x !== undefined ? x : Math.random() * 80 + 10,
       top: y !== undefined ? y : Math.random() * 80 + 10,
       delay: Math.random() * 0.5,
-      message: thankYouMessages[Math.floor(Math.random() * thankYouMessages.length)]
+      message: sparkMessage,
+      color: sparkColor
     };
 
     setSparks(prev => [...prev, newSpark]);
@@ -4742,7 +4772,7 @@ function OfflineMode({ isOpen, onClose, onGlobalRipple }) {
               'Offline wisdom spreading',
               'Thank you', 'Merci', 'Gracias', 'Danke'
             ]}
-            onGlobalRipple={handleGlobalRipple}
+            onGlobalRipple={onGlobalRipple}
           />
         </div>
 
@@ -5523,14 +5553,14 @@ export default function App() {
                 <div className="text-xs text-slate-400 text-center">1-minute calm</div>
               </button>
 
-              {/* Tools Of Thought */}
+              {/* Ripples Of Joy - moved from bottom */}
               <button
-                onClick={() => setShowCBTBrowser(true)}
-                className="bg-gradient-to-br from-blue-500/20 to-indigo-500/20 border border-blue-500/30 rounded-xl p-5 hover:from-blue-500/30 hover:to-indigo-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
+                onClick={() => setShowRipplesModal(true)}
+                className="bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 rounded-xl p-5 hover:from-cyan-500/30 hover:to-blue-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
               >
-                <div className="text-4xl">🧠</div>
-                <div className="font-semibold text-sm">Tools Of Thought</div>
-                <div className="text-xs text-slate-400 text-center">Mindset shifts</div>
+                <div className="text-4xl">🌊</div>
+                <div className="font-semibold text-sm">Ripples Of Joy</div>
+                <div className="text-xs text-slate-400 text-center">Witness sparks</div>
               </button>
 
               {/* Share A Smile */}
@@ -5543,14 +5573,14 @@ export default function App() {
                 <div className="text-xs text-slate-400 text-center">Send joy</div>
               </button>
 
-              {/* Ripples Of Joy */}
+              {/* Offline Mode - moved from bottom, resized */}
               <button
-                onClick={() => setShowRipplesModal(true)}
-                className="bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 rounded-xl p-5 hover:from-cyan-500/30 hover:to-blue-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
+                onClick={() => setShowOfflineMode(true)}
+                className="bg-gradient-to-br from-orange-500/20 to-amber-500/20 border border-orange-500/30 rounded-xl p-5 hover:from-orange-500/30 hover:to-amber-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
               >
-                <div className="text-4xl">🌊</div>
-                <div className="font-semibold text-sm">Ripples Of Joy</div>
-                <div className="text-xs text-slate-400 text-center">Witness sparks</div>
+                <div className="text-4xl">🌟</div>
+                <div className="font-semibold text-sm">Offline Mode</div>
+                <div className="text-xs text-slate-400 text-center">Joy anywhere</div>
               </button>
             </div>
 
@@ -5688,13 +5718,17 @@ export default function App() {
             <div className="font-semibold text-xs">Invite A Friend</div>
           </button>
 
-          {/* Offline Mode */}
+          {/* T.N.T. - Think New Thoughts */}
           <button
-            onClick={() => setShowOfflineMode(true)}
-            className="bg-gradient-to-br from-orange-500/20 to-amber-500/20 border border-orange-500/30 rounded-xl p-4 hover:from-orange-500/30 hover:to-amber-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
+            onClick={() => {
+              setToastMessage('Coming soon! 💭');
+              setToastEmoji('🧨');
+              setShowToast(true);
+            }}
+            className="bg-gradient-to-br from-red-500/20 to-orange-500/20 border border-red-500/30 rounded-xl p-4 hover:from-red-500/30 hover:to-orange-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
           >
-            <div className="text-3xl">🌟</div>
-            <div className="font-semibold text-xs">Offline Mode</div>
+            <div className="text-3xl">🧨</div>
+            <div className="font-semibold text-xs">T.N.T.</div>
           </button>
 
           {/* Settings */}
@@ -5717,10 +5751,11 @@ export default function App() {
       </div>
 
       {/* Modals */}
-      <QuoteBrowser isOpen={showQuoteBrowser} onClose={() => setShowQuoteBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} />
-      <ExerciseBrowser isOpen={showExerciseBrowser} onClose={() => setShowExerciseBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} playSound={playSound} />
-      <BreathworkBrowser isOpen={showBreathworkBrowser} onClose={() => setShowBreathworkBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} playSound={playSound} />
-      <CBTBrowser isOpen={showCBTBrowser} onClose={() => setShowCBTBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} playSound={playSound} />
+      <QuoteBrowser isOpen={showQuoteBrowser} onClose={() => setShowQuoteBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} onGlobalRipple={handleGlobalRipple} />
+      <ExerciseBrowser isOpen={showExerciseBrowser} onClose={() => setShowExerciseBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} playSound={playSound} onGlobalRipple={handleGlobalRipple} />
+      <BreathworkBrowser isOpen={showBreathworkBrowser} onClose={() => setShowBreathworkBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} playSound={playSound} onGlobalRipple={handleGlobalRipple} />
+      {/* CBT Browser - Hidden for now (app is for short bursts of joy, not therapy) */}
+      {/* <CBTBrowser isOpen={showCBTBrowser} onClose={() => setShowCBTBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} playSound={playSound} onGlobalRipple={handleGlobalRipple} /> */}
       <SettingsModal
         isOpen={showSettingsModal}
         onClose={() => setShowSettingsModal(false)}
