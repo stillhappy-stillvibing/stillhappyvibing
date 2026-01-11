@@ -3225,6 +3225,7 @@ function TheWorldTab() {
   const [ripplePhase, setRipplePhase] = useState('outward'); // 'outward' or 'inward'
   const imageRef = useRef(null);
   const phaseInterval = useRef(null);
+  const fourElementsIndexRef = useRef(0); // Track position in Happy, Healthy, Wealthy, Wise sequence
 
   // Thank you in different languages
   const thankYouMessages = [
@@ -3234,13 +3235,41 @@ function TheWorldTab() {
     'Dhanyavaad', 'Toda', 'Terima kasih', 'Cảm ơn', 'Ευχαριστώ'
   ];
 
+  // The four elements in sequence - the drumbeat of repetition
+  const fourElements = [
+    { text: 'Happy', color: 'text-yellow-400' },
+    { text: 'Healthy', color: 'text-sky-400' },
+    { text: 'Wealthy', color: 'text-green-400' },
+    { text: 'Wise', color: 'text-purple-400' }
+  ];
+
   const addSpark = (x, y) => {
+    // The drumbeat of repetition - mix sequential four-element sparks with thank-you messages
+    const showFourElement = Math.random() < 0.6; // 60% chance for four-element spark
+
+    let sparkMessage, sparkColor;
+
+    if (showFourElement) {
+      // Get the next element in the sequence
+      const currentElement = fourElements[fourElementsIndexRef.current % 4];
+      sparkMessage = currentElement.text;
+      sparkColor = currentElement.color;
+
+      // Advance to next element in sequence
+      fourElementsIndexRef.current += 1;
+    } else {
+      // Random thank-you message
+      sparkMessage = thankYouMessages[Math.floor(Math.random() * thankYouMessages.length)];
+      sparkColor = 'text-cyan-300';
+    }
+
     const newSpark = {
       id: Date.now() + Math.random(),
       left: x !== undefined ? x : Math.random() * 80 + 10,
       top: y !== undefined ? y : Math.random() * 80 + 10,
       delay: Math.random() * 0.5,
-      message: thankYouMessages[Math.floor(Math.random() * thankYouMessages.length)]
+      message: sparkMessage,
+      color: sparkColor
     };
 
     setSparks(prev => [...prev, newSpark]);
