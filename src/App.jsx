@@ -4530,7 +4530,7 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats, ch
 }
 
 // Offline Mode Component - Joy practices carousel
-function OfflineMode({ isOpen, onClose }) {
+function OfflineMode({ isOpen, onClose, onGlobalRipple }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [shuffled, setShuffled] = useState(false);
   const [practiceOrder, setPracticeOrder] = useState([]);
@@ -5740,6 +5740,7 @@ export default function App() {
       <OfflineMode
         isOpen={showOfflineMode}
         onClose={() => setShowOfflineMode(false)}
+        onGlobalRipple={handleGlobalRipple}
       />
       <WeeklyReflection
         isOpen={showWeeklyReflection}
