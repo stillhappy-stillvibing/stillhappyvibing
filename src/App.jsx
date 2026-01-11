@@ -2851,7 +2851,7 @@ function RipplesFeed() {
               <div className="flex items-start gap-3 mb-2">
                 <span className="text-2xl">🌱</span>
                 <div className="flex-1">
-                  <p className="text-xs text-cyan-300 mb-1">Someone rippled wisdom</p>
+                  <p className="text-xs text-cyan-300 mb-1">Someone sent waves of wisdom</p>
                   <p className="text-sm italic text-slate-200">"{ripple.text}"</p>
                   <p className="text-xs text-slate-400 mt-1">— {ripple.author}</p>
                 </div>
@@ -2865,7 +2865,7 @@ function RipplesFeed() {
               <div className="flex items-start gap-3 mb-2">
                 <span className="text-2xl">🥋</span>
                 <div className="flex-1">
-                  <p className="text-xs text-cyan-300 mb-1">Someone rippled a practice</p>
+                  <p className="text-xs text-cyan-300 mb-1">Someone shared a practice</p>
                   <p className="text-sm font-semibold text-slate-200">{ripple.title}</p>
                   <p className="text-xs text-slate-400">{ripple.subtitle}</p>
                 </div>
@@ -2879,7 +2879,7 @@ function RipplesFeed() {
               <div className="flex items-start gap-3 mb-2">
                 <span className="text-2xl">{ripple.emoji || '🧠'}</span>
                 <div className="flex-1">
-                  <p className="text-xs text-cyan-300 mb-1">Someone rippled a tool</p>
+                  <p className="text-xs text-cyan-300 mb-1">Someone shared a tool</p>
                   <p className="text-sm font-semibold text-slate-200">{ripple.title}</p>
                 </div>
               </div>
@@ -2892,7 +2892,7 @@ function RipplesFeed() {
               <div className="flex items-start gap-3 mb-2">
                 <span className="text-2xl">{ripple.emoji || '🌬️'}</span>
                 <div className="flex-1">
-                  <p className="text-xs text-cyan-300 mb-1">Someone rippled a breath pattern</p>
+                  <p className="text-xs text-cyan-300 mb-1">Someone shared a breath pattern</p>
                   <p className="text-sm font-semibold text-slate-200">{ripple.name}</p>
                 </div>
               </div>
