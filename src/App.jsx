@@ -108,6 +108,15 @@ const incrementHappinessSource = (source) => {
   runTransaction(sourceRef, (current) => (current || 0) + 1);
 };
 
+// Increment daily sparks shared (resets at 12am GMT)
+const incrementDailySparks = () => {
+  const now = new Date();
+  const gmtDate = new Date(now.toUTCString());
+  const today = `${gmtDate.getUTCFullYear()}-${String(gmtDate.getUTCMonth() + 1).padStart(2, '0')}-${String(gmtDate.getUTCDate()).padStart(2, '0')}`;
+  const dailySparksRef = ref(database, `stats/dailyShares/${today}`);
+  runTransaction(dailySparksRef, (current) => (current || 0) + 1);
+};
+
 // Track global favorites for quotes and exercises
 const incrementQuoteFavorite = (quoteIndex) => {
   const favoriteRef = ref(database, `globalFavorites/quotes/${quoteIndex}`);
@@ -1319,30 +1328,32 @@ const shareExercise = (exercise, addPoints) => {
   });
 };
 
-// Global Counter Component - Shows worldwide users + micro-moment
+// Global Counter Component - Shows daily sparks shared worldwide
 function GlobalCounter() {
-  const [stats, setStats] = useState({
-    activeStreaks: 0,
-    totalCheckins: 0,
-    todayCheckins: 0
-  });
+  const [dailySparks, setDailySparks] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [currentMoment, setCurrentMoment] = useState(() =>
-    microMoments[Math.floor(Math.random() * microMoments.length)]
-  );
+  const [pulse, setPulse] = useState(false);
+  const prevCountRef = useRef(0);
 
   useEffect(() => {
-    const unsubscribe = onValue(globalCounterRef, (snapshot) => {
-      const data = snapshot.val() || {};
-      // Use local date instead of UTC
-      const now = new Date();
-      const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    // Get today's date in GMT
+    const now = new Date();
+    const gmtDate = new Date(now.toUTCString());
+    const today = `${gmtDate.getUTCFullYear()}-${String(gmtDate.getUTCMonth() + 1).padStart(2, '0')}-${String(gmtDate.getUTCDate()).padStart(2, '0')}`;
 
-      setStats({
-        activeStreaks: data.activeStreaks || 0,
-        totalCheckins: data.totalCheckins || 0,
-        todayCheckins: data.todayCheckins?.[today] || 0
-      });
+    const dailySparksRef = ref(database, `stats/dailyShares/${today}`);
+
+    const unsubscribe = onValue(dailySparksRef, (snapshot) => {
+      const count = snapshot.val() || 0;
+
+      // Trigger pulse animation if count increased
+      if (prevCountRef.current > 0 && count > prevCountRef.current) {
+        setPulse(true);
+        setTimeout(() => setPulse(false), 1000);
+      }
+
+      prevCountRef.current = count;
+      setDailySparks(count);
       setLoading(false);
     }, (error) => {
       console.log('Firebase read error:', error);
@@ -1350,15 +1361,6 @@ function GlobalCounter() {
     });
 
     return () => unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    // Rotate to a new micro-moment every 45 seconds
-    const interval = setInterval(() => {
-      setCurrentMoment(microMoments[Math.floor(Math.random() * microMoments.length)]);
-    }, 45000);
-
-    return () => clearInterval(interval);
   }, []);
 
   if (loading) {
@@ -1369,31 +1371,19 @@ function GlobalCounter() {
     );
   }
 
-  // Hide counter when numbers are too low (app just starting)
-  if (stats.totalCheckins < 10 && stats.todayCheckins === 0) {
-    return (
-      <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-2xl p-4 text-center">
-        <div className="flex items-center justify-center gap-2">
-          <span className="text-2xl">{currentMoment.icon}</span>
-          <p className="text-sm text-slate-200 italic">{currentMoment.text}</p>
-        </div>
-      </div>
-    );
-  }
-
   const formatNumber = (num) => num.toLocaleString();
 
   return (
-    <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-2xl p-4 text-center">
+    <div className={`bg-gradient-to-r from-orange-500/10 to-amber-500/10 border border-amber-500/20 rounded-2xl p-4 text-center transition-all duration-500 ${pulse ? 'scale-105 shadow-lg shadow-amber-500/30' : ''}`}>
       <div className="flex items-center justify-center gap-2 mb-3">
         <span className="text-lg">🌍</span>
-        <span className="text-purple-300 font-medium text-sm">
-          <span className="text-white font-bold">{formatNumber(stats.activeStreaks)}</span> active sessions worldwide
+        <span className="text-amber-300 font-medium text-sm">
+          <span className={`text-white font-bold ${pulse ? 'animate-pulse' : ''}`}>{formatNumber(dailySparks)}</span> sparks shared today
         </span>
       </div>
       <div className="flex items-center justify-center gap-2 pt-3 border-t border-white/10">
-        <span className="text-2xl">{currentMoment.icon}</span>
-        <p className="text-sm text-slate-200 italic">{currentMoment.text}</p>
+        <span className="text-xl">✨</span>
+        <p className="text-sm text-slate-200 italic">Someone just sparked joy in the world, smile with them!</p>
       </div>
     </div>
   );
@@ -1489,8 +1479,9 @@ function ShareSmileCard({ isOpen, onClose, addPoints }) {
           shareSuccessful = true;
         }
 
-        if (shareSuccessful && addPoints) {
-          addPoints(POINTS.SHARE_SMILE);
+        if (shareSuccessful) {
+          if (addPoints) addPoints(POINTS.SHARE_SMILE);
+          incrementDailySparks(); // Track global daily sparks
         }
         setGenerating(false);
       }, 'image/png');
@@ -1575,6 +1566,7 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
 
       canvas.toBlob(async (blob) => {
         const filename = `stillhappy-${type}.png`;
+        let shareSuccessful = false;
         if (navigator.share && navigator.canShare?.({ files: [new File([blob], filename, { type: 'image/png' })] })) {
           try {
             await navigator.share({
@@ -1582,6 +1574,7 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
               title: type === 'quote' ? 'Wisdom to Share' : type === 'spark' ? 'Spark Of Joy' : type === 'exercise' ? 'Mental Dojo Practice' : 'Gratitude',
               text: `Smile, and the whole world smileswithyou.com. ✨`
             });
+            shareSuccessful = true;
           } catch (e) {
             // User cancelled or error
           }
@@ -1593,6 +1586,11 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
           a.download = filename;
           a.click();
           URL.revokeObjectURL(url);
+          shareSuccessful = true;
+        }
+
+        if (shareSuccessful) {
+          incrementDailySparks(); // Track global daily sparks
         }
         setGenerating(false);
       }, 'image/png');
@@ -2686,6 +2684,9 @@ function TheWorldTab() {
     setIsPressed(true);
     setRipplePhase('outward');
 
+    // Track daily spark shared
+    incrementDailySparks();
+
     // Haptic feedback
     if (navigator.vibrate) {
       navigator.vibrate([20, 10, 20]);
@@ -2739,7 +2740,7 @@ function TheWorldTab() {
           Smile, and the whole world smiles with you.
         </p>
         <p className="text-amber-300 text-lg leading-relaxed">
-          Smile because someone in the world has sparked joy!
+          Someone just sparked joy in the world, smile with them!
         </p>
       </div>
 
