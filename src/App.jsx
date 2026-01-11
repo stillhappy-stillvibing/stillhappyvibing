@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '8.0.0';
+const APP_VERSION = '8.1.0';
 const BUILD_DATE = '2026-01-11';
 
 // Gamification: Point Values
@@ -4175,29 +4175,14 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats, ch
           </p>
         </div>
 
-        <div className="bg-green-400/10 border border-green-400/30 rounded-xl p-4 mb-6">
-          <h3 className="font-semibold text-green-400 mb-2 flex items-center gap-2">🔒 Your Privacy</h3>
+        <div className="bg-cyan-400/10 border border-cyan-400/30 rounded-xl p-4 mb-6">
+          <h3 className="font-semibold text-cyan-400 mb-2 flex items-center gap-2">🌊 Anonymous Joy</h3>
           <ul className="text-sm text-slate-300 space-y-1">
-            <li>• All personal data stored locally only</li>
-            <li>• Only anonymous counts shared (global counter)</li>
+            <li>• All your data stays on your device</li>
+            <li>• Ripples are posted anonymously to the world</li>
+            <li>• Only spark counts are shared globally</li>
             <li>• No personal info ever leaves your device</li>
-            <li>• Clear your data anytime below</li>
           </ul>
-        </div>
-
-        {/* Share the App */}
-        <div className="bg-gradient-to-r from-pink-500/10 to-purple-500/10 border border-pink-500/20 rounded-xl p-4 mb-6">
-          <h3 className="font-semibold text-pink-400 mb-2 flex items-center gap-2">💝 Share the Happiness</h3>
-          <p className="text-sm text-slate-300 mb-3">Help someone you love have a happier {CURRENT_YEAR}</p>
-          <button
-            onClick={() => {
-              const shareText = `Sparks Of Joy ✨\n\n✨ Sparks Of Joy - Mental Dojo practices\n🌱 Seeds Of Thought - Wisdom to plant\n🌬️ Breath Of Fresh Air - Calming patterns\n💙 Tools Of Thought - Mindset shifts\n🌊 Ripples Of Joy - Witness sparks\n\nSmile, and the whole world smileswithyou.com!`;
-              shareContent(shareText, 'Shared to clipboard!');
-            }}
-            className="w-full py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold hover:scale-105 transition"
-          >
-            💌 Share Your Smile
-          </button>
         </div>
 
         <h3 className="font-semibold mb-3 text-slate-400 text-sm uppercase tracking-wider">Data Management</h3>
