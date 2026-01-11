@@ -1803,7 +1803,7 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
 }
 
 // Quote Browser/Carousel Component
-function QuoteBrowser({ isOpen, onClose, addPoints, onBoost }) {
+function QuoteBrowser({ isOpen, onClose, addPoints, onBoost, onGlobalRipple }) {
   const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * wisdomQuotes.length));
   const [showShareModal, setShowShareModal] = useState(false);
 
@@ -1873,7 +1873,7 @@ function QuoteBrowser({ isOpen, onClose, addPoints, onBoost }) {
             📤 Share
           </button>
 
-          <RippleButton type="quote" data={currentQuote} compact onGlobalRipple={handleGlobalRipple} />
+          <RippleButton type="quote" data={currentQuote} compact onGlobalRipple={onGlobalRipple} />
         </div>
       </div>
 
@@ -2093,7 +2093,7 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare 
 }
 
 // Exercise Browser/Carousel Component
-function ExerciseBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
+function ExerciseBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onGlobalRipple }) {
   const allExercises = exercises;
   const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * allExercises.length));
   const [showShareModal, setShowShareModal] = useState(false);
@@ -2219,7 +2219,7 @@ function ExerciseBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
             📤 Share
           </button>
 
-          <RippleButton type="exercise" data={currentExercise} compact onGlobalRipple={handleGlobalRipple} />
+          <RippleButton type="exercise" data={currentExercise} compact onGlobalRipple={onGlobalRipple} />
         </div>
       </div>
 
@@ -2254,7 +2254,7 @@ function ExerciseBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
 }
 
 // CBT Exercise Browser/Carousel Component
-function CBTBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
+function CBTBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onGlobalRipple }) {
   const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * cbtExercises.length));
   const [showShareModal, setShowShareModal] = useState(false);
 
@@ -2337,7 +2337,7 @@ function CBTBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
             📤 Share
           </button>
 
-          <RippleButton type="cbt" data={currentExercise} compact onGlobalRipple={handleGlobalRipple} />
+          <RippleButton type="cbt" data={currentExercise} compact onGlobalRipple={onGlobalRipple} />
         </div>
       </div>
 
@@ -5717,10 +5717,10 @@ export default function App() {
       </div>
 
       {/* Modals */}
-      <QuoteBrowser isOpen={showQuoteBrowser} onClose={() => setShowQuoteBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} />
-      <ExerciseBrowser isOpen={showExerciseBrowser} onClose={() => setShowExerciseBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} playSound={playSound} />
+      <QuoteBrowser isOpen={showQuoteBrowser} onClose={() => setShowQuoteBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} onGlobalRipple={handleGlobalRipple} />
+      <ExerciseBrowser isOpen={showExerciseBrowser} onClose={() => setShowExerciseBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} playSound={playSound} onGlobalRipple={handleGlobalRipple} />
       <BreathworkBrowser isOpen={showBreathworkBrowser} onClose={() => setShowBreathworkBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} playSound={playSound} onGlobalRipple={handleGlobalRipple} />
-      <CBTBrowser isOpen={showCBTBrowser} onClose={() => setShowCBTBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} playSound={playSound} />
+      <CBTBrowser isOpen={showCBTBrowser} onClose={() => setShowCBTBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} playSound={playSound} onGlobalRipple={handleGlobalRipple} />
       <SettingsModal
         isOpen={showSettingsModal}
         onClose={() => setShowSettingsModal(false)}
