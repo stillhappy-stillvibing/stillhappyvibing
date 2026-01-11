@@ -109,13 +109,10 @@ const incrementHappinessSource = (source) => {
   runTransaction(sourceRef, (current) => (current || 0) + 1);
 };
 
-// Increment daily sparks shared (resets at 12am GMT)
-const incrementDailySparks = () => {
-  const now = new Date();
-  const gmtDate = new Date(now.toUTCString());
-  const today = `${gmtDate.getUTCFullYear()}-${String(gmtDate.getUTCMonth() + 1).padStart(2, '0')}-${String(gmtDate.getUTCDate()).padStart(2, '0')}`;
-  const dailySparksRef = ref(database, `stats/dailyShares/${today}`);
-  runTransaction(dailySparksRef, (current) => (current || 0) + 1);
+// Increment sparks shared (total for all time - like McDonald's billions served!)
+const incrementTotalSparks = () => {
+  const totalSparksRef = ref(database, `stats/totalSparks`);
+  runTransaction(totalSparksRef, (current) => (current || 0) + 1);
 };
 
 // Post a ripple to the global feed
@@ -152,7 +149,7 @@ const postRipple = (type, data) => {
   }
 
   set(rippleRef, rippleData);
-  incrementDailySparks();
+  incrementTotalSparks();
 };
 
 // Track global favorites for quotes and exercises
@@ -1366,22 +1363,17 @@ const shareExercise = (exercise, addPoints) => {
   });
 };
 
-// Global Counter Component - Shows daily sparks shared worldwide
+// Global Counter Component - Shows total sparks created (all-time, like McDonald's billions served!)
 function GlobalCounter() {
-  const [dailySparks, setDailySparks] = useState(0);
+  const [totalSparks, setTotalSparks] = useState(0);
   const [loading, setLoading] = useState(true);
   const [pulse, setPulse] = useState(false);
   const prevCountRef = useRef(0);
 
   useEffect(() => {
-    // Get today's date in GMT
-    const now = new Date();
-    const gmtDate = new Date(now.toUTCString());
-    const today = `${gmtDate.getUTCFullYear()}-${String(gmtDate.getUTCMonth() + 1).padStart(2, '0')}-${String(gmtDate.getUTCDate()).padStart(2, '0')}`;
+    const totalSparksRef = ref(database, `stats/totalSparks`);
 
-    const dailySparksRef = ref(database, `stats/dailyShares/${today}`);
-
-    const unsubscribe = onValue(dailySparksRef, (snapshot) => {
+    const unsubscribe = onValue(totalSparksRef, (snapshot) => {
       const count = snapshot.val() || 0;
 
       // Trigger pulse animation if count increased
@@ -1391,7 +1383,7 @@ function GlobalCounter() {
       }
 
       prevCountRef.current = count;
-      setDailySparks(count);
+      setTotalSparks(count);
       setLoading(false);
     }, (error) => {
       console.log('Firebase read error:', error);
@@ -1414,13 +1406,13 @@ function GlobalCounter() {
   return (
     <div className={`bg-gradient-to-r from-orange-500/10 to-amber-500/10 border border-amber-500/20 rounded-2xl p-4 text-center transition-all duration-500 ${pulse ? 'scale-105 shadow-lg shadow-amber-500/30' : ''}`}>
       <div className="flex items-center justify-center gap-2 mb-3">
-        <span className="text-lg">🌍</span>
+        <span className="text-lg">✨</span>
         <span className="text-amber-300 font-medium text-sm">
-          <span className={`text-white font-bold ${pulse ? 'animate-pulse' : ''}`}>{formatNumber(dailySparks)}</span> sparks shared today
+          <span className={`text-white font-bold ${pulse ? 'animate-pulse' : ''}`}>{formatNumber(totalSparks)}</span> total sparks created
         </span>
       </div>
       <div className="flex items-center justify-center gap-2 pt-3 border-t border-white/10">
-        <span className="text-xl">✨</span>
+        <span className="text-xl">🌍</span>
         <p className="text-sm text-slate-200 italic">Someone just sparked joy in the world, smile with them!</p>
       </div>
     </div>
@@ -1519,7 +1511,7 @@ function ShareSmileCard({ isOpen, onClose, addPoints }) {
 
         if (shareSuccessful) {
           if (addPoints) addPoints(POINTS.SHARE_SMILE);
-          incrementDailySparks(); // Track global daily sparks
+          incrementTotalSparks(); // Track global daily sparks
         }
         setGenerating(false);
       }, 'image/png');
@@ -1628,7 +1620,7 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
         }
 
         if (shareSuccessful) {
-          incrementDailySparks(); // Track global daily sparks
+          incrementTotalSparks(); // Track global daily sparks
         }
         setGenerating(false);
       }, 'image/png');
@@ -3299,7 +3291,7 @@ function TheWorldTab() {
     setRipplePhase('outward');
 
     // Track daily spark shared
-    incrementDailySparks();
+    incrementTotalSparks();
 
     // Haptic feedback
     if (navigator.vibrate) {
@@ -5681,20 +5673,7 @@ export default function App() {
           </button>
         </div>
 
-        {/* Total Joy Points */}
-        <div className="text-center mb-4 relative">
-          {showPointsAnimation && (
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-              <div className="text-2xl font-bold text-yellow-400 animate-bounce">
-                +{pointsGained}
-              </div>
-            </div>
-          )}
-          <p className="text-sm text-slate-400">Total Joy Points</p>
-          <p className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-            {totalPoints.toLocaleString()}
-          </p>
-        </div>
+        {/* Total Joy Points - Hidden (now tracking total sparks in GlobalCounter) */}
 
         {/* Privacy and Footer */}
         <div className="flex items-center justify-center gap-2 text-xs text-slate-500 mt-4">
