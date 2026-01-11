@@ -4793,6 +4793,154 @@ function OfflineMode({ isOpen, onClose, onGlobalRipple, addPoints }) {
   );
 }
 
+// T.N.T. Browser Component - Think New Thoughts Publishing Journals
+function TNTBrowser({ isOpen, onClose }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Dummy journal data (will be replaced with real Amazon KDP data)
+  const journals = [
+    {
+      id: 1,
+      type: 'mantra',
+      title: 'Om Mani Padme Hum - 108 Day Journey',
+      subtitle: '108 repetitions daily for 108 days',
+      description: 'Transform through the tap-tap-tap of repetition. Write this sacred mantra 108 times each day for 108 days. Likita meditation brings the power of the written word to manifest new thoughts.',
+      emoji: '📿',
+      amazonLink: 'https://amazon.com/dummy-link-1'
+    },
+    {
+      id: 2,
+      type: 'creed',
+      title: 'Daily Creed: I Am Abundance',
+      subtitle: 'Morning, noon, and night for 108 days',
+      description: 'Repeat the same powerful creed three times daily for 108 days to completion. As Claude Bristol wrote in T.N.T. It Rocks The Earth - think new thoughts through persistent repetition.',
+      emoji: '🌅',
+      amazonLink: 'https://amazon.com/dummy-link-2'
+    },
+    {
+      id: 3,
+      type: 'mantra',
+      title: 'So Hum - I Am That',
+      subtitle: '108 repetitions daily for 108 days',
+      description: 'Ancient mantra meditation journal. Write "So Hum" 108 times daily, aligning breath with being. The tap-tap-tap creates transformation.',
+      emoji: '🧘',
+      amazonLink: 'https://amazon.com/dummy-link-3'
+    },
+    {
+      id: 4,
+      type: 'creed',
+      title: 'Daily Creed: I Am Health',
+      subtitle: 'Morning, noon, and night for 108 days',
+      description: 'A daily creed focused on vibrant health and vitality. Repeat morning, noon, and night for 108 days. Think new thoughts, create new reality.',
+      emoji: '💪',
+      amazonLink: 'https://amazon.com/dummy-link-4'
+    }
+  ];
+
+  if (!isOpen) return null;
+
+  const currentJournal = journals[currentIndex];
+
+  const handlePrevious = () => {
+    setCurrentIndex((prev) => (prev === 0 ? journals.length - 1 : prev - 1));
+  };
+
+  const handleNext = () => {
+    setCurrentIndex((prev) => (prev === journals.length - 1 ? 0 : prev + 1));
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50 overflow-y-auto" onClick={onClose}>
+      <div className="bg-gradient-to-br from-slate-900 to-red-950 rounded-3xl max-w-2xl w-full p-6 border border-red-400/30 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        {/* Header */}
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-2xl font-bold flex items-center gap-2">
+            <span>🧨</span>
+            <span className="bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent">
+              T.N.T. - Think New Thoughts
+            </span>
+          </h2>
+          <button onClick={onClose} className="text-slate-400 hover:text-white text-xl">✕</button>
+        </div>
+
+        <p className="text-slate-300 text-sm mb-4 text-center italic">
+          Meditation journals from Think New Thoughts Publishing
+        </p>
+
+        {/* Card Counter */}
+        <div className="text-center mb-4">
+          <span className="text-red-400 text-sm font-semibold">
+            {currentIndex + 1} / {journals.length}
+          </span>
+        </div>
+
+        {/* Journal Card */}
+        <div className="bg-gradient-to-br from-red-500/20 to-orange-500/20 border-2 border-red-400/40 rounded-2xl p-6 mb-6 min-h-[400px] flex flex-col">
+          {/* Cover & Title */}
+          <div className="text-center mb-4">
+            <div className="w-48 h-64 mx-auto bg-gradient-to-br from-slate-800 to-slate-700 rounded-lg flex items-center justify-center mb-4 border-2 border-slate-600">
+              <div className="text-8xl">{currentJournal.emoji}</div>
+            </div>
+            <div className="inline-block px-3 py-1 rounded-full bg-orange-500/20 border border-orange-500/30 text-orange-300 text-xs font-semibold mb-2">
+              {currentJournal.type === 'mantra' ? '📿 Mantra Journal' : '🌅 Daily Creed'}
+            </div>
+            <h3 className="text-xl font-bold text-red-300 mb-1">{currentJournal.title}</h3>
+            <p className="text-sm text-slate-400 italic">{currentJournal.subtitle}</p>
+          </div>
+
+          {/* Description */}
+          <div className="flex-1 overflow-y-auto mb-4">
+            <p className="text-sm text-slate-300 leading-relaxed">
+              {currentJournal.description}
+            </p>
+          </div>
+
+          {/* Purchase Button */}
+          <a
+            href={currentJournal.amazonLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full py-3 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 transition font-semibold text-center text-white shadow-lg"
+          >
+            📚 View on Amazon
+          </a>
+        </div>
+
+        {/* Navigation Controls */}
+        <div className="flex items-center justify-center gap-4 mb-4">
+          <button
+            onClick={handlePrevious}
+            className="w-12 h-12 rounded-full bg-red-500/20 border border-red-500/30 text-red-300 hover:bg-red-500/30 transition flex items-center justify-center text-xl"
+          >
+            ←
+          </button>
+
+          <span className="text-slate-400 text-sm font-semibold">
+            Browse Journals
+          </span>
+
+          <button
+            onClick={handleNext}
+            className="w-12 h-12 rounded-full bg-red-500/20 border border-red-500/30 text-red-300 hover:bg-red-500/30 transition flex items-center justify-center text-xl"
+          >
+            →
+          </button>
+        </div>
+
+        {/* Footer */}
+        <div className="text-center">
+          <p className="text-xs text-slate-500 italic">
+            108 days × 108 repetitions = Completion. Transform through the tap-tap-tap of repetition.
+          </p>
+          <p className="text-xs text-slate-500 mt-2">
+            Sparks Of Joy is always free. These journals are optional for deeper practice.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Main App
 export default function App() {
   const [checkins, setCheckins] = useState(() => {
@@ -4956,6 +5104,7 @@ export default function App() {
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showChallengeModal, setShowChallengeModal] = useState(false);
   const [showOfflineMode, setShowOfflineMode] = useState(false);
+  const [showTNTBrowser, setShowTNTBrowser] = useState(false);
   const [showWeeklyReflection, setShowWeeklyReflection] = useState(false);
   const [showMilestone, setShowMilestone] = useState(false);
   const [milestoneData, setMilestoneData] = useState(null);
@@ -5652,11 +5801,7 @@ export default function App() {
 
           {/* T.N.T. - Think New Thoughts */}
           <button
-            onClick={() => {
-              setToastMessage('Coming soon! 💭');
-              setToastEmoji('🧨');
-              setShowToast(true);
-            }}
+            onClick={() => setShowTNTBrowser(true)}
             className="bg-gradient-to-br from-red-500/20 to-orange-500/20 border border-red-500/30 rounded-xl p-4 hover:from-red-500/30 hover:to-orange-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
           >
             <div className="text-3xl">🧨</div>
@@ -5711,6 +5856,10 @@ export default function App() {
         onClose={() => setShowOfflineMode(false)}
         onGlobalRipple={handleGlobalRipple}
         addPoints={addPoints}
+      />
+      <TNTBrowser
+        isOpen={showTNTBrowser}
+        onClose={() => setShowTNTBrowser(false)}
       />
       <WeeklyReflection
         isOpen={showWeeklyReflection}
