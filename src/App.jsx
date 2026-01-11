@@ -4413,8 +4413,6 @@ function OfflineMode({ isOpen, onClose }) {
   const [shuffled, setShuffled] = useState(false);
   const [practiceOrder, setPracticeOrder] = useState([]);
 
-  if (!isOpen) return null;
-
   const practices = [
     {
       id: 'finger',
@@ -4485,7 +4483,9 @@ function OfflineMode({ isOpen, onClose }) {
     if (practiceOrder.length === 0) {
       setPracticeOrder(practices.map((_, idx) => idx));
     }
-  }, []);
+  }, [practiceOrder.length]);
+
+  if (!isOpen) return null;
 
   const currentPractice = practices[practiceOrder[currentIndex]] || practices[0];
 
