@@ -2571,6 +2571,8 @@ function RippleButton({ type, data, compact = false, messages = null, colorSchem
   const [sparks, setSparks] = useState([]);
   const [ripplePhase, setRipplePhase] = useState('outward');
   const phaseIntervalRef = useRef(null);
+  const fourElementsIndexRef = useRef(0); // Track position in Happy, Healthy, Wealthy, Wise sequence
+  const hapticWaveRef = useRef({ count: 0, interval: null }); // Track haptic wave progression
 
   const defaultThankYouMessages = [
     'Thank you', 'Merci', 'Gracias', 'Danke', 'Grazie',
@@ -2580,6 +2582,14 @@ function RippleButton({ type, data, compact = false, messages = null, colorSchem
 
   // Use custom messages if provided, otherwise use default
   const thankYouMessages = messages || defaultThankYouMessages;
+
+  // The four elements in sequence - the drumbeat of repetition
+  const fourElements = [
+    { text: 'Happy', color: 'text-yellow-400' },
+    { text: 'Healthy', color: 'text-sky-400' },
+    { text: 'Wealthy', color: 'text-green-400' },
+    { text: 'Wise', color: 'text-purple-400' }
+  ];
 
   // Color schemes for different ripple types
   const colorSchemes = {
@@ -2608,13 +2618,50 @@ function RippleButton({ type, data, compact = false, messages = null, colorSchem
 
   const scheme = colorSchemes[colorScheme];
 
+  // Generate progressive haptic wave patterns - waves propagating from touch
+  const triggerHapticWave = (waveLevel) => {
+    if (!navigator.vibrate) return;
+
+    // Progressive wave patterns - each level more intense, like waves spreading
+    const wavePatterns = [
+      [20, 10, 20],                           // Level 0: Initial gentle pulse
+      [30, 15, 30, 15, 30],                   // Level 1: Double wave
+      [40, 20, 40, 20, 40, 20, 40],          // Level 2: Triple wave
+      [50, 25, 50, 25, 50, 25, 50, 25, 50], // Level 3: Quadruple wave
+      [60, 30, 60, 30, 60, 30, 60, 30, 60, 30, 60] // Level 4+: Maximum intensity
+    ];
+
+    const patternIndex = Math.min(waveLevel, wavePatterns.length - 1);
+    navigator.vibrate(wavePatterns[patternIndex]);
+  };
+
   const addSpark = () => {
+    // The drumbeat of repetition - mix sequential four-element sparks with thank-you messages
+    const showFourElement = Math.random() < 0.6; // 60% chance for four-element spark
+
+    let sparkMessage, sparkColor;
+
+    if (showFourElement) {
+      // Get the next element in the sequence
+      const currentElement = fourElements[fourElementsIndexRef.current % 4];
+      sparkMessage = currentElement.text;
+      sparkColor = currentElement.color;
+
+      // Advance to next element in sequence
+      fourElementsIndexRef.current += 1;
+    } else {
+      // Random thank-you message
+      sparkMessage = thankYouMessages[Math.floor(Math.random() * thankYouMessages.length)];
+      sparkColor = scheme.spark;
+    }
+
     const newSpark = {
       id: Date.now() + Math.random(),
       left: Math.random() * 80 + 10,
       top: Math.random() * 80 + 10,
       delay: Math.random() * 0.5,
-      message: thankYouMessages[Math.floor(Math.random() * thankYouMessages.length)]
+      message: sparkMessage,
+      color: sparkColor
     };
 
     setSparks(prev => [...prev, newSpark]);
@@ -2629,10 +2676,15 @@ function RippleButton({ type, data, compact = false, messages = null, colorSchem
     e.preventDefault();
     setIsHolding(true);
 
-    // Haptic feedback
-    if (navigator.vibrate) {
-      navigator.vibrate([20, 10, 20]);
-    }
+    // Reset and trigger initial haptic wave
+    hapticWaveRef.current.count = 0;
+    triggerHapticWave(0);
+
+    // Progressive haptic waves every 30 seconds - waves propagating outward
+    hapticWaveRef.current.interval = setInterval(() => {
+      hapticWaveRef.current.count += 1;
+      triggerHapticWave(hapticWaveRef.current.count);
+    }, 30000);
 
     // Animate ripple phases
     phaseIntervalRef.current = setInterval(() => {
@@ -2652,12 +2704,19 @@ function RippleButton({ type, data, compact = false, messages = null, colorSchem
   const handleHoldEnd = () => {
     setIsHolding(false);
 
+    // Clear all intervals
     if (phaseIntervalRef.current) {
       clearInterval(phaseIntervalRef.current);
       if (phaseIntervalRef.sparkInterval) {
         clearInterval(phaseIntervalRef.sparkInterval);
       }
       phaseIntervalRef.current = null;
+    }
+
+    if (hapticWaveRef.current.interval) {
+      clearInterval(hapticWaveRef.current.interval);
+      hapticWaveRef.current.interval = null;
+      hapticWaveRef.current.count = 0;
     }
 
     // Post ripple to global feed
@@ -2704,7 +2763,7 @@ function RippleButton({ type, data, compact = false, messages = null, colorSchem
             {sparks.map(spark => (
               <div
                 key={spark.id}
-                className={`absolute animate-spark ${scheme.spark}`}
+                className={`absolute animate-spark ${spark.color}`}
                 style={{
                   left: `${spark.left}%`,
                   top: `${spark.top}%`,
@@ -2773,7 +2832,7 @@ function RippleButton({ type, data, compact = false, messages = null, colorSchem
           {sparks.map(spark => (
             <div
               key={spark.id}
-              className={`absolute animate-spark ${scheme.spark}`}
+              className={`absolute animate-spark ${spark.color}`}
               style={{
                 left: `${spark.left}%`,
                 top: `${spark.top}%`,
@@ -3235,7 +3294,7 @@ function TheWorldTab() {
             {sparks.map(spark => (
               <div
                 key={spark.id}
-                className="absolute animate-spark text-blue-300"
+                className={`absolute animate-spark ${spark.color}`}
                 style={{
                   left: `${spark.left}%`,
                   top: `${spark.top}%`,
