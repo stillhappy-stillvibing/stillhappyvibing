@@ -2710,6 +2710,15 @@ function TheWorldTab() {
         </p>
       </div>
 
+      {/* Giving/Receiving Status - Above Image */}
+      <div className="mb-4 text-center min-h-[28px]">
+        {isPressed && (
+          <p className="text-amber-300 text-lg font-medium animate-pulse">
+            {ripplePhase === 'outward' ? '🙏 Giving gratitude...' : '💛 Receiving joy...'}
+          </p>
+        )}
+      </div>
+
       {/* Earth Image with Sparks */}
       <div className="relative mb-6 max-w-lg w-full">
         <div
@@ -2766,19 +2775,14 @@ function TheWorldTab() {
             onMouseLeave={handlePressEnd}
             onTouchStart={handlePressStart}
             onTouchEnd={handlePressEnd}
-            className={`w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 border-2 border-amber-300/50 transition-all shadow-lg flex items-center justify-center ${isPressed ? 'scale-95' : 'hover:scale-105'}`}
+            className={`w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 border-2 border-amber-300/50 transition-all shadow-lg flex items-center justify-center select-none ${isPressed ? 'scale-95' : 'hover:scale-105'}`}
+            style={{ userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
           >
-            <span className="text-3xl">✨</span>
+            <span className="text-3xl pointer-events-none">✨</span>
           </button>
           <div className="text-center max-w-md">
             <p className="text-slate-300 text-sm mb-2">
-              {isPressed ? (
-                <span className="text-amber-300 animate-pulse">
-                  {ripplePhase === 'outward' ? '🙏 Giving gratitude...' : '💛 Receiving joy...'}
-                </span>
-              ) : (
-                'Place your ring finger and hold'
-              )}
+              Place your ring finger and hold
             </p>
             <p className="text-slate-400 text-xs leading-relaxed mb-2">
               Close your eyes. Say "thank you, thank you, thank you" three times with joy.
@@ -4685,41 +4689,6 @@ export default function App() {
               </button>
             </div>
 
-            {/* Additional Actions - Invite & Settings */}
-            <div className="grid grid-cols-2 gap-3 mt-4 mb-4">
-              {/* Invite A Friend */}
-              <button
-                onClick={() => {
-                  const inviteText = `Seeds of Joy 🌱\n\nPlant joy, watch it bloom, share it with the world.\n\n✨ Sparks Of Joy - Mental Dojo practices\n🌱 Seeds Of Thought - Wisdom to plant\n🌬️ Breath Of Fresh Air - Calming patterns\n💛 Share A Smile - Send joy\n🌊 Ripples Of Joy - Witness sparks\n\nSmile, and the whole world smiles with you.\n\nsmileswithyou.com`;
-                  if (navigator.share) {
-                    navigator.share({
-                      title: 'Seeds of Joy',
-                      text: inviteText
-                    }).catch(() => {});
-                  } else {
-                    navigator.clipboard.writeText(inviteText);
-                    setToastMessage('Invite link copied!');
-                    setToastEmoji('📋');
-                    setShowToast(true);
-                    setTimeout(() => setShowToast(false), 2000);
-                  }
-                }}
-                className="bg-gradient-to-br from-pink-500/20 to-rose-500/20 border border-pink-500/30 rounded-xl p-4 hover:from-pink-500/30 hover:to-rose-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
-              >
-                <div className="text-3xl">💌</div>
-                <div className="font-semibold text-xs">Invite A Friend</div>
-              </button>
-
-              {/* Settings */}
-              <button
-                onClick={() => setShowSettingsModal(true)}
-                className="bg-gradient-to-br from-slate-500/20 to-gray-500/20 border border-slate-500/30 rounded-xl p-4 hover:from-slate-500/30 hover:to-gray-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
-              >
-                <div className="text-3xl">⚙️</div>
-                <div className="font-semibold text-xs">Settings</div>
-              </button>
-            </div>
-
             {/* Hidden: Inline Check-In - kept for backend logic */}
             <div style={{ display: 'none' }}>
               {recoveryActive ? (
@@ -4829,8 +4798,43 @@ export default function App() {
             </div>
           </>
 
+        {/* Additional Actions - Invite & Settings */}
+        <div className="grid grid-cols-2 gap-3 mt-6 mb-6">
+          {/* Invite A Friend */}
+          <button
+            onClick={() => {
+              const inviteText = `Seeds of Joy 🌱\n\nPlant joy, watch it bloom, share it with the world.\n\n✨ Sparks Of Joy - Mental Dojo practices\n🌱 Seeds Of Thought - Wisdom to plant\n🌬️ Breath Of Fresh Air - Calming patterns\n💛 Share A Smile - Send joy\n🌊 Ripples Of Joy - Witness sparks\n\nSmile, and the whole world smiles with you.\n\nsmileswithyou.com`;
+              if (navigator.share) {
+                navigator.share({
+                  title: 'Seeds of Joy',
+                  text: inviteText
+                }).catch(() => {});
+              } else {
+                navigator.clipboard.writeText(inviteText);
+                setToastMessage('Invite link copied!');
+                setToastEmoji('📋');
+                setShowToast(true);
+                setTimeout(() => setShowToast(false), 2000);
+              }
+            }}
+            className="bg-gradient-to-br from-pink-500/20 to-rose-500/20 border border-pink-500/30 rounded-xl p-4 hover:from-pink-500/30 hover:to-rose-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
+          >
+            <div className="text-3xl">💌</div>
+            <div className="font-semibold text-xs">Invite A Friend</div>
+          </button>
+
+          {/* Settings */}
+          <button
+            onClick={() => setShowSettingsModal(true)}
+            className="bg-gradient-to-br from-slate-500/20 to-gray-500/20 border border-slate-500/30 rounded-xl p-4 hover:from-slate-500/30 hover:to-gray-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
+          >
+            <div className="text-3xl">⚙️</div>
+            <div className="font-semibold text-xs">Settings</div>
+          </button>
+        </div>
+
         {/* Privacy and Footer */}
-        <div className="flex items-center justify-center gap-2 text-xs text-slate-500 mt-6">
+        <div className="flex items-center justify-center gap-2 text-xs text-slate-500 mt-4">
           <span>🔒</span>
           <span>All data stays on your device</span>
         </div>
