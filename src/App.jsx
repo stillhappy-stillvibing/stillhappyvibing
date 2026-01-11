@@ -492,9 +492,9 @@ const exercises = [
   },
   {
     title: "Dream Garden",
-    subtitle: "Plant seeds of joy in your mind",
-    steps: ["Close your eyes and take three slow breaths", "Imagine a beautiful garden in your mind", "Think of one thing that would bring you joy", "Visualize it as a seed of light", "Gently plant it in the garden of your mind", "Watch it take root with warmth and care", "Carry this seed with you throughout your day"],
-    practiceInstruction: "Close your eyes. Visualize a beautiful garden. Plant one seed of something that would bring you joy. Watch it gently take root in your mind.",
+    subtitle: "Plant sparks of joy in your mind",
+    steps: ["Close your eyes and take three slow breaths", "Imagine a beautiful garden in your mind", "Think of one thing that would bring you joy", "Visualize it as a spark of light", "Gently plant it in the garden of your mind", "Watch it take root with warmth and care", "Carry this spark with you throughout your day"],
+    practiceInstruction: "Close your eyes. Visualize a beautiful garden. Plant one spark of something that would bring you joy. Watch it gently take root in your mind.",
     seedThought: "The dreams you plant today bloom into tomorrow's reality"
   },
   {
@@ -1623,7 +1623,10 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
               <p className="text-lg italic mb-4 leading-relaxed">"{data.text}"</p>
               <p className="text-sm font-semibold mb-1">— {data.author}</p>
               <p className="text-xs opacity-80 mb-4">{data.tradition}</p>
-              <p className="text-xs font-bold opacity-90">Smile, and the whole world smileswithyou.com.</p>
+              <p className="text-xs opacity-90">
+                <span className="font-medium">Smile, and the whole world </span>
+                <span className="font-bold italic underline text-orange-300">smileswithyou.com!</span>
+              </p>
             </div>
           </div>
         )}
@@ -1654,7 +1657,7 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
 
               <p className="text-xs text-center opacity-90">
                 <span className="font-medium">Smile, and the whole world </span>
-                <span className="font-bold">smileswithyou.com</span>
+                <span className="font-bold italic underline text-amber-600">smileswithyou.com!</span>
               </p>
             </div>
           </div>
@@ -1696,7 +1699,7 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
 
               <p className="text-sm opacity-90">
                 <span className="font-medium">Smile, and the whole world </span>
-                <span className="font-bold">smileswithyou.com</span>
+                <span className="font-bold italic underline text-amber-600">smileswithyou.com!</span>
               </p>
             </div>
           </div>
@@ -1743,7 +1746,10 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
                 <p className="text-xs font-semibold">🏆 {data.earnedMilestones}/{data.totalMilestones} milestones unlocked</p>
               </div>
 
-              <p className="text-xs font-bold opacity-90 mt-4">Smile, and the whole world smileswithyou.com.</p>
+              <p className="text-xs opacity-90 mt-4">
+                <span className="font-medium">Smile, and the whole world </span>
+                <span className="font-bold italic underline text-orange-300">smileswithyou.com!</span>
+              </p>
             </div>
           </div>
         )}
@@ -1851,6 +1857,7 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare 
   const [isComplete, setIsComplete] = useState(false);
   const [showSparks, setShowSparks] = useState(false);
   const [foundSpark, setFoundSpark] = useState(false); // Track if user clicked button vs timeout
+  const earlyFlameRef = useRef(false); // Track if "Light The Flame" was clicked early
 
   // Calculate progress percentage for glow effect (0% to 100%)
   const progress = ((30 - timeLeft) / 30) * 100;
@@ -1862,6 +1869,7 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare 
       setIsComplete(false);
       setShowSparks(false);
       setFoundSpark(false);
+      earlyFlameRef.current = false; // Reset ref when modal closes
       return;
     }
 
@@ -1869,11 +1877,14 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare 
       setTimeLeft(prev => {
         if (prev <= 1) {
           clearInterval(timer);
-          setIsComplete(true);
-          setShowSparks(true);
-          setFoundSpark(false); // Time ran out, they planted the seed
-          // Hide sparks after 2 seconds
-          setTimeout(() => setShowSparks(false), 2000);
+          // Only auto-complete if "Light The Flame" wasn't clicked
+          if (!earlyFlameRef.current) {
+            setIsComplete(true);
+            setShowSparks(true);
+            setFoundSpark(false); // Time ran out, they planted the seed
+            // Hide sparks after 2 seconds
+            setTimeout(() => setShowSparks(false), 2000);
+          }
           return 0;
         }
         return prev - 1;
@@ -1927,6 +1938,7 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare 
 
             <button
               onClick={() => {
+                earlyFlameRef.current = true; // Mark that flame was lit early
                 setIsComplete(true);
                 setShowSparks(true);
                 setFoundSpark(true); // User clicked the button!
@@ -2268,6 +2280,7 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
   const [isActive, setIsActive] = useState(false);
   const [cycles, setCycles] = useState(0);
   const [showCompletion, setShowCompletion] = useState(false);
+  const earlySparkRef = useRef(false); // Track if "Light it up!" was clicked
 
   const currentPattern = breathworkPatterns[currentIndex];
   const targetCycles = Math.floor(60 / currentPattern.duration); // cycles in 1 minute
@@ -2281,6 +2294,7 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
     setIsActive(false);
     setCycles(0);
     setShowCompletion(false);
+    earlySparkRef.current = false; // Reset early spark flag
   };
 
   // Randomize on open for variety
@@ -2294,6 +2308,7 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
     setIsActive(true);
     setCycles(0);
     setShowCompletion(false);
+    earlySparkRef.current = false; // Reset early spark flag
   };
 
   const handleBoost = () => {
@@ -2312,7 +2327,8 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
     const cycleTimer = setInterval(() => {
       setCycles(prev => {
         const newCycles = prev + 1;
-        if (newCycles >= targetCycles) {
+        // Only auto-complete if "Light it up!" wasn't clicked
+        if (!earlySparkRef.current && newCycles >= targetCycles) {
           setIsActive(false);
           setShowCompletion(true);
           return newCycles;
@@ -2403,6 +2419,7 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
                 </p>
                 <button
                   onClick={() => {
+                    earlySparkRef.current = true; // Mark that spark was found early
                     setIsActive(false);
                     setShowCompletion(true);
                   }}
@@ -3783,8 +3800,8 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats, ch
       localStorage.setItem(`happinessNotificationSettings${CURRENT_YEAR}`, JSON.stringify(updatedSettings));
 
       // Show test notification
-      new Notification('Seeds of Joy 🌱', {
-        body: 'Notifications enabled! We\'ll remind you to plant seeds of joy throughout the day.',
+      new Notification('Sparks Of Joy ✨', {
+        body: 'Notifications enabled! We\'ll remind you to find your spark throughout the day.',
         icon: '/pwa-512x512.svg'
       });
     }
@@ -3919,7 +3936,7 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats, ch
           <p className="text-sm text-slate-300 mb-3">Help someone you love have a happier {CURRENT_YEAR}</p>
           <button
             onClick={() => {
-              const shareText = `Seeds of Joy 🌱\n\nPlant joy, watch it bloom, share it with the world.\n\n✨ Sparks Of Joy - Mental Dojo practices\n🌱 Seeds Of Thought - Wisdom to plant in your mind\n🌬️ Breath Of Fresh Air - Calming patterns\n💙 CBT Tools - Mindset shifts\n\nSmile, and the whole world smileswithyou.com.`;
+              const shareText = `Sparks Of Joy ✨\n\n✨ Sparks Of Joy - Mental Dojo practices\n🌱 Seeds Of Thought - Wisdom to plant\n🌬️ Breath Of Fresh Air - Calming patterns\n💙 Tools Of Thought - Mindset shifts\n🌊 Ripples Of Joy - Witness sparks\n\nSmile, and the whole world smileswithyou.com!`;
               shareContent(shareText, 'Shared to clipboard!');
             }}
             className="w-full py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold hover:scale-105 transition"
@@ -3949,7 +3966,7 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats, ch
 
         {/* Version Info */}
         <div className="mt-6 pt-4 border-t border-white/10 text-center">
-          <p className="text-xs text-slate-500">Seeds of Joy v{APP_VERSION}</p>
+          <p className="text-xs text-slate-500">Sparks Of Joy v{APP_VERSION}</p>
           <p className="text-xs text-slate-600">Build {BUILD_DATE}</p>
         </div>
       </div>
@@ -4627,10 +4644,10 @@ export default function App() {
         <header className="text-center py-3">
           <div className="flex items-center justify-between mb-1">
             <div className="w-8" />
-            <h1 className="text-xl font-bold bg-gradient-to-r from-green-400 via-yellow-400 to-orange-400 bg-clip-text text-transparent">🌱 Seeds of Joy ✨</h1>
+            <h1 className="text-xl font-bold bg-gradient-to-r from-orange-400 via-yellow-400 to-amber-400 bg-clip-text text-transparent">✨ Sparks Of Joy ✨</h1>
             <button onClick={() => setShowSettingsModal(true)} className="text-slate-400 hover:text-white text-xl">⚙️</button>
           </div>
-          <p className="text-slate-400 text-xs mb-2">Plant joy, watch it bloom, share it with the world</p>
+          <p className="text-slate-400 text-xs mb-2">Smile, and the whole world smiles with you</p>
         </header>
 
         {/* No tab navigation - single page interface */}
@@ -4819,10 +4836,10 @@ export default function App() {
           {/* Invite A Friend */}
           <button
             onClick={() => {
-              const inviteText = `Seeds of Joy 🌱\n\nPlant joy, watch it bloom, share it with the world.\n\n✨ Sparks Of Joy - Mental Dojo practices\n🌱 Seeds Of Thought - Wisdom to plant\n🌬️ Breath Of Fresh Air - Calming patterns\n💛 Share A Smile - Send joy\n🌊 Ripples Of Joy - Witness sparks\n\nSmile, and the whole world smiles with you.\n\nsmileswithyou.com`;
+              const inviteText = `Sparks Of Joy ✨\n\n✨ Sparks Of Joy - Mental Dojo practices\n🌱 Seeds Of Thought - Wisdom to plant\n🌬️ Breath Of Fresh Air - Calming patterns\n💛 Share A Smile - Send joy\n🌊 Ripples Of Joy - Witness sparks\n\nSmile, and the whole world smileswithyou.com!`;
               if (navigator.share) {
                 navigator.share({
-                  title: 'Seeds of Joy',
+                  title: 'Sparks Of Joy',
                   text: inviteText
                 }).catch(() => {});
               } else {
@@ -4855,7 +4872,7 @@ export default function App() {
           <span>All data stays on your device</span>
         </div>
 
-        <footer className="text-center mt-4 text-slate-500 text-xs">Made with 💛 for a happier {CURRENT_YEAR}</footer>
+        <footer className="text-center mt-4 text-slate-500 text-xs">Made with 💛 for a happier world!</footer>
       </div>
 
       {/* Modals */}

@@ -1,7 +1,7 @@
 {
-  "name": "seeds-of-joy",
+  "name": "sparks-of-joy",
   "version": "5.4.0",
-  "description": "Plant seeds of joy, watch them bloom, share them with the world",
+  "description": "Smile, and the whole world smiles with you. Find your spark of joy.",
   "type": "module",
   "scripts": {
     "dev": "vite",
