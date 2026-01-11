@@ -1889,7 +1889,7 @@ function QuoteBrowser({ isOpen, onClose, addPoints, onBoost, onGlobalRipple }) {
 
 // Mindfulness Visual Meditation Component - 30 second Tratak (circle gazing)
 // Mental Dojo - 30-second practice space
-function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare }) {
+function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare, onGlobalRipple }) {
   const [timeLeft, setTimeLeft] = useState(30);
   const [isComplete, setIsComplete] = useState(false);
   const [showSparks, setShowSparks] = useState(false);
@@ -2057,7 +2057,7 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare 
                   'Thank you', 'Merci', 'Gracias', 'Danke', 'Grazie',
                   'Obrigado', 'Спасибо', 'ありがとう', '谢谢', 'شكرا'
                 ]}
-                onGlobalRipple={handleGlobalRipple}
+                onGlobalRipple={onGlobalRipple}
               />
             </div>
 
@@ -2247,6 +2247,7 @@ function ExerciseBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onGlo
           onClose={() => setShowMentalDojo(false)}
           addPoints={addPoints}
           onShare={handleDojoShare}
+          onGlobalRipple={onGlobalRipple}
         />
       )}
     </div>
