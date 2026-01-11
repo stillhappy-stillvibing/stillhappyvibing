@@ -141,6 +141,9 @@ const postRipple = (type, data) => {
   } else if (type === 'breathwork') {
     rippleData.name = data.name;
     rippleData.emoji = data.emoji;
+  } else if (type === 'mentalDojo') {
+    rippleData.title = data.title;
+    rippleData.seedThought = data.seedThought;
   }
 
   set(rippleRef, rippleData);
@@ -2009,13 +2012,43 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare 
             </h3>
 
             {/* The seed thought */}
-            <div className="relative mb-12">
+            <div className="relative mb-8">
               <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-yellow-500/10 to-amber-500/10 blur-2xl rounded-2xl"></div>
               <div className="relative bg-gradient-to-br from-orange-500/20 to-yellow-500/20 border-2 border-orange-400/30 rounded-2xl p-10">
                 <p className="text-3xl font-medium leading-relaxed italic text-orange-100">
                   "{exercise.seedThought}"
                 </p>
               </div>
+            </div>
+
+            {/* Byron quote and ripple invitation */}
+            <div className="mb-8 text-center">
+              <p className="text-orange-200/80 text-lg mb-1 italic">
+                "Happiness was born a twin"
+              </p>
+              <p className="text-slate-400 text-sm">
+                Share your inner spark with the world
+              </p>
+            </div>
+
+            {/* Ripple button with personal seeds */}
+            <div className="mb-8">
+              <RippleButton
+                type="mentalDojo"
+                data={{
+                  title: exercise.title,
+                  seedThought: exercise.seedThought
+                }}
+                messages={[
+                  'I am a force for good!',
+                  'I am already blessed!',
+                  'every action is a mirror, let it reflect my best!',
+                  'thank you! thank you! thank you!',
+                  'Happiness was born a twin',
+                  'Thank you', 'Merci', 'Gracias', 'Danke', 'Grazie',
+                  'Obrigado', 'Спасибо', 'ありがとう', '谢谢', 'شكرا'
+                ]}
+              />
             </div>
 
             <div className="flex gap-3 flex-wrap justify-center">
@@ -2523,18 +2556,21 @@ function MicroMoment() {
 }
 
 // Ripple Button Component - Hold to ripple content to the world
-function RippleButton({ type, data, compact = false }) {
+function RippleButton({ type, data, compact = false, messages = null }) {
   const [isHolding, setIsHolding] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [sparks, setSparks] = useState([]);
   const [ripplePhase, setRipplePhase] = useState('outward');
   const phaseIntervalRef = useRef(null);
 
-  const thankYouMessages = [
+  const defaultThankYouMessages = [
     'Thank you', 'Merci', 'Gracias', 'Danke', 'Grazie',
     'Obrigado', 'Спасибо', 'ありがとう', '谢谢', 'شكرا',
     'Teşekkürler', 'Tack', 'Dziękuję', '감사합니다', 'Kiitos'
   ];
+
+  // Use custom messages if provided, otherwise use default
+  const thankYouMessages = messages || defaultThankYouMessages;
 
   const addSpark = () => {
     const newSpark = {
@@ -2821,6 +2857,20 @@ function RipplesFeed() {
                 <div className="flex-1">
                   <p className="text-xs text-cyan-300 mb-1">Someone rippled a breath pattern</p>
                   <p className="text-sm font-semibold text-slate-200">{ripple.name}</p>
+                </div>
+              </div>
+              <p className="text-xs text-slate-500 text-right">{formatTimeAgo(ripple.timestamp)}</p>
+            </>
+          )}
+
+          {ripple.type === 'mentalDojo' && (
+            <>
+              <div className="flex items-start gap-3 mb-2">
+                <span className="text-2xl">🥋✨</span>
+                <div className="flex-1">
+                  <p className="text-xs text-cyan-300 mb-1">Someone found their inner spark</p>
+                  <p className="text-sm font-semibold text-slate-200">{ripple.title}</p>
+                  <p className="text-xs italic text-slate-400 mt-1">"{ripple.seedThought}"</p>
                 </div>
               </div>
               <p className="text-xs text-slate-500 text-right">{formatTimeAgo(ripple.timestamp)}</p>
