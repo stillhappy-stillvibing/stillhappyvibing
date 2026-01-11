@@ -2612,9 +2612,10 @@ function WorldExerciseCarousel({ topExercises }) {
 function TheWorldTab() {
   const [sparks, setSparks] = useState([]);
   const [sparkCount, setSparkCount] = useState(0);
-  const [showRipples, setShowRipples] = useState(false);
-  const [rippleKey, setRippleKey] = useState(0);
+  const [isPressed, setIsPressed] = useState(false);
+  const [ripplePhase, setRipplePhase] = useState('outward'); // 'outward' or 'inward'
   const imageRef = useRef(null);
+  const phaseInterval = useRef(null);
 
   // Thank you in different languages
   const thankYouMessages = [
@@ -2641,28 +2642,41 @@ function TheWorldTab() {
     }, 3000);
   };
 
-  // Plant seeds of joy - creates ripples and sparks
-  const plantSeeds = () => {
+  // Handle button press - start meditation
+  const handlePressStart = () => {
+    setIsPressed(true);
+    setRipplePhase('outward');
+
     // Haptic feedback
     if (navigator.vibrate) {
-      navigator.vibrate([30, 20, 30]);
+      navigator.vibrate([20, 10, 20]);
     }
 
-    // Show ripples from center
-    setShowRipples(true);
-    setRippleKey(prev => prev + 1); // Reset animation
+    // Alternate between outward and inward ripples
+    phaseInterval.current = setInterval(() => {
+      setRipplePhase(prev => prev === 'outward' ? 'inward' : 'outward');
+    }, 1500);
 
-    // Create multiple sparks around the world
-    for (let i = 0; i < 5; i++) {
-      setTimeout(() => {
+    // Add sparks while pressed
+    const sparkInterval = setInterval(() => {
+      if (Math.random() > 0.7) { // 30% chance each interval
         addSpark();
-      }, i * 100);
-    }
+      }
+    }, 200);
 
-    // Hide ripples after animation
-    setTimeout(() => {
-      setShowRipples(false);
-    }, 2000);
+    // Store interval for cleanup
+    phaseInterval.sparkInterval = sparkInterval;
+  };
+
+  const handlePressEnd = () => {
+    setIsPressed(false);
+    if (phaseInterval.current) {
+      clearInterval(phaseInterval.current);
+      if (phaseInterval.sparkInterval) {
+        clearInterval(phaseInterval.sparkInterval);
+      }
+      phaseInterval.current = null;
+    }
   };
 
   // Generate background sparks at random intervals
@@ -2703,16 +2717,16 @@ function TheWorldTab() {
             style={{ minHeight: '300px', maxHeight: '500px', objectFit: 'contain' }}
           />
 
-          {/* Concentric Ripple Circles with "thank you" mantra */}
-          {showRipples && (
-            <div key={rippleKey} className="absolute inset-0 pointer-events-none flex items-center justify-center">
-              <div className="absolute animate-ripple-1 flex items-center justify-center">
+          {/* Concentric Ripple Circles - Outward and Inward */}
+          {isPressed && (
+            <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+              <div className={`absolute ${ripplePhase === 'outward' ? 'animate-ripple-out-1' : 'animate-ripple-in-1'}`}>
                 <span className="text-amber-300 text-xs font-light">thank you</span>
               </div>
-              <div className="absolute animate-ripple-2 flex items-center justify-center">
+              <div className={`absolute ${ripplePhase === 'outward' ? 'animate-ripple-out-2' : 'animate-ripple-in-2'}`}>
                 <span className="text-amber-300 text-xs font-light">thank you</span>
               </div>
-              <div className="absolute animate-ripple-3 flex items-center justify-center">
+              <div className={`absolute ${ripplePhase === 'outward' ? 'animate-ripple-out-3' : 'animate-ripple-in-3'}`}>
                 <span className="text-amber-300 text-xs font-light">thank you</span>
               </div>
             </div>
@@ -2738,21 +2752,38 @@ function TheWorldTab() {
           </div>
         </div>
 
-        {/* Tree Button - Plant Seeds of Joy */}
+        {/* Meditation Button - Small Round Spark */}
         <div className="flex flex-col items-center mt-6 gap-3">
           <button
-            onClick={plantSeeds}
-            className="w-24 h-24 rounded-full bg-gradient-to-br from-green-600 to-emerald-700 border-4 border-green-500/30 hover:from-green-500 hover:to-emerald-600 transition-all hover:scale-105 active:scale-95 flex items-center justify-center shadow-lg"
+            onMouseDown={handlePressStart}
+            onMouseUp={handlePressEnd}
+            onMouseLeave={handlePressEnd}
+            onTouchStart={handlePressStart}
+            onTouchEnd={handlePressEnd}
+            className={`w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 border-2 border-amber-300/50 transition-all shadow-lg flex items-center justify-center ${isPressed ? 'scale-95' : 'hover:scale-105'}`}
           >
-            <span className="text-5xl">🌳</span>
+            <span className="text-3xl">✨</span>
           </button>
-          <p className="text-slate-300 text-sm font-medium">Plant Seeds of Joy</p>
-          <p className="text-slate-400 text-xs text-center max-w-xs">
-            Press the tree to send ripples of gratitude around the world
-          </p>
-          <p className="text-slate-400 text-xs">
-            <span className="text-yellow-400 font-semibold">{sparkCount}</span> sparks witnessed
-          </p>
+          <div className="text-center max-w-md">
+            <p className="text-slate-300 text-sm mb-2">
+              {isPressed ? (
+                <span className="text-amber-300 animate-pulse">
+                  {ripplePhase === 'outward' ? '🙏 Giving gratitude...' : '💛 Receiving joy...'}
+                </span>
+              ) : (
+                'Place your ring finger and hold'
+              )}
+            </p>
+            <p className="text-slate-400 text-xs leading-relaxed mb-2">
+              Close your eyes. Say "thank you, thank you, thank you" three times with joy.
+            </p>
+            <p className="text-slate-400 text-xs italic">
+              Radiate happiness and receive it 10-fold
+            </p>
+            <p className="text-slate-400 text-xs mt-3">
+              <span className="text-yellow-400 font-semibold">{sparkCount}</span> sparks witnessed
+            </p>
+          </div>
         </div>
       </div>
 
@@ -2795,34 +2826,63 @@ function TheWorldTab() {
         .animate-fade-in {
           animation: fade-in 1s ease-in;
         }
-        @keyframes ripple {
+        @keyframes ripple-outward {
           0% {
-            width: 60px;
-            height: 60px;
-            opacity: 0.8;
-            border: 2px solid rgba(251, 191, 36, 0.8);
+            width: 80px;
+            height: 80px;
+            opacity: 0.9;
+            border: 2px solid rgba(251, 191, 36, 0.9);
           }
           100% {
-            width: 300px;
-            height: 300px;
+            width: 400px;
+            height: 400px;
             opacity: 0;
             border: 2px solid rgba(251, 191, 36, 0);
           }
         }
-        .animate-ripple-1, .animate-ripple-2, .animate-ripple-3 {
+        @keyframes ripple-inward {
+          0% {
+            width: 400px;
+            height: 400px;
+            opacity: 0;
+            border: 2px solid rgba(251, 191, 36, 0);
+          }
+          100% {
+            width: 80px;
+            height: 80px;
+            opacity: 0.9;
+            border: 2px solid rgba(251, 191, 36, 0.9);
+          }
+        }
+        .animate-ripple-out-1, .animate-ripple-out-2, .animate-ripple-out-3,
+        .animate-ripple-in-1, .animate-ripple-in-2, .animate-ripple-in-3 {
           position: absolute;
           border-radius: 50%;
           pointer-events: none;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
-        .animate-ripple-1 {
-          animation: ripple 2s ease-out;
+        .animate-ripple-out-1 {
+          animation: ripple-outward 1.5s ease-out infinite;
         }
-        .animate-ripple-2 {
-          animation: ripple 2s ease-out;
+        .animate-ripple-out-2 {
+          animation: ripple-outward 1.5s ease-out infinite;
           animation-delay: 0.3s;
         }
-        .animate-ripple-3 {
-          animation: ripple 2s ease-out;
+        .animate-ripple-out-3 {
+          animation: ripple-outward 1.5s ease-out infinite;
+          animation-delay: 0.6s;
+        }
+        .animate-ripple-in-1 {
+          animation: ripple-inward 1.5s ease-in infinite;
+        }
+        .animate-ripple-in-2 {
+          animation: ripple-inward 1.5s ease-in infinite;
+          animation-delay: 0.3s;
+        }
+        .animate-ripple-in-3 {
+          animation: ripple-inward 1.5s ease-in infinite;
           animation-delay: 0.6s;
         }
       `}</style>
