@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '8.4.1';
+const APP_VERSION = '8.5.0';
 const BUILD_DATE = '2026-01-11';
 
 // Gamification: Point Values
@@ -144,6 +144,10 @@ const postRipple = (type, data) => {
   } else if (type === 'mentalDojo') {
     rippleData.title = data.title;
     rippleData.seedThought = data.seedThought;
+  } else if (type === 'offlinePractice') {
+    rippleData.title = data.title;
+    rippleData.subtitle = data.subtitle;
+    rippleData.emoji = data.emoji;
   }
 
   set(rippleRef, rippleData);
@@ -2909,6 +2913,20 @@ function RipplesFeed() {
               <p className="text-xs text-slate-500 text-right">{formatTimeAgo(ripple.timestamp)}</p>
             </>
           )}
+
+          {ripple.type === 'offlinePractice' && (
+            <>
+              <div className="flex items-start gap-3 mb-2">
+                <span className="text-2xl">{ripple.emoji}</span>
+                <div className="flex-1">
+                  <p className="text-xs text-cyan-300 mb-1">Someone shared an offline practice</p>
+                  <p className="text-sm font-semibold text-slate-200">{ripple.title}</p>
+                  <p className="text-xs italic text-slate-400 mt-1">{ripple.subtitle}</p>
+                </div>
+              </div>
+              <p className="text-xs text-slate-500 text-right">{formatTimeAgo(ripple.timestamp)}</p>
+            </>
+          )}
         </div>
       ))}
     </div>
@@ -4389,9 +4407,11 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats, ch
   );
 }
 
-// Offline Mode Component - Joy practices for anytime, anywhere
+// Offline Mode Component - Joy practices carousel
 function OfflineMode({ isOpen, onClose }) {
-  const [expandedPractice, setExpandedPractice] = useState(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [shuffled, setShuffled] = useState(false);
+  const [practiceOrder, setPracticeOrder] = useState([]);
 
   if (!isOpen) return null;
 
@@ -4460,9 +4480,40 @@ function OfflineMode({ isOpen, onClose }) {
     }
   ];
 
+  // Initialize practice order on mount
+  useEffect(() => {
+    if (practiceOrder.length === 0) {
+      setPracticeOrder(practices.map((_, idx) => idx));
+    }
+  }, []);
+
+  const currentPractice = practices[practiceOrder[currentIndex]] || practices[0];
+
+  const handlePrevious = () => {
+    setCurrentIndex((prev) => (prev === 0 ? practices.length - 1 : prev - 1));
+  };
+
+  const handleNext = () => {
+    setCurrentIndex((prev) => (prev === practices.length - 1 ? 0 : prev + 1));
+  };
+
+  const handleShuffle = () => {
+    const shuffledIndices = [...practices.map((_, idx) => idx)].sort(() => Math.random() - 0.5);
+    setPracticeOrder(shuffledIndices);
+    setCurrentIndex(0);
+    setShuffled(true);
+  };
+
+  const handleSequential = () => {
+    setPracticeOrder(practices.map((_, idx) => idx));
+    setCurrentIndex(0);
+    setShuffled(false);
+  };
+
   return (
     <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50 overflow-y-auto" onClick={onClose}>
       <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-2xl w-full p-6 border border-amber-400/30 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        {/* Header */}
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-2xl font-bold flex items-center gap-2">
             <span>🌟</span>
@@ -4473,63 +4524,100 @@ function OfflineMode({ isOpen, onClose }) {
           <button onClick={onClose} className="text-slate-400 hover:text-white text-xl">✕</button>
         </div>
 
-        <p className="text-slate-300 text-sm mb-6 text-center italic">
+        <p className="text-slate-300 text-sm mb-4 text-center italic">
           Joy practices for anytime, anywhere. Anchor your happiness beyond the app.
         </p>
 
-        <div className="space-y-3">
-          {practices.map(practice => (
-            <div
-              key={practice.id}
-              className="bg-gradient-to-r from-orange-500/10 to-amber-500/10 border border-orange-500/30 rounded-xl overflow-hidden transition hover:border-orange-500/50"
-            >
-              <button
-                onClick={() => setExpandedPractice(expandedPractice === practice.id ? null : practice.id)}
-                className="w-full p-4 flex items-center gap-4 text-left hover:bg-white/5 transition"
-              >
-                <div className="text-4xl">{practice.emoji}</div>
-                <div className="flex-1">
-                  <h3 className="font-bold text-orange-300">{practice.title}</h3>
-                  <p className="text-xs text-slate-400">{practice.subtitle}</p>
-                </div>
-                <div className="text-orange-400 text-xl">
-                  {expandedPractice === practice.id ? '▼' : '▶'}
-                </div>
-              </button>
-
-              {expandedPractice === practice.id && (
-                <div className="px-4 pb-4 animate-in fade-in duration-300">
-                  <p className="text-sm text-orange-200 mb-4 italic">{practice.description}</p>
-
-                  {practice.id === 'finger' && (
-                    <div className="space-y-3">
-                      <div className="bg-slate-800/50 rounded-xl p-4 space-y-2">
-                        {practice.steps.map((step, idx) => (
-                          <div key={idx} className="flex items-center gap-3">
-                            <span className="text-2xl">{step.emoji}</span>
-                            <span className="text-slate-400 text-sm flex-1">Touch thumb to {step.finger}</span>
-                            <span className={`font-bold ${step.color}`}>{step.word}</span>
-                          </div>
-                        ))}
-                      </div>
-                      <p className="text-sm text-slate-300 leading-relaxed">
-                        {practice.instructions}
-                      </p>
-                    </div>
-                  )}
-
-                  {practice.content && (
-                    <p className="text-sm text-slate-300 leading-relaxed">
-                      {practice.content}
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
+        {/* Card Counter */}
+        <div className="text-center mb-4">
+          <span className="text-amber-400 text-sm font-semibold">
+            {currentIndex + 1} / {practices.length}
+          </span>
         </div>
 
-        <div className="mt-6 text-center">
+        {/* Practice Card */}
+        <div className="bg-gradient-to-br from-orange-500/20 to-amber-500/20 border-2 border-orange-400/40 rounded-2xl p-6 mb-6 min-h-[400px] flex flex-col">
+          {/* Emoji & Title */}
+          <div className="text-center mb-4">
+            <div className="text-6xl mb-3">{currentPractice.emoji}</div>
+            <h3 className="text-2xl font-bold text-orange-300 mb-1">{currentPractice.title}</h3>
+            <p className="text-sm text-slate-400 italic">{currentPractice.subtitle}</p>
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 overflow-y-auto">
+            <p className="text-sm text-orange-200 mb-4 italic">{currentPractice.description}</p>
+
+            {currentPractice.id === 'finger' && (
+              <div className="space-y-3">
+                <div className="bg-slate-800/50 rounded-xl p-4 space-y-2">
+                  {currentPractice.steps.map((step, idx) => (
+                    <div key={idx} className="flex items-center gap-3">
+                      <span className="text-2xl">{step.emoji}</span>
+                      <span className="text-slate-400 text-sm flex-1">Touch thumb to {step.finger}</span>
+                      <span className={`font-bold ${step.color}`}>{step.word}</span>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-sm text-slate-300 leading-relaxed">
+                  {currentPractice.instructions}
+                </p>
+              </div>
+            )}
+
+            {currentPractice.content && (
+              <p className="text-sm text-slate-300 leading-relaxed">
+                {currentPractice.content}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Navigation Controls */}
+        <div className="flex items-center justify-center gap-4 mb-4">
+          <button
+            onClick={handlePrevious}
+            className="w-12 h-12 rounded-full bg-orange-500/20 border border-orange-500/30 text-orange-300 hover:bg-orange-500/30 transition flex items-center justify-center text-xl"
+          >
+            ←
+          </button>
+
+          <button
+            onClick={shuffled ? handleSequential : handleShuffle}
+            className="px-6 py-2 rounded-xl bg-purple-500/20 border border-purple-500/30 text-purple-300 hover:bg-purple-500/30 transition font-semibold text-sm"
+          >
+            {shuffled ? '🔄 Sequential' : '🔀 Shuffle'}
+          </button>
+
+          <button
+            onClick={handleNext}
+            className="w-12 h-12 rounded-full bg-orange-500/20 border border-orange-500/30 text-orange-300 hover:bg-orange-500/30 transition flex items-center justify-center text-xl"
+          >
+            →
+          </button>
+        </div>
+
+        {/* Ripple Button */}
+        <div className="mb-4">
+          <RippleButton
+            type="offlinePractice"
+            data={{
+              title: currentPractice.title,
+              subtitle: currentPractice.subtitle,
+              emoji: currentPractice.emoji
+            }}
+            messages={[
+              'Joy anywhere, anytime',
+              'Offline wisdom',
+              'Anchor your happiness',
+              'Carry joy everywhere',
+              'Thank you', 'Merci', 'Gracias', 'Danke'
+            ]}
+          />
+        </div>
+
+        {/* Footer */}
+        <div className="text-center">
           <p className="text-xs text-slate-500 italic">
             These practices are yours to carry everywhere. No app needed. Just you, your awareness, and the infinite joy within.
           </p>
