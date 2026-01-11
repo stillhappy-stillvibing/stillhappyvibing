@@ -2352,7 +2352,7 @@ function CBTBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
 }
 
 // Breathwork Browser Component - 1-minute breathing patterns
-function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
+function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onGlobalRipple }) {
   const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * breathworkPatterns.length));
   const [isActive, setIsActive] = useState(false);
   const [cycles, setCycles] = useState(0);
@@ -2531,7 +2531,7 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
                 </button>
               </div>
 
-              <RippleButton type="breathwork" data={currentPattern} onGlobalRipple={handleGlobalRipple} />
+              <RippleButton type="breathwork" data={currentPattern} onGlobalRipple={onGlobalRipple} />
             </>
           )}
         </div>
@@ -5719,7 +5719,7 @@ export default function App() {
       {/* Modals */}
       <QuoteBrowser isOpen={showQuoteBrowser} onClose={() => setShowQuoteBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} />
       <ExerciseBrowser isOpen={showExerciseBrowser} onClose={() => setShowExerciseBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} playSound={playSound} />
-      <BreathworkBrowser isOpen={showBreathworkBrowser} onClose={() => setShowBreathworkBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} playSound={playSound} />
+      <BreathworkBrowser isOpen={showBreathworkBrowser} onClose={() => setShowBreathworkBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} playSound={playSound} onGlobalRipple={handleGlobalRipple} />
       <CBTBrowser isOpen={showCBTBrowser} onClose={() => setShowCBTBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} playSound={playSound} />
       <SettingsModal
         isOpen={showSettingsModal}
