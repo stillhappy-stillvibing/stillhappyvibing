@@ -1857,6 +1857,7 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare 
   const [isComplete, setIsComplete] = useState(false);
   const [showSparks, setShowSparks] = useState(false);
   const [foundSpark, setFoundSpark] = useState(false); // Track if user clicked button vs timeout
+  const earlyFlameRef = useRef(false); // Track if "Light The Flame" was clicked early
 
   // Calculate progress percentage for glow effect (0% to 100%)
   const progress = ((30 - timeLeft) / 30) * 100;
@@ -1868,6 +1869,7 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare 
       setIsComplete(false);
       setShowSparks(false);
       setFoundSpark(false);
+      earlyFlameRef.current = false; // Reset ref when modal closes
       return;
     }
 
@@ -1875,11 +1877,14 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare 
       setTimeLeft(prev => {
         if (prev <= 1) {
           clearInterval(timer);
-          setIsComplete(true);
-          setShowSparks(true);
-          setFoundSpark(false); // Time ran out, they planted the seed
-          // Hide sparks after 2 seconds
-          setTimeout(() => setShowSparks(false), 2000);
+          // Only auto-complete if "Light The Flame" wasn't clicked
+          if (!earlyFlameRef.current) {
+            setIsComplete(true);
+            setShowSparks(true);
+            setFoundSpark(false); // Time ran out, they planted the seed
+            // Hide sparks after 2 seconds
+            setTimeout(() => setShowSparks(false), 2000);
+          }
           return 0;
         }
         return prev - 1;
@@ -1933,6 +1938,7 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare 
 
             <button
               onClick={() => {
+                earlyFlameRef.current = true; // Mark that flame was lit early
                 setIsComplete(true);
                 setShowSparks(true);
                 setFoundSpark(true); // User clicked the button!
