@@ -4793,9 +4793,9 @@ export default function App() {
     try { return JSON.parse(localStorage.getItem(`happinessCheckins${CURRENT_YEAR}`) || '[]'); } catch { return []; }
   });
 
-  // Gamification: Points tracking
+  // Gamification: Lifetime Points tracking
   const [totalPoints, setTotalPoints] = useState(() => {
-    try { return parseInt(localStorage.getItem(`happinessPoints${CURRENT_YEAR}`) || '0'); } catch { return 0; }
+    try { return parseInt(localStorage.getItem('lifetimeJoyPoints') || '0'); } catch { return 0; }
   });
 
   // Track daily points separately
@@ -4836,7 +4836,7 @@ export default function App() {
   const addPoints = (points, reason = '') => {
     const newTotal = totalPoints + points;
     setTotalPoints(newTotal);
-    localStorage.setItem(`happinessPoints${CURRENT_YEAR}`, newTotal.toString());
+    localStorage.setItem('lifetimeJoyPoints', newTotal.toString());
 
     // Track daily points
     const today = getDayKey(new Date());
@@ -5617,84 +5617,10 @@ export default function App() {
               )}
             </div>
             
-            <div className="bg-white/5 backdrop-blur rounded-2xl p-5 mb-4 border border-white/10 relative overflow-hidden">
-              {/* Points Animation */}
-              {showPointsAnimation && (
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-                  <div className="text-4xl font-bold text-yellow-400 animate-bounce">
-                    +{pointsGained} 🎉
-                  </div>
-                </div>
-              )}
-
-              {/* Day Streak Display */}
-              <div className="text-center mb-4">
-                <p className="text-slate-400 uppercase tracking-widest text-xs mb-2">Your Streak</p>
-                <div className="text-5xl font-bold text-green-400 mb-1">{checkinStreak}</div>
-                <p className="text-slate-400 text-sm">{checkinStreak === 1 ? 'day' : 'days'} of happiness 🔥</p>
-              </div>
-
-              {todayCheckins > 0 ? (
-                <p className="text-green-400 mb-4 flex items-center justify-center gap-2 text-sm">
-                  <span className="animate-pulse">💚</span> You checked in {todayCheckins} time{todayCheckins > 1 ? 's' : ''} today! <span className="animate-pulse">💚</span>
-                </p>
-              ) : (
-                <p className="text-yellow-400 mb-4 flex items-center justify-center gap-2 text-sm">
-                  <span>✨</span> Check in to keep your streak going! <span>✨</span>
-                </p>
-              )}
-
-              {/* Today's Joy Points */}
-              <div className="text-center mb-4 pt-3 border-t border-white/10">
-                <p className="text-slate-400 uppercase tracking-widest text-xs mb-2">Today's Joy</p>
-                <div className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                  {dailyPoints.toLocaleString()} <span className="text-lg">points</span>
-                </div>
-              </div>
-
-              {/* Rank Progress Bar */}
-              <div className="mb-4 pt-3 border-t border-white/10">
-                <p className="text-slate-400 uppercase tracking-widest text-xs mb-2 text-center">
-                  {currentRank.emoji} {currentRank.name} • {totalPoints.toLocaleString()} pts
-                </p>
-                {nextRank && (
-                  <>
-                    <div className="h-3 bg-white/10 rounded-full overflow-hidden mb-1">
-                      <div
-                        className="h-full bg-gradient-to-r from-purple-400 to-pink-400 rounded-full transition-all duration-500"
-                        style={{ width: `${Math.min(100, ((totalPoints - currentRank.minPoints) / (nextRank.minPoints - currentRank.minPoints)) * 100)}%` }}
-                      />
-                    </div>
-                    <p className="text-xs text-center text-purple-300">{pointsToNextRank.toLocaleString()} pts to {nextRank.emoji} {nextRank.name}</p>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* Your Badges */}
-            <div className="mt-4 bg-white/5 rounded-xl p-4 border border-white/10">
-              <h3 className="text-sm font-semibold mb-3 flex items-center justify-center gap-2">
-                🏅 Your Badges 
-                <span className="font-normal text-slate-400">
-                  ({streakBadges.filter(b => checkinStreak >= b.threshold).length}/{streakBadges.length})
-                </span>
-              </h3>
-              <div className="flex flex-wrap gap-2 justify-center">
-                {streakBadges.map(b => {
-                  const earned = checkinStreak >= b.threshold;
-                  return (
-                    <div key={b.id} className={`flex flex-col items-center p-2 rounded-lg transition ${earned ? 'bg-orange-400/20' : 'bg-white/5 opacity-40'}`}>
-                      <span className="text-xl">{b.icon}</span>
-                      <span className="text-[8px] mt-1">{b.name}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
           </>
 
-        {/* Additional Actions - Invite & Settings */}
-        <div className="grid grid-cols-3 gap-3 mt-6 mb-6">
+        {/* Additional Actions - Invite, T.N.T., Joy Points, Settings */}
+        <div className="grid grid-cols-2 gap-3 mt-6 mb-6">
           {/* Invite A Friend */}
           <button
             onClick={() => {
@@ -5730,6 +5656,22 @@ export default function App() {
             <div className="text-3xl">🧨</div>
             <div className="font-semibold text-xs">T.N.T.</div>
           </button>
+
+          {/* Total Joy Points */}
+          <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl p-4 flex flex-col items-center gap-2 relative overflow-hidden">
+            {showPointsAnimation && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                <div className="text-2xl font-bold text-yellow-400 animate-bounce">
+                  +{pointsGained}
+                </div>
+              </div>
+            )}
+            <div className="text-3xl">✨</div>
+            <div className="font-semibold text-xs text-center">Total Joy</div>
+            <div className="text-lg font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+              {totalPoints.toLocaleString()}
+            </div>
+          </div>
 
           {/* Settings */}
           <button
