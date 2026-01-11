@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '8.3.0';
+const APP_VERSION = '8.4.0';
 const BUILD_DATE = '2026-01-11';
 
 // Gamification: Point Values
@@ -4389,6 +4389,140 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats, ch
   );
 }
 
+// Offline Mode Component - Joy practices for anytime, anywhere
+function OfflineMode({ isOpen, onClose }) {
+  const [expandedPractice, setExpandedPractice] = useState(null);
+
+  if (!isOpen) return null;
+
+  const practices = [
+    {
+      id: 'finger',
+      emoji: '🖐️',
+      title: 'Four Finger Practice',
+      subtitle: 'Thumb touches for joy',
+      description: 'A simple mantra you can practice anywhere, anytime.',
+      steps: [
+        { finger: 'pinkie', word: 'Happy', color: 'text-yellow-400', emoji: '🟡' },
+        { finger: 'ring', word: 'Healthy', color: 'text-sky-400', emoji: '🔵' },
+        { finger: 'middle', word: 'Wealthy', color: 'text-green-400', emoji: '🟢' },
+        { finger: 'index', word: 'Wise', color: 'text-purple-400', emoji: '🌈' }
+      ],
+      instructions: 'Touch your thumb to each fingertip while saying the word internally. Repeat as you walk, wait, or whenever you need to center yourself. This ancient practice has been used for decades to anchor joy in every moment.'
+    },
+    {
+      id: 'broadcast',
+      emoji: '📡',
+      title: 'Broadcasting Joy',
+      subtitle: 'Your mind is a radio station',
+      description: 'You\'re always transmitting. Choose your frequency.',
+      content: 'Your mind is like a radio station, constantly broadcasting thoughts and emotions into the world. What frequency are you tuning into? When you choose thoughts of joy, gratitude, and love, you broadcast that frequency outward. Others tune into it without even knowing. You become a beacon of light, affecting every person and situation you encounter. Right now, in this moment, what are you broadcasting? Choose joy, and watch how the world responds.'
+    },
+    {
+      id: 'tuning',
+      emoji: '🎵',
+      title: 'Tuning Into Joy',
+      subtitle: 'Find the frequency',
+      description: 'Joy is always there, waiting to be discovered.',
+      content: 'Joy isn\'t something you create - it\'s something you tune into. Like a radio dial, you can shift your awareness at any moment to find the frequency of joy. It might be in the warmth of the sun on your skin, the smile of a stranger, the taste of your coffee, or simply the miracle of your next breath. Right now, pause and ask: "Where is joy in this moment?" Then listen. Feel. Tune in. It\'s always there, broadcasting on its own frequency, waiting for you to find it.'
+    },
+    {
+      id: 'ripples',
+      emoji: '🌊',
+      title: 'Feel the Ripples',
+      subtitle: 'Sensing joy spread through the land',
+      description: 'Every spark creates infinite ripples.',
+      content: 'Close your eyes and imagine: when you smile at someone, that smile ripples outward. They smile at another, who smiles at another, and on and on. Your single moment of joy creates waves that touch lives you\'ll never meet, in places you\'ll never see. You are not separate from the world - you are intimately connected. Every thought of gratitude, every act of kindness, every spark of joy you create sends ripples through the entire web of humanity. Feel that power. You are affecting the whole world, right now, with your state of being.'
+    },
+    {
+      id: 'candles',
+      emoji: '🕯️',
+      title: 'Light Your Candles',
+      subtitle: 'The spark ignites the four',
+      description: 'When you find your inner spark, light the candles.',
+      content: 'Inside you burns a spark - the eternal flame of your true nature. When you connect with this spark through practice, meditation, or simply by being present, it ignites four candles: Happy (your emotional joy), Healthy (your physical vitality), Wealthy (your abundant mindset), and Wise (your inner knowing). These four candles light your way forward. The spark was always there. The candles were always ready. All you had to do was remember. Light them now, and let them guide you.'
+    }
+  ];
+
+  return (
+    <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50 overflow-y-auto" onClick={onClose}>
+      <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-2xl w-full p-6 border border-amber-400/30 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-2xl font-bold flex items-center gap-2">
+            <span>🌟</span>
+            <span className="bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent">
+              Offline Mode
+            </span>
+          </h2>
+          <button onClick={onClose} className="text-slate-400 hover:text-white text-xl">✕</button>
+        </div>
+
+        <p className="text-slate-300 text-sm mb-6 text-center italic">
+          Joy practices for anytime, anywhere. Anchor your happiness beyond the app.
+        </p>
+
+        <div className="space-y-3">
+          {practices.map(practice => (
+            <div
+              key={practice.id}
+              className="bg-gradient-to-r from-orange-500/10 to-amber-500/10 border border-orange-500/30 rounded-xl overflow-hidden transition hover:border-orange-500/50"
+            >
+              <button
+                onClick={() => setExpandedPractice(expandedPractice === practice.id ? null : practice.id)}
+                className="w-full p-4 flex items-center gap-4 text-left hover:bg-white/5 transition"
+              >
+                <div className="text-4xl">{practice.emoji}</div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-orange-300">{practice.title}</h3>
+                  <p className="text-xs text-slate-400">{practice.subtitle}</p>
+                </div>
+                <div className="text-orange-400 text-xl">
+                  {expandedPractice === practice.id ? '▼' : '▶'}
+                </div>
+              </button>
+
+              {expandedPractice === practice.id && (
+                <div className="px-4 pb-4 animate-in fade-in duration-300">
+                  <p className="text-sm text-orange-200 mb-4 italic">{practice.description}</p>
+
+                  {practice.id === 'finger' && (
+                    <div className="space-y-3">
+                      <div className="bg-slate-800/50 rounded-xl p-4 space-y-2">
+                        {practice.steps.map((step, idx) => (
+                          <div key={idx} className="flex items-center gap-3">
+                            <span className="text-2xl">{step.emoji}</span>
+                            <span className="text-slate-400 text-sm flex-1">Touch thumb to {step.finger}</span>
+                            <span className={`font-bold ${step.color}`}>{step.word}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-sm text-slate-300 leading-relaxed">
+                        {practice.instructions}
+                      </p>
+                    </div>
+                  )}
+
+                  {practice.content && (
+                    <p className="text-sm text-slate-300 leading-relaxed">
+                      {practice.content}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-6 text-center">
+          <p className="text-xs text-slate-500 italic">
+            These practices are yours to carry everywhere. No app needed. Just you, your awareness, and the infinite joy within.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Main App
 export default function App() {
   const [checkins, setCheckins] = useState(() => {
@@ -4495,6 +4629,7 @@ export default function App() {
 
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showChallengeModal, setShowChallengeModal] = useState(false);
+  const [showOfflineMode, setShowOfflineMode] = useState(false);
   const [showWeeklyReflection, setShowWeeklyReflection] = useState(false);
   const [showMilestone, setShowMilestone] = useState(false);
   const [milestoneData, setMilestoneData] = useState(null);
@@ -5261,6 +5396,15 @@ export default function App() {
             <div className="font-semibold text-xs">Invite A Friend</div>
           </button>
 
+          {/* Offline Mode */}
+          <button
+            onClick={() => setShowOfflineMode(true)}
+            className="bg-gradient-to-br from-orange-500/20 to-amber-500/20 border border-orange-500/30 rounded-xl p-4 hover:from-orange-500/30 hover:to-amber-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
+          >
+            <div className="text-3xl">🌟</div>
+            <div className="font-semibold text-xs">Offline Mode</div>
+          </button>
+
           {/* Settings */}
           <button
             onClick={() => setShowSettingsModal(true)}
@@ -5300,6 +5444,10 @@ export default function App() {
       <ChallengeModal
         isOpen={showChallengeModal}
         onClose={() => setShowChallengeModal(false)}
+      />
+      <OfflineMode
+        isOpen={showOfflineMode}
+        onClose={() => setShowOfflineMode(false)}
       />
       <WeeklyReflection
         isOpen={showWeeklyReflection}
