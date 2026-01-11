@@ -4742,7 +4742,7 @@ function OfflineMode({ isOpen, onClose, onGlobalRipple }) {
               'Offline wisdom spreading',
               'Thank you', 'Merci', 'Gracias', 'Danke'
             ]}
-            onGlobalRipple={handleGlobalRipple}
+            onGlobalRipple={onGlobalRipple}
           />
         </div>
 
