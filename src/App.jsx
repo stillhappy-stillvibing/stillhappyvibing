@@ -4441,6 +4441,22 @@ function OfflineMode({ isOpen, onClose }) {
       subtitle: 'The spark ignites the four',
       description: 'When you find your inner spark, light the candles.',
       content: 'Inside you burns a spark - the eternal flame of your true nature. When you connect with this spark through practice, meditation, or simply by being present, it ignites four candles: Happy (your emotional joy), Healthy (your physical vitality), Wealthy (your abundant mindset), and Wise (your inner knowing). These four candles light your way forward. The spark was always there. The candles were always ready. All you had to do was remember. Light them now, and let them guide you.'
+    },
+    {
+      id: 'thankYou',
+      emoji: '🙏',
+      title: 'Thank You Mantra',
+      subtitle: 'Tuning into the infinite',
+      description: 'Gently repeat "thank you" throughout your day.',
+      content: 'Throughout your day, gently repeat to yourself: "thank you, thank you, thank you." When you need it most, when you\'re receiving a thank you someone has sent out to the infinite, tune in. As Ralph Waldo Trine wrote about "In Tune with the Infinite" - gratitude is the frequency that connects you to all that is. This simple mantra opens your heart, shifts your awareness, and aligns you with the abundant flow of the universe. Say it while walking, waiting, working, or resting. Let it become your constant companion, a gentle reminder that you are blessed, connected, and one with the infinite source of all joy.'
+    },
+    {
+      id: 'mirror',
+      emoji: '🪞',
+      title: 'Mirror Meditation',
+      subtitle: 'Reflect your best self',
+      description: 'Close your eyes and find the spark within.',
+      content: 'Close your eyes. Take a deep breath. Find the spark within you - that eternal light that has always been there. Now, remember these truths: "I am already blessed." Let that sink in. You are already whole, already complete, already blessed. Now feel this: "Every action is a mirror - let it reflect the best in us!" Everything you do reflects back to the world and to yourself. When you choose kindness, joy, and love, you see it reflected everywhere. Your actions are mirrors showing the world who you truly are. Make each reflection beautiful. Make each action a spark of your inner light.'
     }
   ];
 
@@ -5372,7 +5388,7 @@ export default function App() {
           </>
 
         {/* Additional Actions - Invite & Settings */}
-        <div className="grid grid-cols-2 gap-3 mt-6 mb-6">
+        <div className="grid grid-cols-3 gap-3 mt-6 mb-6">
           {/* Invite A Friend */}
           <button
             onClick={() => {
