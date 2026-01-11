@@ -4861,7 +4861,7 @@ export default function App() {
           <span>All data stays on your device</span>
         </div>
 
-        <footer className="text-center mt-4 text-slate-500 text-xs">Made with 💛 for a happier {CURRENT_YEAR}</footer>
+        <footer className="text-center mt-4 text-slate-500 text-xs">Made with 💛 for a happier world!</footer>
       </div>
 
       {/* Modals */}
