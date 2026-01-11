@@ -5553,14 +5553,14 @@ export default function App() {
                 <div className="text-xs text-slate-400 text-center">1-minute calm</div>
               </button>
 
-              {/* Tools Of Thought */}
+              {/* Ripples Of Joy - moved from bottom */}
               <button
-                onClick={() => setShowCBTBrowser(true)}
-                className="bg-gradient-to-br from-blue-500/20 to-indigo-500/20 border border-blue-500/30 rounded-xl p-5 hover:from-blue-500/30 hover:to-indigo-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
+                onClick={() => setShowRipplesModal(true)}
+                className="bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 rounded-xl p-5 hover:from-cyan-500/30 hover:to-blue-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
               >
-                <div className="text-4xl">🧠</div>
-                <div className="font-semibold text-sm">Tools Of Thought</div>
-                <div className="text-xs text-slate-400 text-center">Mindset shifts</div>
+                <div className="text-4xl">🌊</div>
+                <div className="font-semibold text-sm">Ripples Of Joy</div>
+                <div className="text-xs text-slate-400 text-center">Witness sparks</div>
               </button>
 
               {/* Share A Smile */}
@@ -5573,14 +5573,14 @@ export default function App() {
                 <div className="text-xs text-slate-400 text-center">Send joy</div>
               </button>
 
-              {/* Ripples Of Joy */}
+              {/* Offline Mode - moved from bottom, resized */}
               <button
-                onClick={() => setShowRipplesModal(true)}
-                className="bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 rounded-xl p-5 hover:from-cyan-500/30 hover:to-blue-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
+                onClick={() => setShowOfflineMode(true)}
+                className="bg-gradient-to-br from-orange-500/20 to-amber-500/20 border border-orange-500/30 rounded-xl p-5 hover:from-orange-500/30 hover:to-amber-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
               >
-                <div className="text-4xl">🌊</div>
-                <div className="font-semibold text-sm">Ripples Of Joy</div>
-                <div className="text-xs text-slate-400 text-center">Witness sparks</div>
+                <div className="text-4xl">🌟</div>
+                <div className="font-semibold text-sm">Offline Mode</div>
+                <div className="text-xs text-slate-400 text-center">Joy anywhere</div>
               </button>
             </div>
 
@@ -5718,13 +5718,17 @@ export default function App() {
             <div className="font-semibold text-xs">Invite A Friend</div>
           </button>
 
-          {/* Offline Mode */}
+          {/* T.N.T. - Think New Thoughts */}
           <button
-            onClick={() => setShowOfflineMode(true)}
-            className="bg-gradient-to-br from-orange-500/20 to-amber-500/20 border border-orange-500/30 rounded-xl p-4 hover:from-orange-500/30 hover:to-amber-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
+            onClick={() => {
+              setToastMessage('Coming soon! 💭');
+              setToastEmoji('🧨');
+              setShowToast(true);
+            }}
+            className="bg-gradient-to-br from-red-500/20 to-orange-500/20 border border-red-500/30 rounded-xl p-4 hover:from-red-500/30 hover:to-orange-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
           >
-            <div className="text-3xl">🌟</div>
-            <div className="font-semibold text-xs">Offline Mode</div>
+            <div className="text-3xl">🧨</div>
+            <div className="font-semibold text-xs">T.N.T.</div>
           </button>
 
           {/* Settings */}
@@ -5750,7 +5754,8 @@ export default function App() {
       <QuoteBrowser isOpen={showQuoteBrowser} onClose={() => setShowQuoteBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} onGlobalRipple={handleGlobalRipple} />
       <ExerciseBrowser isOpen={showExerciseBrowser} onClose={() => setShowExerciseBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} playSound={playSound} onGlobalRipple={handleGlobalRipple} />
       <BreathworkBrowser isOpen={showBreathworkBrowser} onClose={() => setShowBreathworkBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} playSound={playSound} onGlobalRipple={handleGlobalRipple} />
-      <CBTBrowser isOpen={showCBTBrowser} onClose={() => setShowCBTBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} playSound={playSound} onGlobalRipple={handleGlobalRipple} />
+      {/* CBT Browser - Hidden for now (app is for short bursts of joy, not therapy) */}
+      {/* <CBTBrowser isOpen={showCBTBrowser} onClose={() => setShowCBTBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} playSound={playSound} onGlobalRipple={handleGlobalRipple} /> */}
       <SettingsModal
         isOpen={showSettingsModal}
         onClose={() => setShowSettingsModal(false)}
