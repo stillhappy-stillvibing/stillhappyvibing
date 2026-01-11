@@ -2672,7 +2672,7 @@ function RippleButton({ type, data, compact = false, messages = null, colorSchem
     return (
       <div className="text-center py-2 animate-in fade-in">
         <p className="text-amber-300 text-sm font-medium">
-          ✨ Rippled to the world!
+          🌊 Waves of joy vibrating through the Infinite
         </p>
       </div>
     );
