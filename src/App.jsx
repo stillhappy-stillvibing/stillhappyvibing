@@ -2572,6 +2572,7 @@ function RippleButton({ type, data, compact = false, messages = null, colorSchem
   const [ripplePhase, setRipplePhase] = useState('outward');
   const phaseIntervalRef = useRef(null);
   const fourElementsIndexRef = useRef(0); // Track position in Happy, Healthy, Wealthy, Wise sequence
+  const hapticWaveRef = useRef({ count: 0, interval: null }); // Track haptic wave progression
 
   const defaultThankYouMessages = [
     'Thank you', 'Merci', 'Gracias', 'Danke', 'Grazie',
@@ -2617,6 +2618,23 @@ function RippleButton({ type, data, compact = false, messages = null, colorSchem
 
   const scheme = colorSchemes[colorScheme];
 
+  // Generate progressive haptic wave patterns - waves propagating from touch
+  const triggerHapticWave = (waveLevel) => {
+    if (!navigator.vibrate) return;
+
+    // Progressive wave patterns - each level more intense, like waves spreading
+    const wavePatterns = [
+      [20, 10, 20],                           // Level 0: Initial gentle pulse
+      [30, 15, 30, 15, 30],                   // Level 1: Double wave
+      [40, 20, 40, 20, 40, 20, 40],          // Level 2: Triple wave
+      [50, 25, 50, 25, 50, 25, 50, 25, 50], // Level 3: Quadruple wave
+      [60, 30, 60, 30, 60, 30, 60, 30, 60, 30, 60] // Level 4+: Maximum intensity
+    ];
+
+    const patternIndex = Math.min(waveLevel, wavePatterns.length - 1);
+    navigator.vibrate(wavePatterns[patternIndex]);
+  };
+
   const addSpark = () => {
     // The drumbeat of repetition - mix sequential four-element sparks with thank-you messages
     const showFourElement = Math.random() < 0.6; // 60% chance for four-element spark
@@ -2658,10 +2676,15 @@ function RippleButton({ type, data, compact = false, messages = null, colorSchem
     e.preventDefault();
     setIsHolding(true);
 
-    // Haptic feedback
-    if (navigator.vibrate) {
-      navigator.vibrate([20, 10, 20]);
-    }
+    // Reset and trigger initial haptic wave
+    hapticWaveRef.current.count = 0;
+    triggerHapticWave(0);
+
+    // Progressive haptic waves every 30 seconds - waves propagating outward
+    hapticWaveRef.current.interval = setInterval(() => {
+      hapticWaveRef.current.count += 1;
+      triggerHapticWave(hapticWaveRef.current.count);
+    }, 30000);
 
     // Animate ripple phases
     phaseIntervalRef.current = setInterval(() => {
@@ -2681,12 +2704,19 @@ function RippleButton({ type, data, compact = false, messages = null, colorSchem
   const handleHoldEnd = () => {
     setIsHolding(false);
 
+    // Clear all intervals
     if (phaseIntervalRef.current) {
       clearInterval(phaseIntervalRef.current);
       if (phaseIntervalRef.sparkInterval) {
         clearInterval(phaseIntervalRef.sparkInterval);
       }
       phaseIntervalRef.current = null;
+    }
+
+    if (hapticWaveRef.current.interval) {
+      clearInterval(hapticWaveRef.current.interval);
+      hapticWaveRef.current.interval = null;
+      hapticWaveRef.current.count = 0;
     }
 
     // Post ripple to global feed
