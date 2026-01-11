@@ -4599,6 +4599,9 @@ function OfflineMode({ isOpen, onClose }) {
 
         {/* Ripple Button */}
         <div className="mb-4">
+          <p className="text-center text-xs text-slate-400 italic mb-2">
+            🌍 Imagine yourself at Earth's center, transmitting and receiving sparks of joy
+          </p>
           <RippleButton
             type="offlinePractice"
             data={{
@@ -4607,10 +4610,14 @@ function OfflineMode({ isOpen, onClose }) {
               emoji: currentPractice.emoji
             }}
             messages={[
+              'Sending joy to the world',
+              'Receiving joy from the world',
+              'Broadcasting from Earth\'s center',
+              'Tuning into infinite joy',
+              'Transmitting happiness',
+              'Receiving gratitude',
               'Joy anywhere, anytime',
-              'Offline wisdom',
-              'Anchor your happiness',
-              'Carry joy everywhere',
+              'Offline wisdom spreading',
               'Thank you', 'Merci', 'Gracias', 'Danke'
             ]}
           />
