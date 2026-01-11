@@ -1850,6 +1850,7 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare 
   const [timeLeft, setTimeLeft] = useState(30);
   const [isComplete, setIsComplete] = useState(false);
   const [showSparks, setShowSparks] = useState(false);
+  const [foundSpark, setFoundSpark] = useState(false); // Track if user clicked button vs timeout
 
   // Calculate progress percentage for glow effect (0% to 100%)
   const progress = ((30 - timeLeft) / 30) * 100;
@@ -1860,6 +1861,7 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare 
       setTimeLeft(30);
       setIsComplete(false);
       setShowSparks(false);
+      setFoundSpark(false);
       return;
     }
 
@@ -1869,6 +1871,7 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare 
           clearInterval(timer);
           setIsComplete(true);
           setShowSparks(true);
+          setFoundSpark(false); // Time ran out, they planted the seed
           // Hide sparks after 2 seconds
           setTimeout(() => setShowSparks(false), 2000);
           return 0;
@@ -1926,6 +1929,7 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare 
               onClick={() => {
                 setIsComplete(true);
                 setShowSparks(true);
+                setFoundSpark(true); // User clicked the button!
                 setTimeout(() => setShowSparks(false), 2000);
               }}
               className="px-8 py-3 bg-gradient-to-r from-orange-400 to-yellow-500 hover:from-orange-500 hover:to-yellow-600 text-slate-900 rounded-xl font-bold transition hover:scale-105"
@@ -1958,7 +1962,9 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare 
               </div>
             )}
 
-            <h3 className="text-3xl font-bold mb-8 text-orange-300">You've planted a seed of joy, it will spark within</h3>
+            <h3 className="text-3xl font-bold mb-8 text-orange-300">
+              {foundSpark ? "You found the spark within!" : "You've planted a seed of joy, it will spark within"}
+            </h3>
 
             {/* The seed thought */}
             <div className="relative mb-12">
@@ -4676,6 +4682,41 @@ export default function App() {
                 <div className="text-4xl">🌊</div>
                 <div className="font-semibold text-sm">Ripples Of Joy</div>
                 <div className="text-xs text-slate-400 text-center">Witness sparks</div>
+              </button>
+            </div>
+
+            {/* Additional Actions - Invite & Settings */}
+            <div className="grid grid-cols-2 gap-3 mt-4 mb-4">
+              {/* Invite A Friend */}
+              <button
+                onClick={() => {
+                  const inviteText = `Seeds of Joy 🌱\n\nPlant joy, watch it bloom, share it with the world.\n\n✨ Sparks Of Joy - Mental Dojo practices\n🌱 Seeds Of Thought - Wisdom to plant\n🌬️ Breath Of Fresh Air - Calming patterns\n💛 Share A Smile - Send joy\n🌊 Ripples Of Joy - Witness sparks\n\nSmile, and the whole world smiles with you.\n\nsmileswithyou.com`;
+                  if (navigator.share) {
+                    navigator.share({
+                      title: 'Seeds of Joy',
+                      text: inviteText
+                    }).catch(() => {});
+                  } else {
+                    navigator.clipboard.writeText(inviteText);
+                    setToastMessage('Invite link copied!');
+                    setToastEmoji('📋');
+                    setShowToast(true);
+                    setTimeout(() => setShowToast(false), 2000);
+                  }
+                }}
+                className="bg-gradient-to-br from-pink-500/20 to-rose-500/20 border border-pink-500/30 rounded-xl p-4 hover:from-pink-500/30 hover:to-rose-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
+              >
+                <div className="text-3xl">💌</div>
+                <div className="font-semibold text-xs">Invite A Friend</div>
+              </button>
+
+              {/* Settings */}
+              <button
+                onClick={() => setShowSettingsModal(true)}
+                className="bg-gradient-to-br from-slate-500/20 to-gray-500/20 border border-slate-500/30 rounded-xl p-4 hover:from-slate-500/30 hover:to-gray-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
+              >
+                <div className="text-3xl">⚙️</div>
+                <div className="font-semibold text-xs">Settings</div>
               </button>
             </div>
 
