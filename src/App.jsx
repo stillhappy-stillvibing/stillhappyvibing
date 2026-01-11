@@ -2487,6 +2487,8 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
                   ✕ Close
                 </button>
               </div>
+
+              <RippleButton type="breathwork" data={currentPattern} />
             </>
           )}
         </div>
@@ -2524,11 +2526,35 @@ function MicroMoment() {
 function RippleButton({ type, data, compact = false }) {
   const [isHolding, setIsHolding] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const holdTimerRef = useRef(null);
-  const ripplePhase = useRef('outward');
+  const [sparks, setSparks] = useState([]);
+  const [ripplePhase, setRipplePhase] = useState('outward');
   const phaseIntervalRef = useRef(null);
 
-  const handleHoldStart = () => {
+  const thankYouMessages = [
+    'Thank you', 'Merci', 'Gracias', 'Danke', 'Grazie',
+    'Obrigado', 'Спасибо', 'ありがとう', '谢谢', 'شكرا',
+    'Teşekkürler', 'Tack', 'Dziękuję', '감사합니다', 'Kiitos'
+  ];
+
+  const addSpark = () => {
+    const newSpark = {
+      id: Date.now() + Math.random(),
+      left: Math.random() * 80 + 10,
+      top: Math.random() * 80 + 10,
+      delay: Math.random() * 0.5,
+      message: thankYouMessages[Math.floor(Math.random() * thankYouMessages.length)]
+    };
+
+    setSparks(prev => [...prev, newSpark]);
+
+    setTimeout(() => {
+      setSparks(prev => prev.filter(s => s.id !== newSpark.id));
+    }, 3000);
+  };
+
+  const handleHoldStart = (e) => {
+    // Prevent context menu on long press
+    e.preventDefault();
     setIsHolding(true);
 
     // Haptic feedback
@@ -2538,8 +2564,17 @@ function RippleButton({ type, data, compact = false }) {
 
     // Animate ripple phases
     phaseIntervalRef.current = setInterval(() => {
-      ripplePhase.current = ripplePhase.current === 'outward' ? 'inward' : 'outward';
+      setRipplePhase(prev => prev === 'outward' ? 'inward' : 'outward');
     }, 800);
+
+    // Add sparks while holding
+    const sparkInterval = setInterval(() => {
+      if (Math.random() > 0.7) {
+        addSpark();
+      }
+    }, 200);
+
+    phaseIntervalRef.sparkInterval = sparkInterval;
   };
 
   const handleHoldEnd = () => {
@@ -2547,6 +2582,9 @@ function RippleButton({ type, data, compact = false }) {
 
     if (phaseIntervalRef.current) {
       clearInterval(phaseIntervalRef.current);
+      if (phaseIntervalRef.sparkInterval) {
+        clearInterval(phaseIntervalRef.sparkInterval);
+      }
       phaseIntervalRef.current = null;
     }
 
@@ -2570,48 +2608,113 @@ function RippleButton({ type, data, compact = false }) {
 
   if (compact) {
     return (
+      <div className="relative">
+        <button
+          onMouseDown={handleHoldStart}
+          onMouseUp={handleHoldEnd}
+          onMouseLeave={handleHoldEnd}
+          onTouchStart={handleHoldStart}
+          onTouchEnd={handleHoldEnd}
+          onContextMenu={(e) => e.preventDefault()}
+          className={`w-full py-2 rounded-lg border text-sm font-semibold transition ${
+            isHolding
+              ? 'bg-cyan-500/30 border-cyan-500/50 text-cyan-300 scale-105'
+              : 'bg-cyan-500/20 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/30'
+          }`}
+          style={{ userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
+        >
+          {isHolding ? '🌊 Rippling...' : '🌊 Hold to Ripple'}
+        </button>
+
+        {/* Sparks overlay */}
+        {isHolding && (
+          <div className="absolute inset-0 pointer-events-none">
+            {sparks.map(spark => (
+              <div
+                key={spark.id}
+                className="absolute animate-spark text-cyan-300"
+                style={{
+                  left: `${spark.left}%`,
+                  top: `${spark.top}%`,
+                  animationDelay: `${spark.delay}s`
+                }}
+              >
+                <div className="text-xs font-semibold whitespace-nowrap">
+                  ✨ {spark.message}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative">
       <button
         onMouseDown={handleHoldStart}
         onMouseUp={handleHoldEnd}
         onMouseLeave={handleHoldEnd}
         onTouchStart={handleHoldStart}
         onTouchEnd={handleHoldEnd}
-        className={`w-full py-2 rounded-lg border text-sm font-semibold transition ${
+        onContextMenu={(e) => e.preventDefault()}
+        className={`w-full py-3 rounded-xl border font-bold transition-all duration-300 ${
           isHolding
-            ? 'bg-cyan-500/30 border-cyan-500/50 text-cyan-300 scale-105'
-            : 'bg-cyan-500/20 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/30'
+            ? 'bg-gradient-to-r from-cyan-500/40 to-blue-500/40 border-cyan-400/50 text-cyan-200 scale-105 shadow-lg shadow-cyan-500/30'
+            : 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border-cyan-500/30 text-cyan-300 hover:from-cyan-500/30 hover:to-blue-500/30'
         }`}
+        style={{ userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
       >
-        {isHolding ? '🌊 Rippling...' : '🌊 Hold to Ripple'}
-      </button>
-    );
-  }
+        {/* Concentric ripple circles */}
+        {isHolding && (
+          <div className="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden rounded-xl">
+            <div className={`absolute ${ripplePhase === 'outward' ? 'animate-ripple-out-1' : 'animate-ripple-in-1'}`}>
+              <span className="text-cyan-300 text-xs font-light">thank you</span>
+            </div>
+            <div className={`absolute ${ripplePhase === 'outward' ? 'animate-ripple-out-2' : 'animate-ripple-in-2'}`}>
+              <span className="text-cyan-300 text-xs font-light">thank you</span>
+            </div>
+            <div className={`absolute ${ripplePhase === 'outward' ? 'animate-ripple-out-3' : 'animate-ripple-in-3'}`}>
+              <span className="text-cyan-300 text-xs font-light">thank you</span>
+            </div>
+          </div>
+        )}
 
-  return (
-    <button
-      onMouseDown={handleHoldStart}
-      onMouseUp={handleHoldEnd}
-      onMouseLeave={handleHoldEnd}
-      onTouchStart={handleHoldStart}
-      onTouchEnd={handleHoldEnd}
-      className={`w-full py-3 rounded-xl border font-bold transition-all duration-300 ${
-        isHolding
-          ? 'bg-gradient-to-r from-cyan-500/40 to-blue-500/40 border-cyan-400/50 text-cyan-200 scale-105 shadow-lg shadow-cyan-500/30'
-          : 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border-cyan-500/30 text-cyan-300 hover:from-cyan-500/30 hover:to-blue-500/30'
-      }`}
-    >
-      {isHolding ? (
-        <span className="flex items-center justify-center gap-2">
-          <span className="animate-pulse">🌊</span>
-          <span>Rippling to the world...</span>
-        </span>
-      ) : (
-        <span className="flex items-center justify-center gap-2">
-          <span>🌊</span>
-          <span>Hold to Ripple to World</span>
-        </span>
+        {isHolding ? (
+          <span className="flex items-center justify-center gap-2 relative z-10">
+            <span className="animate-pulse">🌊</span>
+            <span>Rippling to the world...</span>
+          </span>
+        ) : (
+          <span className="flex items-center justify-center gap-2">
+            <span>🌊</span>
+            <span>Hold to Ripple to World</span>
+          </span>
+        )}
+      </button>
+
+      {/* Sparks overlay */}
+      {isHolding && (
+        <div className="absolute inset-0 pointer-events-none">
+          {sparks.map(spark => (
+            <div
+              key={spark.id}
+              className="absolute animate-spark text-cyan-300"
+              style={{
+                left: `${spark.left}%`,
+                top: `${spark.top}%`,
+                animationDelay: `${spark.delay}s`
+              }}
+            >
+              <div className="text-xs font-semibold whitespace-nowrap">
+                ✨ {spark.message}
+              </div>
+            </div>
+          ))}
+        </div>
       )}
-    </button>
+    </div>
   );
 }
 
@@ -4185,41 +4288,12 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats, ch
           </ul>
         </div>
 
-        <h3 className="font-semibold mb-3 text-slate-400 text-sm uppercase tracking-wider">Data Management</h3>
-
-        {/* Danger Zone */}
-        <div className="space-y-2">
-          {actions.map(action => (
-            <button
-              key={action.id}
-              onClick={() => setConfirmAction(action)}
-              className="w-full p-4 bg-white/5 hover:bg-white/10 rounded-xl text-left transition flex items-center justify-between"
-            >
-              <div>
-                <p className="font-medium">{action.label}</p>
-                <p className="text-xs text-slate-400">{action.desc}</p>
-              </div>
-              <span className="text-red-400">🗑️</span>
-            </button>
-          ))}
-        </div>
-
         {/* Version Info */}
         <div className="mt-6 pt-4 border-t border-white/10 text-center">
           <p className="text-xs text-slate-500">Sparks Of Joy v{APP_VERSION}</p>
           <p className="text-xs text-slate-600">Build {BUILD_DATE}</p>
         </div>
       </div>
-
-      <ConfirmDialog
-        isOpen={confirmAction !== null}
-        onClose={() => setConfirmAction(null)}
-        onConfirm={() => confirmAction?.onConfirm()}
-        title={`${confirmAction?.label}?`}
-        message="This action cannot be undone. Your data will be permanently deleted."
-        confirmText="Delete"
-        danger={true}
-      />
     </div>
   );
 }
