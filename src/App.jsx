@@ -2482,6 +2482,12 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
 
           {isActive && (
             <div className="text-center py-10">
+              <div className="mb-4">
+                <div className="text-3xl mb-2">{currentPattern.emoji}</div>
+                <h3 className="text-teal-400 font-semibold text-lg mb-4">
+                  {currentPattern.name}
+                </h3>
+              </div>
               <div className="mb-6">
                 <BreathingGuide pattern={currentPattern.pattern} playSound={playSound} />
               </div>
