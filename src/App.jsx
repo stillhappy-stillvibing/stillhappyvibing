@@ -2274,6 +2274,7 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
   const [isActive, setIsActive] = useState(false);
   const [cycles, setCycles] = useState(0);
   const [showCompletion, setShowCompletion] = useState(false);
+  const earlySparkRef = useRef(false); // Track if "Light it up!" was clicked
 
   const currentPattern = breathworkPatterns[currentIndex];
   const targetCycles = Math.floor(60 / currentPattern.duration); // cycles in 1 minute
@@ -2287,6 +2288,7 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
     setIsActive(false);
     setCycles(0);
     setShowCompletion(false);
+    earlySparkRef.current = false; // Reset early spark flag
   };
 
   // Randomize on open for variety
@@ -2300,6 +2302,7 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
     setIsActive(true);
     setCycles(0);
     setShowCompletion(false);
+    earlySparkRef.current = false; // Reset early spark flag
   };
 
   const handleBoost = () => {
@@ -2318,7 +2321,8 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
     const cycleTimer = setInterval(() => {
       setCycles(prev => {
         const newCycles = prev + 1;
-        if (newCycles >= targetCycles) {
+        // Only auto-complete if "Light it up!" wasn't clicked
+        if (!earlySparkRef.current && newCycles >= targetCycles) {
           setIsActive(false);
           setShowCompletion(true);
           return newCycles;
@@ -2409,6 +2413,7 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
                 </p>
                 <button
                   onClick={() => {
+                    earlySparkRef.current = true; // Mark that spark was found early
                     setIsActive(false);
                     setShowCompletion(true);
                   }}
