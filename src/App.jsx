@@ -4788,80 +4788,13 @@ export default function App() {
             </div>
           </>
 
-        {/* Tools For Happiness Section */}
-        <>
-            <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold mb-2">🌱 Joy Toolkit</h2>
-              <p className="text-slate-400 text-sm">Seeds of thought, sparks of joy, and breath to grow your garden</p>
-            </div>
+        {/* Privacy and Footer */}
+        <div className="flex items-center justify-center gap-2 text-xs text-slate-500 mt-6">
+          <span>🔒</span>
+          <span>All data stays on your device</span>
+        </div>
 
-            {/* Seeds Of Thought Section */}
-            <div className="bg-white/5 rounded-2xl p-5 mb-4 border border-white/10">
-              <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                🌱 Seeds Of Thought
-              </h3>
-              <button
-                onClick={() => setShowQuoteBrowser(true)}
-                className="w-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl p-4 hover:from-purple-500/30 hover:to-pink-500/30 transition"
-              >
-                <div className="text-3xl mb-2">🌱</div>
-                <div className="font-medium">Browse {wisdomQuotes.length} Seeds Of Thought</div>
-                <div className="text-xs text-slate-400 mt-1">Wisdom to plant in your mind</div>
-              </button>
-            </div>
-
-            {/* Sparks Of Joy Section */}
-            <div className="bg-white/5 rounded-2xl p-5 mb-4 border border-white/10">
-              <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                ✨ Sparks Of Joy
-              </h3>
-              <button
-                onClick={() => setShowExerciseBrowser(true)}
-                className="w-full bg-gradient-to-r from-orange-500/20 to-yellow-500/20 border border-orange-500/30 rounded-xl p-4 hover:from-orange-500/30 hover:to-yellow-500/30 transition"
-              >
-                <div className="text-3xl mb-2">🥋</div>
-                <div className="font-medium">Enter Your Mental Dojo</div>
-                <div className="text-xs text-slate-400 mt-1">30-second practices to spark joy & train your mind</div>
-              </button>
-            </div>
-
-            {/* Breath Of Fresh Air Section */}
-            <div className="bg-white/5 rounded-2xl p-5 mb-4 border border-white/10">
-              <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                🌬️ Breath Of Fresh Air
-              </h3>
-              <button
-                onClick={() => setShowBreathworkBrowser(true)}
-                className="w-full bg-gradient-to-r from-teal-500/20 to-cyan-500/20 border border-teal-500/30 rounded-xl p-4 hover:from-teal-500/30 hover:to-cyan-500/30 transition"
-              >
-                <div className="text-3xl mb-2">🌬️</div>
-                <div className="font-medium">Browse {breathworkPatterns.length} Breathing Patterns</div>
-                <div className="text-xs text-slate-400 mt-1">1-minute calm for body & mind</div>
-              </button>
-            </div>
-
-            {/* Tools Of Thought Section */}
-            <div className="bg-white/5 rounded-2xl p-5 mb-4 border border-white/10">
-              <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                🧠 Tools Of Thought
-              </h3>
-              <button
-                onClick={() => setShowCBTBrowser(true)}
-                className="w-full bg-gradient-to-r from-blue-500/20 to-indigo-500/20 border border-blue-500/30 rounded-xl p-4 hover:from-blue-500/30 hover:to-indigo-500/30 transition"
-              >
-                <div className="text-3xl mb-2">🧠</div>
-                <div className="font-medium">Browse {cbtExercises.length} Mindset Exercises</div>
-                <div className="text-xs text-slate-400 mt-1">Shift your thinking, shift your world</div>
-              </button>
-            </div>
-
-          <div className="flex items-center justify-center gap-2 text-xs text-slate-500 mt-6">
-            <span>🔒</span>
-            <span>All data stays on your device</span>
-          </div>
-
-          <footer className="text-center mt-4 text-slate-500 text-xs">Made with 💛 for a happier {CURRENT_YEAR}</footer>
-        </>
+        <footer className="text-center mt-4 text-slate-500 text-xs">Made with 💛 for a happier {CURRENT_YEAR}</footer>
       </div>
 
       {/* Modals */}
