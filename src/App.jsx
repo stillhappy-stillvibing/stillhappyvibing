@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '8.9.0';
+const APP_VERSION = '8.10.0';
 const BUILD_DATE = '2026-01-11';
 
 // Gamification: Point Values
@@ -29,6 +29,7 @@ const POINTS = {
   SHARE_SMILE: 30,
   SHARE_ACHIEVEMENT: 25,
   SHARE_PATTERNS: 25,
+  RIPPLE: 50, // Points for sending ripples to the world - main exercise!
 
   // Daily bonuses
   FIRST_CHECKIN: 25,
@@ -1873,7 +1874,7 @@ function QuoteBrowser({ isOpen, onClose, addPoints, onBoost, onGlobalRipple }) {
             📤 Share
           </button>
 
-          <RippleButton type="quote" data={currentQuote} compact onGlobalRipple={onGlobalRipple} />
+          <RippleButton type="quote" data={currentQuote} compact onGlobalRipple={onGlobalRipple} addPoints={addPoints} />
         </div>
       </div>
 
@@ -2058,6 +2059,7 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare,
                   'Obrigado', 'Спасибо', 'ありがとう', '谢谢', 'شكرا'
                 ]}
                 onGlobalRipple={onGlobalRipple}
+                addPoints={addPoints}
               />
             </div>
 
@@ -2219,7 +2221,7 @@ function ExerciseBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onGlo
             📤 Share
           </button>
 
-          <RippleButton type="exercise" data={currentExercise} compact onGlobalRipple={onGlobalRipple} />
+          <RippleButton type="exercise" data={currentExercise} compact onGlobalRipple={onGlobalRipple} addPoints={addPoints} />
         </div>
       </div>
 
@@ -2338,7 +2340,7 @@ function CBTBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onGlobalRi
             📤 Share
           </button>
 
-          <RippleButton type="cbt" data={currentExercise} compact onGlobalRipple={onGlobalRipple} />
+          <RippleButton type="cbt" data={currentExercise} compact onGlobalRipple={onGlobalRipple} addPoints={addPoints} />
         </div>
       </div>
 
@@ -2480,6 +2482,12 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
 
           {isActive && (
             <div className="text-center py-10">
+              <div className="mb-4">
+                <div className="text-3xl mb-2">{currentPattern.emoji}</div>
+                <h3 className="text-teal-400 font-semibold text-lg mb-4">
+                  {currentPattern.name}
+                </h3>
+              </div>
               <div className="mb-6">
                 <BreathingGuide pattern={currentPattern.pattern} playSound={playSound} />
               </div>
@@ -2532,7 +2540,7 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
                 </button>
               </div>
 
-              <RippleButton type="breathwork" data={currentPattern} onGlobalRipple={onGlobalRipple} />
+              <RippleButton type="breathwork" data={currentPattern} onGlobalRipple={onGlobalRipple} addPoints={addPoints} />
             </>
           )}
         </div>
@@ -2619,7 +2627,7 @@ function GlobalRippleOverlay({ isActive, sparks }) {
 }
 
 // Ripple Button Component - Hold to ripple content to the world
-function RippleButton({ type, data, compact = false, messages = null, colorScheme = 'cyan', onGlobalRipple }) {
+function RippleButton({ type, data, compact = false, messages = null, colorScheme = 'cyan', onGlobalRipple, addPoints }) {
   const [isHolding, setIsHolding] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [sparks, setSparks] = useState([]);
@@ -2785,6 +2793,11 @@ function RippleButton({ type, data, compact = false, messages = null, colorSchem
 
     // Post ripple to global feed
     postRipple(type, data);
+
+    // Award points for sending ripple
+    if (addPoints) {
+      addPoints(POINTS.RIPPLE);
+    }
 
     // Show confirmation
     setShowConfirmation(true);
@@ -4560,7 +4573,7 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats, ch
 }
 
 // Offline Mode Component - Joy practices carousel
-function OfflineMode({ isOpen, onClose, onGlobalRipple }) {
+function OfflineMode({ isOpen, onClose, onGlobalRipple, addPoints }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [shuffled, setShuffled] = useState(false);
   const [practiceOrder, setPracticeOrder] = useState([]);
@@ -4773,6 +4786,7 @@ function OfflineMode({ isOpen, onClose, onGlobalRipple }) {
               'Thank you', 'Merci', 'Gracias', 'Danke'
             ]}
             onGlobalRipple={onGlobalRipple}
+            addPoints={addPoints}
           />
         </div>
 
@@ -5717,6 +5731,7 @@ export default function App() {
         isOpen={showOfflineMode}
         onClose={() => setShowOfflineMode(false)}
         onGlobalRipple={handleGlobalRipple}
+        addPoints={addPoints}
       />
       <WeeklyReflection
         isOpen={showWeeklyReflection}
