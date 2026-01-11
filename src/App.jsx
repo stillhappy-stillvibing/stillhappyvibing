@@ -2039,7 +2039,12 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare 
                   title: exercise.title,
                   seedThought: exercise.seedThought
                 }}
+                colorScheme="fourElements"
                 messages={[
+                  'Happy',
+                  'Healthy',
+                  'Wealthy',
+                  'Wise',
                   'I am a force for good!',
                   'I am already blessed!',
                   'every action is a mirror, let it reflect my best!',
@@ -2556,7 +2561,7 @@ function MicroMoment() {
 }
 
 // Ripple Button Component - Hold to ripple content to the world
-function RippleButton({ type, data, compact = false, messages = null }) {
+function RippleButton({ type, data, compact = false, messages = null, colorScheme = 'cyan' }) {
   const [isHolding, setIsHolding] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [sparks, setSparks] = useState([]);
@@ -2571,6 +2576,33 @@ function RippleButton({ type, data, compact = false, messages = null }) {
 
   // Use custom messages if provided, otherwise use default
   const thankYouMessages = messages || defaultThankYouMessages;
+
+  // Color schemes for different ripple types
+  const colorSchemes = {
+    cyan: {
+      button: 'from-cyan-500/20 to-blue-500/20 border-cyan-500/30 text-cyan-300 hover:from-cyan-500/30 hover:to-blue-500/30',
+      buttonActive: 'from-cyan-500/40 to-blue-500/40 border-cyan-400/50 text-cyan-200 shadow-cyan-500/30',
+      spark: 'text-cyan-300',
+      circles: [
+        { color: 'text-cyan-300', text: 'thank you' },
+        { color: 'text-cyan-300', text: 'thank you' },
+        { color: 'text-cyan-300', text: 'thank you' }
+      ]
+    },
+    fourElements: {
+      button: 'from-orange-500/20 to-yellow-500/20 border-orange-500/30 text-orange-300 hover:from-orange-500/30 hover:to-yellow-500/30',
+      buttonActive: 'from-orange-500/40 to-yellow-500/40 border-orange-400/50 text-orange-200 shadow-orange-500/30',
+      spark: 'text-orange-300',
+      circles: [
+        { color: 'text-yellow-400', text: 'Happy', gradient: false },
+        { color: 'text-sky-400', text: 'Healthy', gradient: false },
+        { color: 'text-green-400', text: 'Wealthy', gradient: false },
+        { color: 'bg-gradient-to-r from-red-400 via-yellow-400 via-green-400 via-blue-400 to-purple-400 bg-clip-text text-transparent', text: 'Wise', gradient: true }
+      ]
+    }
+  };
+
+  const scheme = colorSchemes[colorScheme];
 
   const addSpark = () => {
     const newSpark = {
@@ -2654,8 +2686,8 @@ function RippleButton({ type, data, compact = false, messages = null }) {
           onContextMenu={(e) => e.preventDefault()}
           className={`w-full py-2 rounded-lg border text-sm font-semibold transition ${
             isHolding
-              ? 'bg-cyan-500/30 border-cyan-500/50 text-cyan-300 scale-105'
-              : 'bg-cyan-500/20 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/30'
+              ? `bg-cyan-500/30 border-cyan-500/50 text-cyan-300 scale-105`
+              : `bg-cyan-500/20 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/30`
           }`}
           style={{ userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
         >
@@ -2668,7 +2700,7 @@ function RippleButton({ type, data, compact = false, messages = null }) {
             {sparks.map(spark => (
               <div
                 key={spark.id}
-                className="absolute animate-spark text-cyan-300"
+                className={`absolute animate-spark ${scheme.spark}`}
                 style={{
                   left: `${spark.left}%`,
                   top: `${spark.top}%`,
@@ -2697,23 +2729,24 @@ function RippleButton({ type, data, compact = false, messages = null }) {
         onContextMenu={(e) => e.preventDefault()}
         className={`w-full py-3 rounded-xl border font-bold transition-all duration-300 ${
           isHolding
-            ? 'bg-gradient-to-r from-cyan-500/40 to-blue-500/40 border-cyan-400/50 text-cyan-200 scale-105 shadow-lg shadow-cyan-500/30'
-            : 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border-cyan-500/30 text-cyan-300 hover:from-cyan-500/30 hover:to-blue-500/30'
+            ? `bg-gradient-to-r ${scheme.buttonActive} scale-105 shadow-lg`
+            : `bg-gradient-to-r ${scheme.button}`
         }`}
         style={{ userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
       >
         {/* Concentric ripple circles */}
         {isHolding && (
           <div className="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden rounded-xl">
-            <div className={`absolute ${ripplePhase === 'outward' ? 'animate-ripple-out-1' : 'animate-ripple-in-1'}`}>
-              <span className="text-cyan-300 text-xs font-light">thank you</span>
-            </div>
-            <div className={`absolute ${ripplePhase === 'outward' ? 'animate-ripple-out-2' : 'animate-ripple-in-2'}`}>
-              <span className="text-cyan-300 text-xs font-light">thank you</span>
-            </div>
-            <div className={`absolute ${ripplePhase === 'outward' ? 'animate-ripple-out-3' : 'animate-ripple-in-3'}`}>
-              <span className="text-cyan-300 text-xs font-light">thank you</span>
-            </div>
+            {scheme.circles.map((circle, idx) => (
+              <div
+                key={idx}
+                className={`absolute ${ripplePhase === 'outward' ? `animate-ripple-out-${idx + 1}` : `animate-ripple-in-${idx + 1}`}`}
+              >
+                <span className={`text-xs font-light ${circle.color}`}>
+                  {circle.text}
+                </span>
+              </div>
+            ))}
           </div>
         )}
 
@@ -2736,7 +2769,7 @@ function RippleButton({ type, data, compact = false, messages = null }) {
           {sparks.map(spark => (
             <div
               key={spark.id}
-              className="absolute animate-spark text-cyan-300"
+              className={`absolute animate-spark ${scheme.spark}`}
               style={{
                 left: `${spark.left}%`,
                 top: `${spark.top}%`,
@@ -3305,8 +3338,8 @@ function TheWorldTab() {
             border: 2px solid rgba(251, 191, 36, 0.9);
           }
         }
-        .animate-ripple-out-1, .animate-ripple-out-2, .animate-ripple-out-3,
-        .animate-ripple-in-1, .animate-ripple-in-2, .animate-ripple-in-3 {
+        .animate-ripple-out-1, .animate-ripple-out-2, .animate-ripple-out-3, .animate-ripple-out-4,
+        .animate-ripple-in-1, .animate-ripple-in-2, .animate-ripple-in-3, .animate-ripple-in-4 {
           position: absolute;
           border-radius: 50%;
           pointer-events: none;
@@ -3325,6 +3358,10 @@ function TheWorldTab() {
           animation: ripple-outward 1.5s ease-out infinite;
           animation-delay: 0.6s;
         }
+        .animate-ripple-out-4 {
+          animation: ripple-outward 1.5s ease-out infinite;
+          animation-delay: 0.9s;
+        }
         .animate-ripple-in-1 {
           animation: ripple-inward 1.5s ease-in infinite;
         }
@@ -3335,6 +3372,10 @@ function TheWorldTab() {
         .animate-ripple-in-3 {
           animation: ripple-inward 1.5s ease-in infinite;
           animation-delay: 0.6s;
+        }
+        .animate-ripple-in-4 {
+          animation: ripple-inward 1.5s ease-in infinite;
+          animation-delay: 0.9s;
         }
       `}</style>
     </div>
