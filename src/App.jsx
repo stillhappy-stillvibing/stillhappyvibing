@@ -2571,6 +2571,7 @@ function RippleButton({ type, data, compact = false, messages = null, colorSchem
   const [sparks, setSparks] = useState([]);
   const [ripplePhase, setRipplePhase] = useState('outward');
   const phaseIntervalRef = useRef(null);
+  const fourElementsIndexRef = useRef(0); // Track position in Happy, Healthy, Wealthy, Wise sequence
 
   const defaultThankYouMessages = [
     'Thank you', 'Merci', 'Gracias', 'Danke', 'Grazie',
@@ -2580,6 +2581,14 @@ function RippleButton({ type, data, compact = false, messages = null, colorSchem
 
   // Use custom messages if provided, otherwise use default
   const thankYouMessages = messages || defaultThankYouMessages;
+
+  // The four elements in sequence - the drumbeat of repetition
+  const fourElements = [
+    { text: 'Happy', color: 'text-yellow-400' },
+    { text: 'Healthy', color: 'text-sky-400' },
+    { text: 'Wealthy', color: 'text-green-400' },
+    { text: 'Wise', color: 'text-purple-400' }
+  ];
 
   // Color schemes for different ripple types
   const colorSchemes = {
@@ -2609,12 +2618,32 @@ function RippleButton({ type, data, compact = false, messages = null, colorSchem
   const scheme = colorSchemes[colorScheme];
 
   const addSpark = () => {
+    // The drumbeat of repetition - mix sequential four-element sparks with thank-you messages
+    const showFourElement = Math.random() < 0.6; // 60% chance for four-element spark
+
+    let sparkMessage, sparkColor;
+
+    if (showFourElement) {
+      // Get the next element in the sequence
+      const currentElement = fourElements[fourElementsIndexRef.current % 4];
+      sparkMessage = currentElement.text;
+      sparkColor = currentElement.color;
+
+      // Advance to next element in sequence
+      fourElementsIndexRef.current += 1;
+    } else {
+      // Random thank-you message
+      sparkMessage = thankYouMessages[Math.floor(Math.random() * thankYouMessages.length)];
+      sparkColor = scheme.spark;
+    }
+
     const newSpark = {
       id: Date.now() + Math.random(),
       left: Math.random() * 80 + 10,
       top: Math.random() * 80 + 10,
       delay: Math.random() * 0.5,
-      message: thankYouMessages[Math.floor(Math.random() * thankYouMessages.length)]
+      message: sparkMessage,
+      color: sparkColor
     };
 
     setSparks(prev => [...prev, newSpark]);
@@ -2704,7 +2733,7 @@ function RippleButton({ type, data, compact = false, messages = null, colorSchem
             {sparks.map(spark => (
               <div
                 key={spark.id}
-                className={`absolute animate-spark ${scheme.spark}`}
+                className={`absolute animate-spark ${spark.color}`}
                 style={{
                   left: `${spark.left}%`,
                   top: `${spark.top}%`,
@@ -2773,7 +2802,7 @@ function RippleButton({ type, data, compact = false, messages = null, colorSchem
           {sparks.map(spark => (
             <div
               key={spark.id}
-              className={`absolute animate-spark ${scheme.spark}`}
+              className={`absolute animate-spark ${spark.color}`}
               style={{
                 left: `${spark.left}%`,
                 top: `${spark.top}%`,
@@ -3235,7 +3264,7 @@ function TheWorldTab() {
             {sparks.map(spark => (
               <div
                 key={spark.id}
-                className="absolute animate-spark text-blue-300"
+                className={`absolute animate-spark ${spark.color}`}
                 style={{
                   left: `${spark.left}%`,
                   top: `${spark.top}%`,
