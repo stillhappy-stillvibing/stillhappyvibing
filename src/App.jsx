@@ -5801,7 +5801,11 @@ export default function App() {
 
           {/* T.N.T. - Think New Thoughts */}
           <button
-            onClick={() => setShowTNTBrowser(true)}
+            onClick={() => {
+              setToastMessage('Coming soon! 💭');
+              setToastEmoji('🧨');
+              setShowToast(true);
+            }}
             className="bg-gradient-to-br from-red-500/20 to-orange-500/20 border border-red-500/30 rounded-xl p-4 hover:from-red-500/30 hover:to-orange-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
           >
             <div className="text-3xl">🧨</div>
