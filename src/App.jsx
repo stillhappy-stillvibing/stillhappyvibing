@@ -5619,8 +5619,8 @@ export default function App() {
             
           </>
 
-        {/* Additional Actions - Invite, T.N.T., Joy Points, Settings */}
-        <div className="grid grid-cols-2 gap-3 mt-6 mb-6">
+        {/* Additional Actions - Invite, T.N.T., Settings */}
+        <div className="grid grid-cols-3 gap-3 mt-6 mb-3">
           {/* Invite A Friend */}
           <button
             onClick={() => {
@@ -5657,22 +5657,6 @@ export default function App() {
             <div className="font-semibold text-xs">T.N.T.</div>
           </button>
 
-          {/* Total Joy Points */}
-          <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl p-4 flex flex-col items-center gap-2 relative overflow-hidden">
-            {showPointsAnimation && (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-                <div className="text-2xl font-bold text-yellow-400 animate-bounce">
-                  +{pointsGained}
-                </div>
-              </div>
-            )}
-            <div className="text-3xl">✨</div>
-            <div className="font-semibold text-xs text-center">Total Joy</div>
-            <div className="text-lg font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-              {totalPoints.toLocaleString()}
-            </div>
-          </div>
-
           {/* Settings */}
           <button
             onClick={() => setShowSettingsModal(true)}
@@ -5681,6 +5665,21 @@ export default function App() {
             <div className="text-3xl">⚙️</div>
             <div className="font-semibold text-xs">Settings</div>
           </button>
+        </div>
+
+        {/* Total Joy Points */}
+        <div className="text-center mb-4 relative">
+          {showPointsAnimation && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+              <div className="text-2xl font-bold text-yellow-400 animate-bounce">
+                +{pointsGained}
+              </div>
+            </div>
+          )}
+          <p className="text-sm text-slate-400">Total Joy Points</p>
+          <p className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            {totalPoints.toLocaleString()}
+          </p>
         </div>
 
         {/* Privacy and Footer */}
