@@ -6,7 +6,7 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '5.5.0';
+const APP_VERSION = '8.1.0';
 const BUILD_DATE = '2026-01-11';
 
 // Gamification: Point Values
@@ -106,6 +106,45 @@ const incrementHappinessSource = (source) => {
   if (!source) return;
   const sourceRef = ref(database, `globalHappinessSources/${source}`);
   runTransaction(sourceRef, (current) => (current || 0) + 1);
+};
+
+// Increment daily sparks shared (resets at 12am GMT)
+const incrementDailySparks = () => {
+  const now = new Date();
+  const gmtDate = new Date(now.toUTCString());
+  const today = `${gmtDate.getUTCFullYear()}-${String(gmtDate.getUTCMonth() + 1).padStart(2, '0')}-${String(gmtDate.getUTCDate()).padStart(2, '0')}`;
+  const dailySparksRef = ref(database, `stats/dailyShares/${today}`);
+  runTransaction(dailySparksRef, (current) => (current || 0) + 1);
+};
+
+// Post a ripple to the global feed
+const postRipple = (type, data) => {
+  const timestamp = Date.now();
+  const rippleRef = ref(database, `globalRipples/${timestamp}`);
+
+  let rippleData = {
+    type,
+    timestamp
+  };
+
+  // Format data based on type
+  if (type === 'quote') {
+    rippleData.text = data.text;
+    rippleData.author = data.author;
+    rippleData.tradition = data.tradition;
+  } else if (type === 'exercise') {
+    rippleData.title = data.title;
+    rippleData.subtitle = data.subtitle;
+  } else if (type === 'cbt') {
+    rippleData.title = data.title;
+    rippleData.emoji = data.emoji;
+  } else if (type === 'breathwork') {
+    rippleData.name = data.name;
+    rippleData.emoji = data.emoji;
+  }
+
+  set(rippleRef, rippleData);
+  incrementDailySparks();
 };
 
 // Track global favorites for quotes and exercises
@@ -1319,30 +1358,32 @@ const shareExercise = (exercise, addPoints) => {
   });
 };
 
-// Global Counter Component - Shows worldwide users + micro-moment
+// Global Counter Component - Shows daily sparks shared worldwide
 function GlobalCounter() {
-  const [stats, setStats] = useState({
-    activeStreaks: 0,
-    totalCheckins: 0,
-    todayCheckins: 0
-  });
+  const [dailySparks, setDailySparks] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [currentMoment, setCurrentMoment] = useState(() =>
-    microMoments[Math.floor(Math.random() * microMoments.length)]
-  );
+  const [pulse, setPulse] = useState(false);
+  const prevCountRef = useRef(0);
 
   useEffect(() => {
-    const unsubscribe = onValue(globalCounterRef, (snapshot) => {
-      const data = snapshot.val() || {};
-      // Use local date instead of UTC
-      const now = new Date();
-      const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    // Get today's date in GMT
+    const now = new Date();
+    const gmtDate = new Date(now.toUTCString());
+    const today = `${gmtDate.getUTCFullYear()}-${String(gmtDate.getUTCMonth() + 1).padStart(2, '0')}-${String(gmtDate.getUTCDate()).padStart(2, '0')}`;
 
-      setStats({
-        activeStreaks: data.activeStreaks || 0,
-        totalCheckins: data.totalCheckins || 0,
-        todayCheckins: data.todayCheckins?.[today] || 0
-      });
+    const dailySparksRef = ref(database, `stats/dailyShares/${today}`);
+
+    const unsubscribe = onValue(dailySparksRef, (snapshot) => {
+      const count = snapshot.val() || 0;
+
+      // Trigger pulse animation if count increased
+      if (prevCountRef.current > 0 && count > prevCountRef.current) {
+        setPulse(true);
+        setTimeout(() => setPulse(false), 1000);
+      }
+
+      prevCountRef.current = count;
+      setDailySparks(count);
       setLoading(false);
     }, (error) => {
       console.log('Firebase read error:', error);
@@ -1350,15 +1391,6 @@ function GlobalCounter() {
     });
 
     return () => unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    // Rotate to a new micro-moment every 45 seconds
-    const interval = setInterval(() => {
-      setCurrentMoment(microMoments[Math.floor(Math.random() * microMoments.length)]);
-    }, 45000);
-
-    return () => clearInterval(interval);
   }, []);
 
   if (loading) {
@@ -1369,31 +1401,19 @@ function GlobalCounter() {
     );
   }
 
-  // Hide counter when numbers are too low (app just starting)
-  if (stats.totalCheckins < 10 && stats.todayCheckins === 0) {
-    return (
-      <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-2xl p-4 text-center">
-        <div className="flex items-center justify-center gap-2">
-          <span className="text-2xl">{currentMoment.icon}</span>
-          <p className="text-sm text-slate-200 italic">{currentMoment.text}</p>
-        </div>
-      </div>
-    );
-  }
-
   const formatNumber = (num) => num.toLocaleString();
 
   return (
-    <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-2xl p-4 text-center">
+    <div className={`bg-gradient-to-r from-orange-500/10 to-amber-500/10 border border-amber-500/20 rounded-2xl p-4 text-center transition-all duration-500 ${pulse ? 'scale-105 shadow-lg shadow-amber-500/30' : ''}`}>
       <div className="flex items-center justify-center gap-2 mb-3">
         <span className="text-lg">🌍</span>
-        <span className="text-purple-300 font-medium text-sm">
-          <span className="text-white font-bold">{formatNumber(stats.activeStreaks)}</span> active sessions worldwide
+        <span className="text-amber-300 font-medium text-sm">
+          <span className={`text-white font-bold ${pulse ? 'animate-pulse' : ''}`}>{formatNumber(dailySparks)}</span> sparks shared today
         </span>
       </div>
       <div className="flex items-center justify-center gap-2 pt-3 border-t border-white/10">
-        <span className="text-2xl">{currentMoment.icon}</span>
-        <p className="text-sm text-slate-200 italic">{currentMoment.text}</p>
+        <span className="text-xl">✨</span>
+        <p className="text-sm text-slate-200 italic">Someone just sparked joy in the world, smile with them!</p>
       </div>
     </div>
   );
@@ -1489,8 +1509,9 @@ function ShareSmileCard({ isOpen, onClose, addPoints }) {
           shareSuccessful = true;
         }
 
-        if (shareSuccessful && addPoints) {
-          addPoints(POINTS.SHARE_SMILE);
+        if (shareSuccessful) {
+          if (addPoints) addPoints(POINTS.SHARE_SMILE);
+          incrementDailySparks(); // Track global daily sparks
         }
         setGenerating(false);
       }, 'image/png');
@@ -1575,6 +1596,7 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
 
       canvas.toBlob(async (blob) => {
         const filename = `stillhappy-${type}.png`;
+        let shareSuccessful = false;
         if (navigator.share && navigator.canShare?.({ files: [new File([blob], filename, { type: 'image/png' })] })) {
           try {
             await navigator.share({
@@ -1582,6 +1604,7 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
               title: type === 'quote' ? 'Wisdom to Share' : type === 'spark' ? 'Spark Of Joy' : type === 'exercise' ? 'Mental Dojo Practice' : 'Gratitude',
               text: `Smile, and the whole world smileswithyou.com. ✨`
             });
+            shareSuccessful = true;
           } catch (e) {
             // User cancelled or error
           }
@@ -1593,6 +1616,11 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
           a.download = filename;
           a.click();
           URL.revokeObjectURL(url);
+          shareSuccessful = true;
+        }
+
+        if (shareSuccessful) {
+          incrementDailySparks(); // Track global daily sparks
         }
         setGenerating(false);
       }, 'image/png');
@@ -1833,10 +1861,12 @@ function QuoteBrowser({ isOpen, onClose, addPoints, onBoost }) {
 
           <button
             onClick={() => setShowShareModal(true)}
-            className="w-full py-2 rounded-lg bg-purple-500/20 border border-purple-500/30 text-purple-400 text-sm hover:bg-purple-500/30 transition"
+            className="w-full py-2 rounded-lg bg-purple-500/20 border border-purple-500/30 text-purple-400 text-sm hover:bg-purple-500/30 transition mb-3"
           >
             📤 Share
           </button>
+
+          <RippleButton type="quote" data={currentQuote} compact />
         </div>
       </div>
 
@@ -2141,10 +2171,12 @@ function ExerciseBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
 
           <button
             onClick={() => setShowShareModal(true)}
-            className="w-full py-2 rounded-lg bg-blue-500/20 border border-blue-500/30 text-blue-400 text-sm hover:bg-blue-500/30 transition"
+            className="w-full py-2 rounded-lg bg-blue-500/20 border border-blue-500/30 text-blue-400 text-sm hover:bg-blue-500/30 transition mb-3"
           >
             📤 Share
           </button>
+
+          <RippleButton type="exercise" data={currentExercise} compact />
         </div>
       </div>
 
@@ -2257,10 +2289,12 @@ function CBTBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
 
           <button
             onClick={() => setShowShareModal(true)}
-            className="w-full py-2 rounded-lg bg-blue-500/20 border border-blue-500/30 text-blue-400 text-sm hover:bg-blue-500/30 transition"
+            className="w-full py-2 rounded-lg bg-blue-500/20 border border-blue-500/30 text-blue-400 text-sm hover:bg-blue-500/30 transition mb-3"
           >
             📤 Share
           </button>
+
+          <RippleButton type="cbt" data={currentExercise} compact />
         </div>
       </div>
 
@@ -2486,6 +2520,215 @@ function MicroMoment() {
   );
 }
 
+// Ripple Button Component - Hold to ripple content to the world
+function RippleButton({ type, data, compact = false }) {
+  const [isHolding, setIsHolding] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const holdTimerRef = useRef(null);
+  const ripplePhase = useRef('outward');
+  const phaseIntervalRef = useRef(null);
+
+  const handleHoldStart = () => {
+    setIsHolding(true);
+
+    // Haptic feedback
+    if (navigator.vibrate) {
+      navigator.vibrate([20, 10, 20]);
+    }
+
+    // Animate ripple phases
+    phaseIntervalRef.current = setInterval(() => {
+      ripplePhase.current = ripplePhase.current === 'outward' ? 'inward' : 'outward';
+    }, 800);
+  };
+
+  const handleHoldEnd = () => {
+    setIsHolding(false);
+
+    if (phaseIntervalRef.current) {
+      clearInterval(phaseIntervalRef.current);
+      phaseIntervalRef.current = null;
+    }
+
+    // Post ripple to global feed
+    postRipple(type, data);
+
+    // Show confirmation
+    setShowConfirmation(true);
+    setTimeout(() => setShowConfirmation(false), 2000);
+  };
+
+  if (showConfirmation) {
+    return (
+      <div className="text-center py-2 animate-in fade-in">
+        <p className="text-amber-300 text-sm font-medium">
+          ✨ Rippled to the world!
+        </p>
+      </div>
+    );
+  }
+
+  if (compact) {
+    return (
+      <button
+        onMouseDown={handleHoldStart}
+        onMouseUp={handleHoldEnd}
+        onMouseLeave={handleHoldEnd}
+        onTouchStart={handleHoldStart}
+        onTouchEnd={handleHoldEnd}
+        className={`w-full py-2 rounded-lg border text-sm font-semibold transition ${
+          isHolding
+            ? 'bg-cyan-500/30 border-cyan-500/50 text-cyan-300 scale-105'
+            : 'bg-cyan-500/20 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/30'
+        }`}
+      >
+        {isHolding ? '🌊 Rippling...' : '🌊 Hold to Ripple'}
+      </button>
+    );
+  }
+
+  return (
+    <button
+      onMouseDown={handleHoldStart}
+      onMouseUp={handleHoldEnd}
+      onMouseLeave={handleHoldEnd}
+      onTouchStart={handleHoldStart}
+      onTouchEnd={handleHoldEnd}
+      className={`w-full py-3 rounded-xl border font-bold transition-all duration-300 ${
+        isHolding
+          ? 'bg-gradient-to-r from-cyan-500/40 to-blue-500/40 border-cyan-400/50 text-cyan-200 scale-105 shadow-lg shadow-cyan-500/30'
+          : 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border-cyan-500/30 text-cyan-300 hover:from-cyan-500/30 hover:to-blue-500/30'
+      }`}
+    >
+      {isHolding ? (
+        <span className="flex items-center justify-center gap-2">
+          <span className="animate-pulse">🌊</span>
+          <span>Rippling to the world...</span>
+        </span>
+      ) : (
+        <span className="flex items-center justify-center gap-2">
+          <span>🌊</span>
+          <span>Hold to Ripple to World</span>
+        </span>
+      )}
+    </button>
+  );
+}
+
+// Ripples Feed Component - Shows what's being rippled globally
+function RipplesFeed() {
+  const [ripples, setRipples] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const ripplesRef = ref(database, 'globalRipples');
+
+    const unsubscribe = onValue(ripplesRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        // Convert to array and sort by timestamp (newest first)
+        const ripplesArray = Object.entries(data)
+          .map(([id, ripple]) => ({ id, ...ripple }))
+          .sort((a, b) => b.timestamp - a.timestamp)
+          .slice(0, 20); // Keep only latest 20
+        setRipples(ripplesArray);
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="text-center py-4">
+        <p className="text-slate-400 text-sm">Loading ripples...</p>
+      </div>
+    );
+  }
+
+  if (ripples.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-slate-400 text-sm">No ripples yet. Be the first to ripple joy to the world!</p>
+      </div>
+    );
+  }
+
+  const formatTimeAgo = (timestamp) => {
+    const seconds = Math.floor((Date.now() - timestamp) / 1000);
+    if (seconds < 60) return 'just now';
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+    return `${Math.floor(seconds / 86400)}d ago`;
+  };
+
+  return (
+    <div className="space-y-3 max-w-2xl mx-auto">
+      {ripples.map((ripple) => (
+        <div
+          key={ripple.id}
+          className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 rounded-xl p-4 animate-in fade-in"
+        >
+          {ripple.type === 'quote' && (
+            <>
+              <div className="flex items-start gap-3 mb-2">
+                <span className="text-2xl">🌱</span>
+                <div className="flex-1">
+                  <p className="text-xs text-cyan-300 mb-1">Someone rippled wisdom</p>
+                  <p className="text-sm italic text-slate-200">"{ripple.text}"</p>
+                  <p className="text-xs text-slate-400 mt-1">— {ripple.author}</p>
+                </div>
+              </div>
+              <p className="text-xs text-slate-500 text-right">{formatTimeAgo(ripple.timestamp)}</p>
+            </>
+          )}
+
+          {ripple.type === 'exercise' && (
+            <>
+              <div className="flex items-start gap-3 mb-2">
+                <span className="text-2xl">🥋</span>
+                <div className="flex-1">
+                  <p className="text-xs text-cyan-300 mb-1">Someone rippled a practice</p>
+                  <p className="text-sm font-semibold text-slate-200">{ripple.title}</p>
+                  <p className="text-xs text-slate-400">{ripple.subtitle}</p>
+                </div>
+              </div>
+              <p className="text-xs text-slate-500 text-right">{formatTimeAgo(ripple.timestamp)}</p>
+            </>
+          )}
+
+          {ripple.type === 'cbt' && (
+            <>
+              <div className="flex items-start gap-3 mb-2">
+                <span className="text-2xl">{ripple.emoji || '🧠'}</span>
+                <div className="flex-1">
+                  <p className="text-xs text-cyan-300 mb-1">Someone rippled a tool</p>
+                  <p className="text-sm font-semibold text-slate-200">{ripple.title}</p>
+                </div>
+              </div>
+              <p className="text-xs text-slate-500 text-right">{formatTimeAgo(ripple.timestamp)}</p>
+            </>
+          )}
+
+          {ripple.type === 'breathwork' && (
+            <>
+              <div className="flex items-start gap-3 mb-2">
+                <span className="text-2xl">{ripple.emoji || '🌬️'}</span>
+                <div className="flex-1">
+                  <p className="text-xs text-cyan-300 mb-1">Someone rippled a breath pattern</p>
+                  <p className="text-sm font-semibold text-slate-200">{ripple.name}</p>
+                </div>
+              </div>
+              <p className="text-xs text-slate-500 text-right">{formatTimeAgo(ripple.timestamp)}</p>
+            </>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // World Quote Carousel - Shows all quotes sorted by favorites
 function WorldQuoteCarousel({ topQuotes }) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -2686,6 +2929,9 @@ function TheWorldTab() {
     setIsPressed(true);
     setRipplePhase('outward');
 
+    // Track daily spark shared
+    incrementDailySparks();
+
     // Haptic feedback
     if (navigator.vibrate) {
       navigator.vibrate([20, 10, 20]);
@@ -2739,7 +2985,7 @@ function TheWorldTab() {
           Smile, and the whole world smiles with you.
         </p>
         <p className="text-amber-300 text-lg leading-relaxed">
-          Smile because someone in the world has sparked joy!
+          Someone just sparked joy in the world, smile with them!
         </p>
       </div>
 
@@ -2831,12 +3077,21 @@ function TheWorldTab() {
       </div>
 
       {/* Carl Sagan Quote */}
-      <div className="bg-white/5 backdrop-blur rounded-2xl p-6 border border-white/10 max-w-2xl">
+      <div className="bg-white/5 backdrop-blur rounded-2xl p-6 border border-white/10 max-w-2xl mb-8">
         <p className="text-slate-300 text-sm leading-relaxed italic mb-3">
           "Look again at that dot. That's here. That's home. That's us. On it everyone you love, everyone you know, everyone you ever heard of, every human being who ever was, lived out their lives...
           on a mote of dust suspended in a sunbeam."
         </p>
         <p className="text-slate-400 text-xs text-right">— Carl Sagan</p>
+      </div>
+
+      {/* Ripples Feed - What's being shared globally */}
+      <div className="w-full max-w-2xl mb-8">
+        <div className="text-center mb-6">
+          <h3 className="text-xl font-bold mb-2">🌊 Global Ripples</h3>
+          <p className="text-slate-400 text-sm">What's sparking joy around the world</p>
+        </div>
+        <RipplesFeed />
       </div>
 
       {/* CSS Animations */}
@@ -3920,29 +4175,14 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats, ch
           </p>
         </div>
 
-        <div className="bg-green-400/10 border border-green-400/30 rounded-xl p-4 mb-6">
-          <h3 className="font-semibold text-green-400 mb-2 flex items-center gap-2">🔒 Your Privacy</h3>
+        <div className="bg-cyan-400/10 border border-cyan-400/30 rounded-xl p-4 mb-6">
+          <h3 className="font-semibold text-cyan-400 mb-2 flex items-center gap-2">🌊 Anonymous Joy</h3>
           <ul className="text-sm text-slate-300 space-y-1">
-            <li>• All personal data stored locally only</li>
-            <li>• Only anonymous counts shared (global counter)</li>
+            <li>• All your data stays on your device</li>
+            <li>• Ripples are posted anonymously to the world</li>
+            <li>• Only spark counts are shared globally</li>
             <li>• No personal info ever leaves your device</li>
-            <li>• Clear your data anytime below</li>
           </ul>
-        </div>
-
-        {/* Share the App */}
-        <div className="bg-gradient-to-r from-pink-500/10 to-purple-500/10 border border-pink-500/20 rounded-xl p-4 mb-6">
-          <h3 className="font-semibold text-pink-400 mb-2 flex items-center gap-2">💝 Share the Happiness</h3>
-          <p className="text-sm text-slate-300 mb-3">Help someone you love have a happier {CURRENT_YEAR}</p>
-          <button
-            onClick={() => {
-              const shareText = `Sparks Of Joy ✨\n\n✨ Sparks Of Joy - Mental Dojo practices\n🌱 Seeds Of Thought - Wisdom to plant\n🌬️ Breath Of Fresh Air - Calming patterns\n💙 Tools Of Thought - Mindset shifts\n🌊 Ripples Of Joy - Witness sparks\n\nSmile, and the whole world smileswithyou.com!`;
-              shareContent(shareText, 'Shared to clipboard!');
-            }}
-            className="w-full py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold hover:scale-105 transition"
-          >
-            💌 Share Your Smile
-          </button>
         </div>
 
         <h3 className="font-semibold mb-3 text-slate-400 text-sm uppercase tracking-wider">Data Management</h3>
