@@ -1517,14 +1517,24 @@ function ShareSmileCard({ isOpen, onClose, addPoints }) {
         {/* The Card to be captured */}
         <div
           ref={cardRef}
-          className="bg-gradient-to-br from-amber-400 via-orange-400 to-pink-400 rounded-2xl p-8 mb-4 aspect-square flex items-center justify-center"
+          className="bg-gradient-to-br from-amber-400 via-orange-400 to-pink-400 rounded-2xl p-8 mb-4 aspect-square flex flex-col justify-between"
         >
-          <div className="text-center text-white">
-            <p className="text-6xl mb-6">💛</p>
-            <p className="text-lg font-medium leading-relaxed italic px-2">
-              "{message}"
+          {/* Top left header */}
+          <p className="text-white text-sm font-light italic self-start">
+            Thinking of you...
+          </p>
+
+          {/* Center message */}
+          <div className="flex items-center justify-center flex-1">
+            <p className="text-white text-lg font-medium leading-relaxed text-center px-2">
+              {message}
             </p>
           </div>
+
+          {/* Bottom right footer */}
+          <p className="text-white text-sm font-light italic self-end">
+            ... sparked joy in my mind.
+          </p>
         </div>
 
         <div className="flex gap-2 mb-2">
@@ -1840,6 +1850,7 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare 
   const [timeLeft, setTimeLeft] = useState(30);
   const [isComplete, setIsComplete] = useState(false);
   const [showSparks, setShowSparks] = useState(false);
+  const [foundSpark, setFoundSpark] = useState(false); // Track if user clicked button vs timeout
 
   // Calculate progress percentage for glow effect (0% to 100%)
   const progress = ((30 - timeLeft) / 30) * 100;
@@ -1850,6 +1861,7 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare 
       setTimeLeft(30);
       setIsComplete(false);
       setShowSparks(false);
+      setFoundSpark(false);
       return;
     }
 
@@ -1859,6 +1871,7 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare 
           clearInterval(timer);
           setIsComplete(true);
           setShowSparks(true);
+          setFoundSpark(false); // Time ran out, they planted the seed
           // Hide sparks after 2 seconds
           setTimeout(() => setShowSparks(false), 2000);
           return 0;
@@ -1916,6 +1929,7 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare 
               onClick={() => {
                 setIsComplete(true);
                 setShowSparks(true);
+                setFoundSpark(true); // User clicked the button!
                 setTimeout(() => setShowSparks(false), 2000);
               }}
               className="px-8 py-3 bg-gradient-to-r from-orange-400 to-yellow-500 hover:from-orange-500 hover:to-yellow-600 text-slate-900 rounded-xl font-bold transition hover:scale-105"
@@ -1948,7 +1962,9 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare 
               </div>
             )}
 
-            <h3 className="text-3xl font-bold mb-8 text-orange-300">You've planted a seed of joy, it will spark within</h3>
+            <h3 className="text-3xl font-bold mb-8 text-orange-300">
+              {foundSpark ? "You found the spark within!" : "You've planted a seed of joy, it will spark within"}
+            </h3>
 
             {/* The seed thought */}
             <div className="relative mb-12">
@@ -2379,6 +2395,22 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
               <div className="mt-4 text-xs text-slate-500">
                 Keep breathing... {Math.max(0, 60 - cycles * currentPattern.duration)}s remaining
               </div>
+
+              {/* Early completion option */}
+              <div className="mt-8 pt-6 border-t border-white/10">
+                <p className="text-amber-300 text-sm mb-3 italic">
+                  Just one breath can spark joy
+                </p>
+                <button
+                  onClick={() => {
+                    setIsActive(false);
+                    setShowCompletion(true);
+                  }}
+                  className="px-6 py-3 bg-gradient-to-r from-orange-400 to-yellow-500 hover:from-orange-500 hover:to-yellow-600 text-slate-900 rounded-xl font-bold transition hover:scale-105"
+                >
+                  Light it up!
+                </button>
+              </div>
             </div>
           )}
 
@@ -2598,33 +2630,286 @@ function WorldExerciseCarousel({ topExercises }) {
   );
 }
 
-// The World Tab Component - Coming Soon
+// The World Tab Component - Ripples of Joy
 function TheWorldTab() {
+  const [sparks, setSparks] = useState([]);
+  const [sparkCount, setSparkCount] = useState(0);
+  const [isPressed, setIsPressed] = useState(false);
+  const [ripplePhase, setRipplePhase] = useState('outward'); // 'outward' or 'inward'
+  const imageRef = useRef(null);
+  const phaseInterval = useRef(null);
+
+  // Thank you in different languages
+  const thankYouMessages = [
+    'Thank you', 'Merci', 'Gracias', 'Danke', 'Grazie',
+    'Obrigado', 'Спасибо', 'ありがとう', '谢谢', 'شكرا',
+    'Teşekkürler', 'Tack', 'Dziękuję', '감사합니다', 'Kiitos',
+    'Dhanyavaad', 'Toda', 'Terima kasih', 'Cảm ơn', 'Ευχαριστώ'
+  ];
+
+  const addSpark = (x, y) => {
+    const newSpark = {
+      id: Date.now() + Math.random(),
+      left: x !== undefined ? x : Math.random() * 80 + 10,
+      top: y !== undefined ? y : Math.random() * 80 + 10,
+      delay: Math.random() * 0.5,
+      message: thankYouMessages[Math.floor(Math.random() * thankYouMessages.length)]
+    };
+
+    setSparks(prev => [...prev, newSpark]);
+    setSparkCount(prev => prev + 1);
+
+    setTimeout(() => {
+      setSparks(prev => prev.filter(s => s.id !== newSpark.id));
+    }, 3000);
+  };
+
+  // Handle button press - start meditation
+  const handlePressStart = () => {
+    setIsPressed(true);
+    setRipplePhase('outward');
+
+    // Haptic feedback
+    if (navigator.vibrate) {
+      navigator.vibrate([20, 10, 20]);
+    }
+
+    // Alternate between outward and inward ripples
+    phaseInterval.current = setInterval(() => {
+      setRipplePhase(prev => prev === 'outward' ? 'inward' : 'outward');
+    }, 1500);
+
+    // Add sparks while pressed
+    const sparkInterval = setInterval(() => {
+      if (Math.random() > 0.7) { // 30% chance each interval
+        addSpark();
+      }
+    }, 200);
+
+    // Store interval for cleanup
+    phaseInterval.sparkInterval = sparkInterval;
+  };
+
+  const handlePressEnd = () => {
+    setIsPressed(false);
+    if (phaseInterval.current) {
+      clearInterval(phaseInterval.current);
+      if (phaseInterval.sparkInterval) {
+        clearInterval(phaseInterval.sparkInterval);
+      }
+      phaseInterval.current = null;
+    }
+  };
+
+  // Generate background sparks at random intervals
+  useEffect(() => {
+    const interval = setInterval(() => {
+      addSpark();
+    }, 2000 + Math.random() * 3000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <div className="flex flex-col items-center justify-center py-20">
-      <div className="relative mb-8">
-        {/* Rotating Earth */}
-        <div className="text-[120px] animate-spin-slow">
-          🌍
+    <div className="flex flex-col items-center py-8 px-4">
+      {/* Header */}
+      <div className="text-center mb-8 max-w-2xl">
+        <h2 className="text-2xl font-bold mb-3">🌊 Ripples of Joy</h2>
+        <p className="text-slate-300 text-base leading-relaxed mb-2">
+          Give and you shall receive.
+        </p>
+        <p className="text-slate-400 text-sm mb-3">
+          Smile, and the whole world smiles with you.
+        </p>
+        <p className="text-amber-300 text-lg leading-relaxed">
+          Smile because someone in the world has sparked joy!
+        </p>
+      </div>
+
+      {/* Giving/Receiving Status - Above Image */}
+      <div className="mb-4 text-center min-h-[28px]">
+        {isPressed && (
+          <p className="text-amber-300 text-lg font-medium animate-pulse">
+            {ripplePhase === 'outward' ? '🙏 Giving gratitude...' : '💛 Receiving joy...'}
+          </p>
+        )}
+      </div>
+
+      {/* Earth Image with Sparks */}
+      <div className="relative mb-6 max-w-lg w-full">
+        <div
+          ref={imageRef}
+          className="relative rounded-2xl overflow-hidden border-2 border-white/20 bg-black"
+        >
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/9/97/The_Earth_seen_from_Apollo_17.jpg"
+            alt="Blue Marble (Apollo 17)"
+            className="w-full h-auto"
+            style={{ minHeight: '300px', maxHeight: '500px', objectFit: 'contain' }}
+          />
+
+          {/* Concentric Ripple Circles - Outward and Inward */}
+          {isPressed && (
+            <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+              <div className={`absolute ${ripplePhase === 'outward' ? 'animate-ripple-out-1' : 'animate-ripple-in-1'}`}>
+                <span className="text-amber-300 text-xs font-light">thank you</span>
+              </div>
+              <div className={`absolute ${ripplePhase === 'outward' ? 'animate-ripple-out-2' : 'animate-ripple-in-2'}`}>
+                <span className="text-amber-300 text-xs font-light">thank you</span>
+              </div>
+              <div className={`absolute ${ripplePhase === 'outward' ? 'animate-ripple-out-3' : 'animate-ripple-in-3'}`}>
+                <span className="text-amber-300 text-xs font-light">thank you</span>
+              </div>
+            </div>
+          )}
+
+          {/* Sparks overlay */}
+          <div className="absolute inset-0 pointer-events-none">
+            {sparks.map(spark => (
+              <div
+                key={spark.id}
+                className="absolute animate-spark text-blue-300"
+                style={{
+                  left: `${spark.left}%`,
+                  top: `${spark.top}%`,
+                  animationDelay: `${spark.delay}s`
+                }}
+              >
+                <div className="text-xs font-semibold whitespace-nowrap">
+                  ✨ {spark.message}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Meditation Button - Small Round Spark */}
+        <div className="flex flex-col items-center mt-6 gap-3">
+          <button
+            onMouseDown={handlePressStart}
+            onMouseUp={handlePressEnd}
+            onMouseLeave={handlePressEnd}
+            onTouchStart={handlePressStart}
+            onTouchEnd={handlePressEnd}
+            className={`w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 border-2 border-amber-300/50 transition-all shadow-lg flex items-center justify-center select-none ${isPressed ? 'scale-95' : 'hover:scale-105'}`}
+            style={{ userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
+          >
+            <span className="text-3xl pointer-events-none">✨</span>
+          </button>
+          <div className="text-center max-w-md">
+            <p className="text-slate-300 text-sm mb-2">
+              Place your ring finger and hold
+            </p>
+            <p className="text-slate-400 text-xs leading-relaxed mb-2">
+              Close your eyes. Say "thank you, thank you, thank you" three times with joy.
+            </p>
+            <p className="text-slate-400 text-xs italic">
+              Radiate happiness and receive it 10-fold
+            </p>
+            <p className="text-slate-400 text-xs mt-3">
+              <span className="text-yellow-400 font-semibold">{sparkCount}</span> sparks witnessed
+            </p>
+          </div>
         </div>
       </div>
-      <h2 className="text-2xl font-bold mb-2">Coming Soon</h2>
-      <p className="text-slate-400 text-center max-w-md">
-        We're building something special to connect joy across the world
-      </p>
 
-      {/* Add the animation to the page */}
+      {/* Carl Sagan Quote */}
+      <div className="bg-white/5 backdrop-blur rounded-2xl p-6 border border-white/10 max-w-2xl">
+        <p className="text-slate-300 text-sm leading-relaxed italic mb-3">
+          "Look again at that dot. That's here. That's home. That's us. On it everyone you love, everyone you know, everyone you ever heard of, every human being who ever was, lived out their lives...
+          on a mote of dust suspended in a sunbeam."
+        </p>
+        <p className="text-slate-400 text-xs text-right">— Carl Sagan</p>
+      </div>
+
+      {/* CSS Animations */}
       <style>{`
-        @keyframes spin-slow {
-          from {
-            transform: rotate(0deg);
+        @keyframes spark {
+          0% {
+            opacity: 0;
+            transform: scale(0) translateY(0);
           }
-          to {
-            transform: rotate(360deg);
+          30% {
+            opacity: 1;
+            transform: scale(1) translateY(-10px);
+          }
+          100% {
+            opacity: 0;
+            transform: scale(0.8) translateY(-50px);
           }
         }
-        .animate-spin-slow {
-          animation: spin-slow 20s linear infinite;
+        .animate-spark {
+          animation: spark 3s ease-out forwards;
+        }
+        @keyframes fade-in {
+          0% {
+            opacity: 0;
+          }
+          100% {
+            opacity: 1;
+          }
+        }
+        .animate-fade-in {
+          animation: fade-in 1s ease-in;
+        }
+        @keyframes ripple-outward {
+          0% {
+            width: 80px;
+            height: 80px;
+            opacity: 0.9;
+            border: 2px solid rgba(251, 191, 36, 0.9);
+          }
+          100% {
+            width: 400px;
+            height: 400px;
+            opacity: 0;
+            border: 2px solid rgba(251, 191, 36, 0);
+          }
+        }
+        @keyframes ripple-inward {
+          0% {
+            width: 400px;
+            height: 400px;
+            opacity: 0;
+            border: 2px solid rgba(251, 191, 36, 0);
+          }
+          100% {
+            width: 80px;
+            height: 80px;
+            opacity: 0.9;
+            border: 2px solid rgba(251, 191, 36, 0.9);
+          }
+        }
+        .animate-ripple-out-1, .animate-ripple-out-2, .animate-ripple-out-3,
+        .animate-ripple-in-1, .animate-ripple-in-2, .animate-ripple-in-3 {
+          position: absolute;
+          border-radius: 50%;
+          pointer-events: none;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .animate-ripple-out-1 {
+          animation: ripple-outward 1.5s ease-out infinite;
+        }
+        .animate-ripple-out-2 {
+          animation: ripple-outward 1.5s ease-out infinite;
+          animation-delay: 0.3s;
+        }
+        .animate-ripple-out-3 {
+          animation: ripple-outward 1.5s ease-out infinite;
+          animation-delay: 0.6s;
+        }
+        .animate-ripple-in-1 {
+          animation: ripple-inward 1.5s ease-in infinite;
+        }
+        .animate-ripple-in-2 {
+          animation: ripple-inward 1.5s ease-in infinite;
+          animation-delay: 0.3s;
+        }
+        .animate-ripple-in-3 {
+          animation: ripple-inward 1.5s ease-in infinite;
+          animation-delay: 0.6s;
         }
       `}</style>
     </div>
@@ -3800,6 +4085,7 @@ export default function App() {
   const [showExerciseBrowser, setShowExerciseBrowser] = useState(false);
   const [showBreathworkBrowser, setShowBreathworkBrowser] = useState(false);
   const [showCBTBrowser, setShowCBTBrowser] = useState(false);
+  const [showRipplesModal, setShowRipplesModal] = useState(false);
   const [showPowerBoost, setShowPowerBoost] = useState(false);
   const [checkInCooldownUntil, setCheckInCooldownUntil] = useState(0);
   const [cooldownRemaining, setCooldownRemaining] = useState(0);
@@ -4347,26 +4633,11 @@ export default function App() {
           <p className="text-slate-400 text-xs mb-2">Plant joy, watch it bloom, share it with the world</p>
         </header>
 
-        {/* Tab Navigation */}
-        <div className="flex bg-white/5 rounded-xl p-1 mb-4">
-          {[
-            { id: 'timer', label: '😊 Home' },
-            { id: 'world', label: '🌍 World' },
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 py-2 rounded-lg text-sm font-medium transition ${activeTab === tab.id ? 'bg-white/10 text-white' : 'text-slate-400'}`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        {/* No tab navigation - single page interface */}
 
-        {/* Timer Tab */}
-        {activeTab === 'timer' && (
-          <>
-            {/* Global Counter */}
+        {/* Main Content */}
+        <>
+          {/* Global Counter */}
             <div className="mb-4">
               <GlobalCounter />
             </div>
@@ -4423,19 +4694,14 @@ export default function App() {
                 <div className="text-xs text-slate-400 text-center">Send joy</div>
               </button>
 
-              {/* Ripples Of Joy - Coming Soon */}
+              {/* Ripples Of Joy */}
               <button
-                onClick={() => {
-                  setToastMessage('Coming soon! 🌊');
-                  setToastEmoji('🌊');
-                  setShowToast(true);
-                }}
-                className="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 rounded-xl p-5 transition hover:scale-105 flex flex-col items-center gap-2 relative"
+                onClick={() => setShowRipplesModal(true)}
+                className="bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 rounded-xl p-5 hover:from-cyan-500/30 hover:to-blue-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
               >
-                <div className="text-4xl opacity-50">🌊</div>
-                <div className="font-semibold text-sm text-slate-400">Ripples Of Joy</div>
-                <div className="text-xs text-slate-500 text-center">Coming soon</div>
-                <div className="absolute top-2 right-2 text-xs bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded-full">Soon</div>
+                <div className="text-4xl">🌊</div>
+                <div className="font-semibold text-sm">Ripples Of Joy</div>
+                <div className="text-xs text-slate-400 text-center">Witness sparks</div>
               </button>
             </div>
 
@@ -4547,84 +4813,44 @@ export default function App() {
               </div>
             </div>
           </>
-        )}
 
-        {/* Tools For Happiness Tab */}
-        {activeTab === 'tools' && (
-          <>
-            <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold mb-2">🌱 Joy Toolkit</h2>
-              <p className="text-slate-400 text-sm">Seeds of thought, sparks of joy, and breath to grow your garden</p>
-            </div>
+        {/* Additional Actions - Invite & Settings */}
+        <div className="grid grid-cols-2 gap-3 mt-6 mb-6">
+          {/* Invite A Friend */}
+          <button
+            onClick={() => {
+              const inviteText = `Seeds of Joy 🌱\n\nPlant joy, watch it bloom, share it with the world.\n\n✨ Sparks Of Joy - Mental Dojo practices\n🌱 Seeds Of Thought - Wisdom to plant\n🌬️ Breath Of Fresh Air - Calming patterns\n💛 Share A Smile - Send joy\n🌊 Ripples Of Joy - Witness sparks\n\nSmile, and the whole world smiles with you.\n\nsmileswithyou.com`;
+              if (navigator.share) {
+                navigator.share({
+                  title: 'Seeds of Joy',
+                  text: inviteText
+                }).catch(() => {});
+              } else {
+                navigator.clipboard.writeText(inviteText);
+                setToastMessage('Invite link copied!');
+                setToastEmoji('📋');
+                setShowToast(true);
+                setTimeout(() => setShowToast(false), 2000);
+              }
+            }}
+            className="bg-gradient-to-br from-pink-500/20 to-rose-500/20 border border-pink-500/30 rounded-xl p-4 hover:from-pink-500/30 hover:to-rose-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
+          >
+            <div className="text-3xl">💌</div>
+            <div className="font-semibold text-xs">Invite A Friend</div>
+          </button>
 
-            {/* Seeds Of Thought Section */}
-            <div className="bg-white/5 rounded-2xl p-5 mb-4 border border-white/10">
-              <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                🌱 Seeds Of Thought
-              </h3>
-              <button
-                onClick={() => setShowQuoteBrowser(true)}
-                className="w-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl p-4 hover:from-purple-500/30 hover:to-pink-500/30 transition"
-              >
-                <div className="text-3xl mb-2">🌱</div>
-                <div className="font-medium">Browse {wisdomQuotes.length} Seeds Of Thought</div>
-                <div className="text-xs text-slate-400 mt-1">Wisdom to plant in your mind</div>
-              </button>
-            </div>
+          {/* Settings */}
+          <button
+            onClick={() => setShowSettingsModal(true)}
+            className="bg-gradient-to-br from-slate-500/20 to-gray-500/20 border border-slate-500/30 rounded-xl p-4 hover:from-slate-500/30 hover:to-gray-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
+          >
+            <div className="text-3xl">⚙️</div>
+            <div className="font-semibold text-xs">Settings</div>
+          </button>
+        </div>
 
-            {/* Sparks Of Joy Section */}
-            <div className="bg-white/5 rounded-2xl p-5 mb-4 border border-white/10">
-              <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                ✨ Sparks Of Joy
-              </h3>
-              <button
-                onClick={() => setShowExerciseBrowser(true)}
-                className="w-full bg-gradient-to-r from-orange-500/20 to-yellow-500/20 border border-orange-500/30 rounded-xl p-4 hover:from-orange-500/30 hover:to-yellow-500/30 transition"
-              >
-                <div className="text-3xl mb-2">🥋</div>
-                <div className="font-medium">Enter Your Mental Dojo</div>
-                <div className="text-xs text-slate-400 mt-1">30-second practices to spark joy & train your mind</div>
-              </button>
-            </div>
-
-            {/* Breath Of Fresh Air Section */}
-            <div className="bg-white/5 rounded-2xl p-5 mb-4 border border-white/10">
-              <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                🌬️ Breath Of Fresh Air
-              </h3>
-              <button
-                onClick={() => setShowBreathworkBrowser(true)}
-                className="w-full bg-gradient-to-r from-teal-500/20 to-cyan-500/20 border border-teal-500/30 rounded-xl p-4 hover:from-teal-500/30 hover:to-cyan-500/30 transition"
-              >
-                <div className="text-3xl mb-2">🌬️</div>
-                <div className="font-medium">Browse {breathworkPatterns.length} Breathing Patterns</div>
-                <div className="text-xs text-slate-400 mt-1">1-minute calm for body & mind</div>
-              </button>
-            </div>
-
-            {/* Tools Of Thought Section */}
-            <div className="bg-white/5 rounded-2xl p-5 mb-4 border border-white/10">
-              <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                🧠 Tools Of Thought
-              </h3>
-              <button
-                onClick={() => setShowCBTBrowser(true)}
-                className="w-full bg-gradient-to-r from-blue-500/20 to-indigo-500/20 border border-blue-500/30 rounded-xl p-4 hover:from-blue-500/30 hover:to-indigo-500/30 transition"
-              >
-                <div className="text-3xl mb-2">🧠</div>
-                <div className="font-medium">Browse {cbtExercises.length} Mindset Exercises</div>
-                <div className="text-xs text-slate-400 mt-1">Shift your thinking, shift your world</div>
-              </button>
-            </div>
-          </>
-        )}
-
-        {/* The World Tab */}
-        {activeTab === 'world' && (
-          <TheWorldTab />
-        )}
-
-        <div className="flex items-center justify-center gap-2 text-xs text-slate-500 mt-6">
+        {/* Privacy and Footer */}
+        <div className="flex items-center justify-center gap-2 text-xs text-slate-500 mt-4">
           <span>🔒</span>
           <span>All data stays on your device</span>
         </div>
@@ -4685,6 +4911,22 @@ export default function App() {
         onClose={() => setShowShareSmile(false)}
         addPoints={addPoints}
       />
+
+      {/* Ripples Of Joy Modal */}
+      {showRipplesModal && (
+        <div className="fixed inset-0 bg-black/95 z-50 overflow-y-auto">
+          <div className="min-h-screen">
+            <button
+              onClick={() => setShowRipplesModal(false)}
+              className="fixed top-4 right-4 z-10 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl transition"
+            >
+              ✕ Close
+            </button>
+            <TheWorldTab />
+          </div>
+        </div>
+      )}
+
       <Confetti active={showConfetti} />
       <Toast
         message={toastMessage}
