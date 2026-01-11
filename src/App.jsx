@@ -29,7 +29,7 @@ const POINTS = {
   SHARE_SMILE: 30,
   SHARE_ACHIEVEMENT: 25,
   SHARE_PATTERNS: 25,
-  RIPPLE: 5, // Points for sending ripples to the world
+  RIPPLE: 50, // Points for sending ripples to the world - main exercise!
 
   // Daily bonuses
   FIRST_CHECKIN: 25,
