@@ -2395,6 +2395,22 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
               <div className="mt-4 text-xs text-slate-500">
                 Keep breathing... {Math.max(0, 60 - cycles * currentPattern.duration)}s remaining
               </div>
+
+              {/* Early completion option */}
+              <div className="mt-8 pt-6 border-t border-white/10">
+                <p className="text-amber-300 text-sm mb-3 italic">
+                  Just one breath can spark joy
+                </p>
+                <button
+                  onClick={() => {
+                    setIsActive(false);
+                    setShowCompletion(true);
+                  }}
+                  className="px-6 py-3 bg-gradient-to-r from-orange-400 to-yellow-500 hover:from-orange-500 hover:to-yellow-600 text-slate-900 rounded-xl font-bold transition hover:scale-105"
+                >
+                  Light it up!
+                </button>
+              </div>
             </div>
           )}
 
