@@ -4864,7 +4864,7 @@ function TNTBrowser({ isOpen, onClose }) {
         </div>
 
         <p className="text-slate-300 text-sm mb-4 text-center italic">
-          Meditation journals from Think New Thoughts Publishing
+          You don't need to pay, but you may like these journals
         </p>
 
         {/* Card Counter */}
@@ -4933,7 +4933,7 @@ function TNTBrowser({ isOpen, onClose }) {
             108 days × 108 repetitions = Completion. Transform through the tap-tap-tap of repetition.
           </p>
           <p className="text-xs text-slate-500 mt-2">
-            Sparks Of Joy is always free. These journals are optional for deeper practice.
+            Sparks Of Joy is always free. You may enjoy these journals for deeper practice.
           </p>
         </div>
       </div>
