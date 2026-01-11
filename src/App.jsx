@@ -2612,11 +2612,9 @@ function WorldExerciseCarousel({ topExercises }) {
 function TheWorldTab() {
   const [sparks, setSparks] = useState([]);
   const [sparkCount, setSparkCount] = useState(0);
-  const [showGiveMessage, setShowGiveMessage] = useState(false);
-  const [isTouching, setIsTouching] = useState(false);
-  const [touchPosition, setTouchPosition] = useState({ x: 50, y: 50 });
+  const [showRipples, setShowRipples] = useState(false);
+  const [rippleKey, setRippleKey] = useState(0);
   const imageRef = useRef(null);
-  const continuousSparkInterval = useRef(null);
 
   // Thank you in different languages
   const thankYouMessages = [
@@ -2626,14 +2624,13 @@ function TheWorldTab() {
     'Dhanyavaad', 'Toda', 'Terima kasih', 'Cảm ơn', 'Ευχαριστώ'
   ];
 
-  const addSpark = (x, y, isUserSpark = false) => {
+  const addSpark = (x, y) => {
     const newSpark = {
       id: Date.now() + Math.random(),
       left: x !== undefined ? x : Math.random() * 80 + 10,
       top: y !== undefined ? y : Math.random() * 80 + 10,
       delay: Math.random() * 0.5,
-      message: thankYouMessages[Math.floor(Math.random() * thankYouMessages.length)],
-      isUserSpark
+      message: thankYouMessages[Math.floor(Math.random() * thankYouMessages.length)]
     };
 
     setSparks(prev => [...prev, newSpark]);
@@ -2644,78 +2641,35 @@ function TheWorldTab() {
     }, 3000);
   };
 
-  // Detect two-finger touch (ring + middle finger)
-  useEffect(() => {
-    const handleTouchStart = (e) => {
-      if (e.touches.length === 2 && imageRef.current?.contains(e.target)) {
-        e.preventDefault();
+  // Plant seeds of joy - creates ripples and sparks
+  const plantSeeds = () => {
+    // Haptic feedback
+    if (navigator.vibrate) {
+      navigator.vibrate([30, 20, 30]);
+    }
 
-        // Check if fingers are close together (ring + middle finger)
-        const touch1 = e.touches[0];
-        const touch2 = e.touches[1];
-        const distance = Math.sqrt(
-          Math.pow(touch2.clientX - touch1.clientX, 2) +
-          Math.pow(touch2.clientY - touch1.clientY, 2)
-        );
+    // Show ripples from center
+    setShowRipples(true);
+    setRippleKey(prev => prev + 1); // Reset animation
 
-        // If fingers are reasonably close (within 100px), consider it ring+middle
-        if (distance < 100) {
-          // Haptic feedback - create ripple effect
-          if (navigator.vibrate) {
-            navigator.vibrate([50, 30, 50, 30, 50]); // Ripple pattern
-          }
+    // Create multiple sparks around the world
+    for (let i = 0; i < 5; i++) {
+      setTimeout(() => {
+        addSpark();
+      }, i * 100);
+    }
 
-          setIsTouching(true);
+    // Hide ripples after animation
+    setTimeout(() => {
+      setShowRipples(false);
+    }, 2000);
+  };
 
-          // Calculate center position
-          const rect = imageRef.current.getBoundingClientRect();
-          const centerX = ((touch1.clientX + touch2.clientX) / 2 - rect.left) / rect.width * 100;
-          const centerY = ((touch1.clientY + touch2.clientY) / 2 - rect.top) / rect.height * 100;
-
-          // Store touch position for ripple circles
-          setTouchPosition({ x: centerX, y: centerY });
-
-          // Add initial spark
-          addSpark(centerX, centerY, true);
-          setShowGiveMessage(true);
-
-          // Start continuous sparks while holding
-          continuousSparkInterval.current = setInterval(() => {
-            const offsetX = centerX + (Math.random() - 0.5) * 20;
-            const offsetY = centerY + (Math.random() - 0.5) * 20;
-            addSpark(offsetX, offsetY, true);
-          }, 300);
-        }
-      }
-    };
-
-    const handleTouchEnd = (e) => {
-      if (e.touches.length < 2) {
-        setIsTouching(false);
-        setShowGiveMessage(false);
-        if (continuousSparkInterval.current) {
-          clearInterval(continuousSparkInterval.current);
-          continuousSparkInterval.current = null;
-        }
-      }
-    };
-
-    document.addEventListener('touchstart', handleTouchStart, { passive: false });
-    document.addEventListener('touchend', handleTouchEnd, { passive: false });
-    return () => {
-      document.removeEventListener('touchstart', handleTouchStart);
-      document.removeEventListener('touchend', handleTouchEnd);
-      if (continuousSparkInterval.current) {
-        clearInterval(continuousSparkInterval.current);
-      }
-    };
-  }, []);
-
-  // Generate sparks at random intervals
+  // Generate background sparks at random intervals
   useEffect(() => {
     const interval = setInterval(() => {
       addSpark();
-    }, 1000 + Math.random() * 2000);
+    }, 2000 + Math.random() * 3000);
 
     return () => clearInterval(interval);
   }, []);
@@ -2737,7 +2691,7 @@ function TheWorldTab() {
       </div>
 
       {/* Earth Image with Sparks */}
-      <div className="relative mb-8 max-w-lg w-full">
+      <div className="relative mb-6 max-w-lg w-full">
         <div
           ref={imageRef}
           className="relative rounded-2xl overflow-hidden border-2 border-white/20 bg-black"
@@ -2749,45 +2703,18 @@ function TheWorldTab() {
             style={{ minHeight: '300px', maxHeight: '500px', objectFit: 'contain' }}
           />
 
-          {/* Concentric Ripple Circles - shown when touching */}
-          {isTouching && (
-            <div className="absolute inset-0 pointer-events-none">
-              <div
-                className="absolute animate-ripple-1"
-                style={{
-                  left: `${touchPosition.x}%`,
-                  top: `${touchPosition.y}%`,
-                  transform: 'translate(-50%, -50%)',
-                  width: '40px',
-                  height: '40px',
-                  border: '2px solid rgba(251, 191, 36, 0.6)',
-                  borderRadius: '50%'
-                }}
-              />
-              <div
-                className="absolute animate-ripple-2"
-                style={{
-                  left: `${touchPosition.x}%`,
-                  top: `${touchPosition.y}%`,
-                  transform: 'translate(-50%, -50%)',
-                  width: '40px',
-                  height: '40px',
-                  border: '2px solid rgba(251, 191, 36, 0.5)',
-                  borderRadius: '50%'
-                }}
-              />
-              <div
-                className="absolute animate-ripple-3"
-                style={{
-                  left: `${touchPosition.x}%`,
-                  top: `${touchPosition.y}%`,
-                  transform: 'translate(-50%, -50%)',
-                  width: '40px',
-                  height: '40px',
-                  border: '2px solid rgba(251, 191, 36, 0.4)',
-                  borderRadius: '50%'
-                }}
-              />
+          {/* Concentric Ripple Circles with "thank you" mantra */}
+          {showRipples && (
+            <div key={rippleKey} className="absolute inset-0 pointer-events-none flex items-center justify-center">
+              <div className="absolute animate-ripple-1 flex items-center justify-center">
+                <span className="text-amber-300 text-xs font-light">thank you</span>
+              </div>
+              <div className="absolute animate-ripple-2 flex items-center justify-center">
+                <span className="text-amber-300 text-xs font-light">thank you</span>
+              </div>
+              <div className="absolute animate-ripple-3 flex items-center justify-center">
+                <span className="text-amber-300 text-xs font-light">thank you</span>
+              </div>
             </div>
           )}
 
@@ -2796,7 +2723,7 @@ function TheWorldTab() {
             {sparks.map(spark => (
               <div
                 key={spark.id}
-                className={`absolute animate-spark ${spark.isUserSpark ? 'text-yellow-300' : 'text-blue-300'}`}
+                className="absolute animate-spark text-blue-300"
                 style={{
                   left: `${spark.left}%`,
                   top: `${spark.top}%`,
@@ -2809,29 +2736,22 @@ function TheWorldTab() {
               </div>
             ))}
           </div>
-
-          {/* Give Message Overlay */}
-          {showGiveMessage && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm pointer-events-none">
-              <div className="text-center">
-                <div className="text-6xl mb-3 animate-pulse">🌊</div>
-                <p className="text-yellow-300 text-xl font-semibold">Creating ripples of joy...</p>
-                <p className="text-slate-300 text-sm mt-2">Hold to keep the ripples flowing</p>
-              </div>
-            </div>
-          )}
         </div>
 
-        {/* Instructions */}
-        <div className="text-center mt-4 p-4 bg-white/5 rounded-xl border border-white/10">
-          <p className="text-slate-300 text-sm mb-2">
-            🤞 Touch Earth with your ring & middle finger together
-          </p>
-          <p className="text-slate-400 text-xs mb-1">
-            Hold to create continuous ripples of joy
+        {/* Tree Button - Plant Seeds of Joy */}
+        <div className="flex flex-col items-center mt-6 gap-3">
+          <button
+            onClick={plantSeeds}
+            className="w-24 h-24 rounded-full bg-gradient-to-br from-green-600 to-emerald-700 border-4 border-green-500/30 hover:from-green-500 hover:to-emerald-600 transition-all hover:scale-105 active:scale-95 flex items-center justify-center shadow-lg"
+          >
+            <span className="text-5xl">🌳</span>
+          </button>
+          <p className="text-slate-300 text-sm font-medium">Plant Seeds of Joy</p>
+          <p className="text-slate-400 text-xs text-center max-w-xs">
+            Press the tree to send ripples of gratitude around the world
           </p>
           <p className="text-slate-400 text-xs">
-            You've witnessed <span className="text-yellow-400 font-semibold">{sparkCount}</span> sparks around the world
+            <span className="text-yellow-400 font-semibold">{sparkCount}</span> sparks witnessed
           </p>
         </div>
       </div>
@@ -2877,26 +2797,33 @@ function TheWorldTab() {
         }
         @keyframes ripple {
           0% {
-            width: 40px;
-            height: 40px;
-            opacity: 1;
+            width: 60px;
+            height: 60px;
+            opacity: 0.8;
+            border: 2px solid rgba(251, 191, 36, 0.8);
           }
           100% {
-            width: 200px;
-            height: 200px;
+            width: 300px;
+            height: 300px;
             opacity: 0;
+            border: 2px solid rgba(251, 191, 36, 0);
           }
         }
+        .animate-ripple-1, .animate-ripple-2, .animate-ripple-3 {
+          position: absolute;
+          border-radius: 50%;
+          pointer-events: none;
+        }
         .animate-ripple-1 {
-          animation: ripple 2s ease-out infinite;
+          animation: ripple 2s ease-out;
         }
         .animate-ripple-2 {
-          animation: ripple 2s ease-out infinite;
-          animation-delay: 0.4s;
+          animation: ripple 2s ease-out;
+          animation-delay: 0.3s;
         }
         .animate-ripple-3 {
-          animation: ripple 2s ease-out infinite;
-          animation-delay: 0.8s;
+          animation: ripple 2s ease-out;
+          animation-delay: 0.6s;
         }
       `}</style>
     </div>
