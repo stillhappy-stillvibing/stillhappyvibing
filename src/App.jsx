@@ -1544,7 +1544,7 @@ function ShareSmileCard({ isOpen, onClose, addPoints }) {
           className="bg-gradient-to-br from-amber-400 via-orange-400 to-pink-400 rounded-2xl p-8 mb-4 aspect-square flex flex-col justify-between"
         >
           {/* Top left header */}
-          <p className="text-white text-sm font-light italic self-start">
+          <p className="text-white text-sm font-bold italic self-start">
             Thinking of you...
           </p>
 
@@ -1556,8 +1556,8 @@ function ShareSmileCard({ isOpen, onClose, addPoints }) {
           </div>
 
           {/* Bottom right footer */}
-          <p className="text-white text-sm font-light italic self-end">
-            ... sparked joy in my mind.
+          <p className="text-white text-sm font-bold italic self-end">
+            ...sparked joy in my life!
           </p>
         </div>
 
