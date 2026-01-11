@@ -1623,7 +1623,10 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
               <p className="text-lg italic mb-4 leading-relaxed">"{data.text}"</p>
               <p className="text-sm font-semibold mb-1">— {data.author}</p>
               <p className="text-xs opacity-80 mb-4">{data.tradition}</p>
-              <p className="text-xs font-bold opacity-90">Smile, and the whole world smileswithyou.com.</p>
+              <p className="text-xs opacity-90">
+                <span className="font-medium">Smile, and the whole world </span>
+                <span className="font-bold italic underline text-orange-300">smileswithyou.com!</span>
+              </p>
             </div>
           </div>
         )}
@@ -1654,7 +1657,7 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
 
               <p className="text-xs text-center opacity-90">
                 <span className="font-medium">Smile, and the whole world </span>
-                <span className="font-bold">smileswithyou.com</span>
+                <span className="font-bold italic underline text-amber-600">smileswithyou.com!</span>
               </p>
             </div>
           </div>
@@ -1696,7 +1699,7 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
 
               <p className="text-sm opacity-90">
                 <span className="font-medium">Smile, and the whole world </span>
-                <span className="font-bold">smileswithyou.com</span>
+                <span className="font-bold italic underline text-amber-600">smileswithyou.com!</span>
               </p>
             </div>
           </div>
@@ -1743,7 +1746,10 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
                 <p className="text-xs font-semibold">🏆 {data.earnedMilestones}/{data.totalMilestones} milestones unlocked</p>
               </div>
 
-              <p className="text-xs font-bold opacity-90 mt-4">Smile, and the whole world smileswithyou.com.</p>
+              <p className="text-xs opacity-90 mt-4">
+                <span className="font-medium">Smile, and the whole world </span>
+                <span className="font-bold italic underline text-orange-300">smileswithyou.com!</span>
+              </p>
             </div>
           </div>
         )}
@@ -3919,7 +3925,7 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats, ch
           <p className="text-sm text-slate-300 mb-3">Help someone you love have a happier {CURRENT_YEAR}</p>
           <button
             onClick={() => {
-              const shareText = `Sparks Of Joy ✨\n\nSmile, and the whole world smiles with you.\n\n✨ Sparks Of Joy - Mental Dojo practices\n🌱 Seeds Of Thought - Wisdom to plant\n🌬️ Breath Of Fresh Air - Calming patterns\n💙 Tools Of Thought - Mindset shifts\n🌊 Ripples Of Joy - Witness sparks\n\nFind your spark at smileswithyou.com`;
+              const shareText = `Sparks Of Joy ✨\n\n✨ Sparks Of Joy - Mental Dojo practices\n🌱 Seeds Of Thought - Wisdom to plant\n🌬️ Breath Of Fresh Air - Calming patterns\n💙 Tools Of Thought - Mindset shifts\n🌊 Ripples Of Joy - Witness sparks\n\nSmile, and the whole world smileswithyou.com!`;
               shareContent(shareText, 'Shared to clipboard!');
             }}
             className="w-full py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold hover:scale-105 transition"
@@ -4819,7 +4825,7 @@ export default function App() {
           {/* Invite A Friend */}
           <button
             onClick={() => {
-              const inviteText = `Sparks Of Joy ✨\n\nSmile, and the whole world smiles with you.\n\n✨ Sparks Of Joy - Mental Dojo practices\n🌱 Seeds Of Thought - Wisdom to plant\n🌬️ Breath Of Fresh Air - Calming patterns\n💛 Share A Smile - Send joy\n🌊 Ripples Of Joy - Witness sparks\n\nFind your spark at smileswithyou.com`;
+              const inviteText = `Sparks Of Joy ✨\n\n✨ Sparks Of Joy - Mental Dojo practices\n🌱 Seeds Of Thought - Wisdom to plant\n🌬️ Breath Of Fresh Air - Calming patterns\n💛 Share A Smile - Send joy\n🌊 Ripples Of Joy - Witness sparks\n\nSmile, and the whole world smileswithyou.com!`;
               if (navigator.share) {
                 navigator.share({
                   title: 'Sparks Of Joy',
