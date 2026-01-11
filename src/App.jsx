@@ -492,9 +492,9 @@ const exercises = [
   },
   {
     title: "Dream Garden",
-    subtitle: "Plant seeds of joy in your mind",
-    steps: ["Close your eyes and take three slow breaths", "Imagine a beautiful garden in your mind", "Think of one thing that would bring you joy", "Visualize it as a seed of light", "Gently plant it in the garden of your mind", "Watch it take root with warmth and care", "Carry this seed with you throughout your day"],
-    practiceInstruction: "Close your eyes. Visualize a beautiful garden. Plant one seed of something that would bring you joy. Watch it gently take root in your mind.",
+    subtitle: "Plant sparks of joy in your mind",
+    steps: ["Close your eyes and take three slow breaths", "Imagine a beautiful garden in your mind", "Think of one thing that would bring you joy", "Visualize it as a spark of light", "Gently plant it in the garden of your mind", "Watch it take root with warmth and care", "Carry this spark with you throughout your day"],
+    practiceInstruction: "Close your eyes. Visualize a beautiful garden. Plant one spark of something that would bring you joy. Watch it gently take root in your mind.",
     seedThought: "The dreams you plant today bloom into tomorrow's reality"
   },
   {
@@ -3783,8 +3783,8 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats, ch
       localStorage.setItem(`happinessNotificationSettings${CURRENT_YEAR}`, JSON.stringify(updatedSettings));
 
       // Show test notification
-      new Notification('Seeds of Joy 🌱', {
-        body: 'Notifications enabled! We\'ll remind you to plant seeds of joy throughout the day.',
+      new Notification('Sparks Of Joy ✨', {
+        body: 'Notifications enabled! We\'ll remind you to find your spark throughout the day.',
         icon: '/pwa-512x512.svg'
       });
     }
@@ -3919,7 +3919,7 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats, ch
           <p className="text-sm text-slate-300 mb-3">Help someone you love have a happier {CURRENT_YEAR}</p>
           <button
             onClick={() => {
-              const shareText = `Seeds of Joy 🌱\n\nPlant joy, watch it bloom, share it with the world.\n\n✨ Sparks Of Joy - Mental Dojo practices\n🌱 Seeds Of Thought - Wisdom to plant in your mind\n🌬️ Breath Of Fresh Air - Calming patterns\n💙 CBT Tools - Mindset shifts\n\nSmile, and the whole world smileswithyou.com.`;
+              const shareText = `Sparks Of Joy ✨\n\nSmile, and the whole world smiles with you.\n\n✨ Sparks Of Joy - Mental Dojo practices\n🌱 Seeds Of Thought - Wisdom to plant\n🌬️ Breath Of Fresh Air - Calming patterns\n💙 Tools Of Thought - Mindset shifts\n🌊 Ripples Of Joy - Witness sparks\n\nFind your spark at smileswithyou.com`;
               shareContent(shareText, 'Shared to clipboard!');
             }}
             className="w-full py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold hover:scale-105 transition"
@@ -3949,7 +3949,7 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats, ch
 
         {/* Version Info */}
         <div className="mt-6 pt-4 border-t border-white/10 text-center">
-          <p className="text-xs text-slate-500">Seeds of Joy v{APP_VERSION}</p>
+          <p className="text-xs text-slate-500">Sparks Of Joy v{APP_VERSION}</p>
           <p className="text-xs text-slate-600">Build {BUILD_DATE}</p>
         </div>
       </div>
@@ -4627,10 +4627,10 @@ export default function App() {
         <header className="text-center py-3">
           <div className="flex items-center justify-between mb-1">
             <div className="w-8" />
-            <h1 className="text-xl font-bold bg-gradient-to-r from-green-400 via-yellow-400 to-orange-400 bg-clip-text text-transparent">🌱 Seeds of Joy ✨</h1>
+            <h1 className="text-xl font-bold bg-gradient-to-r from-orange-400 via-yellow-400 to-amber-400 bg-clip-text text-transparent">✨ Sparks Of Joy ✨</h1>
             <button onClick={() => setShowSettingsModal(true)} className="text-slate-400 hover:text-white text-xl">⚙️</button>
           </div>
-          <p className="text-slate-400 text-xs mb-2">Plant joy, watch it bloom, share it with the world</p>
+          <p className="text-slate-400 text-xs mb-2">Smile, and the whole world smiles with you</p>
         </header>
 
         {/* No tab navigation - single page interface */}
@@ -4819,10 +4819,10 @@ export default function App() {
           {/* Invite A Friend */}
           <button
             onClick={() => {
-              const inviteText = `Seeds of Joy 🌱\n\nPlant joy, watch it bloom, share it with the world.\n\n✨ Sparks Of Joy - Mental Dojo practices\n🌱 Seeds Of Thought - Wisdom to plant\n🌬️ Breath Of Fresh Air - Calming patterns\n💛 Share A Smile - Send joy\n🌊 Ripples Of Joy - Witness sparks\n\nSmile, and the whole world smiles with you.\n\nsmileswithyou.com`;
+              const inviteText = `Sparks Of Joy ✨\n\nSmile, and the whole world smiles with you.\n\n✨ Sparks Of Joy - Mental Dojo practices\n🌱 Seeds Of Thought - Wisdom to plant\n🌬️ Breath Of Fresh Air - Calming patterns\n💛 Share A Smile - Send joy\n🌊 Ripples Of Joy - Witness sparks\n\nFind your spark at smileswithyou.com`;
               if (navigator.share) {
                 navigator.share({
-                  title: 'Seeds of Joy',
+                  title: 'Sparks Of Joy',
                   text: inviteText
                 }).catch(() => {});
               } else {
