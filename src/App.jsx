@@ -1873,7 +1873,7 @@ function QuoteBrowser({ isOpen, onClose, addPoints, onBoost }) {
             📤 Share
           </button>
 
-          <RippleButton type="quote" data={currentQuote} compact />
+          <RippleButton type="quote" data={currentQuote} compact onGlobalRipple={handleGlobalRipple} />
         </div>
       </div>
 
@@ -2057,6 +2057,7 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare 
                   'Thank you', 'Merci', 'Gracias', 'Danke', 'Grazie',
                   'Obrigado', 'Спасибо', 'ありがとう', '谢谢', 'شكرا'
                 ]}
+                onGlobalRipple={handleGlobalRipple}
               />
             </div>
 
@@ -2218,7 +2219,7 @@ function ExerciseBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
             📤 Share
           </button>
 
-          <RippleButton type="exercise" data={currentExercise} compact />
+          <RippleButton type="exercise" data={currentExercise} compact onGlobalRipple={handleGlobalRipple} />
         </div>
       </div>
 
@@ -2336,7 +2337,7 @@ function CBTBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
             📤 Share
           </button>
 
-          <RippleButton type="cbt" data={currentExercise} compact />
+          <RippleButton type="cbt" data={currentExercise} compact onGlobalRipple={handleGlobalRipple} />
         </div>
       </div>
 
@@ -2530,7 +2531,7 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound }) {
                 </button>
               </div>
 
-              <RippleButton type="breathwork" data={currentPattern} />
+              <RippleButton type="breathwork" data={currentPattern} onGlobalRipple={handleGlobalRipple} />
             </>
           )}
         </div>
@@ -2564,8 +2565,60 @@ function MicroMoment() {
   );
 }
 
+// Global Ripple Visualization - Earth with waves and sparks
+function GlobalRippleOverlay({ isActive, sparks }) {
+  if (!isActive) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center">
+      {/* Dark overlay */}
+      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm animate-in fade-in duration-300" />
+
+      {/* Earth in center */}
+      <div className="relative z-10">
+        <div className="text-9xl animate-pulse">🌍</div>
+
+        {/* Concentric ripple waves */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          {[...Array(5)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute rounded-full border-2 border-cyan-400/40"
+              style={{
+                width: `${(i + 1) * 120}px`,
+                height: `${(i + 1) * 120}px`,
+                animation: `rippleWave 3s ease-out infinite`,
+                animationDelay: `${i * 0.4}s`
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Floating sparks */}
+      <div className="absolute inset-0">
+        {sparks.map(spark => (
+          <div
+            key={spark.id}
+            className={`absolute animate-spark ${spark.color}`}
+            style={{
+              left: `${spark.left}%`,
+              top: `${spark.top}%`,
+              animationDelay: `${spark.delay}s`
+            }}
+          >
+            <div className="text-sm font-semibold whitespace-nowrap">
+              ✨ {spark.message}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // Ripple Button Component - Hold to ripple content to the world
-function RippleButton({ type, data, compact = false, messages = null, colorScheme = 'cyan' }) {
+function RippleButton({ type, data, compact = false, messages = null, colorScheme = 'cyan', onGlobalRipple }) {
   const [isHolding, setIsHolding] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [sparks, setSparks] = useState([]);
@@ -2676,6 +2729,11 @@ function RippleButton({ type, data, compact = false, messages = null, colorSchem
     e.preventDefault();
     setIsHolding(true);
 
+    // Trigger global ripple visualization
+    if (onGlobalRipple) {
+      onGlobalRipple(true);
+    }
+
     // Reset and trigger initial haptic wave
     hapticWaveRef.current.count = 0;
     triggerHapticWave(0);
@@ -2703,6 +2761,11 @@ function RippleButton({ type, data, compact = false, messages = null, colorSchem
 
   const handleHoldEnd = () => {
     setIsHolding(false);
+
+    // Hide global ripple visualization
+    if (onGlobalRipple) {
+      onGlobalRipple(false);
+    }
 
     // Clear all intervals
     if (phaseIntervalRef.current) {
@@ -4679,6 +4742,7 @@ function OfflineMode({ isOpen, onClose }) {
               'Offline wisdom spreading',
               'Thank you', 'Merci', 'Gracias', 'Danke'
             ]}
+            onGlobalRipple={handleGlobalRipple}
           />
         </div>
 
@@ -4765,6 +4829,62 @@ export default function App() {
     }
   };
 
+  // Global ripple overlay handlers
+  const sparkIntervalRef = useRef(null);
+  const fourElementsIndexRef = useRef(0);
+
+  const handleGlobalRipple = (isActive) => {
+    setIsGlobalRippling(isActive);
+
+    if (isActive) {
+      // Start generating sparks for the global overlay
+      sparkIntervalRef.current = setInterval(() => {
+        const fourElements = [
+          { text: 'Happy', color: 'text-yellow-400' },
+          { text: 'Healthy', color: 'text-sky-400' },
+          { text: 'Wealthy', color: 'text-green-400' },
+          { text: 'Wise', color: 'text-purple-400' }
+        ];
+
+        const showFourElement = Math.random() < 0.7; // 70% chance for four-element spark
+        let sparkMessage, sparkColor;
+
+        if (showFourElement) {
+          const currentElement = fourElements[fourElementsIndexRef.current % 4];
+          sparkMessage = currentElement.text;
+          sparkColor = currentElement.color;
+          fourElementsIndexRef.current += 1;
+        } else {
+          const thankYouMessages = ['Thank you', 'Merci', 'Gracias', 'Danke', 'Grazie', 'Obrigado'];
+          sparkMessage = thankYouMessages[Math.floor(Math.random() * thankYouMessages.length)];
+          sparkColor = 'text-cyan-300';
+        }
+
+        const newSpark = {
+          id: Date.now() + Math.random(),
+          left: Math.random() * 80 + 10,
+          top: Math.random() * 80 + 10,
+          delay: Math.random() * 0.5,
+          message: sparkMessage,
+          color: sparkColor
+        };
+
+        setGlobalRippleSparks(prev => [...prev, newSpark]);
+
+        setTimeout(() => {
+          setGlobalRippleSparks(prev => prev.filter(s => s.id !== newSpark.id));
+        }, 3000);
+      }, 400); // Generate a spark every 400ms
+    } else {
+      // Stop generating sparks and clear existing ones
+      if (sparkIntervalRef.current) {
+        clearInterval(sparkIntervalRef.current);
+        sparkIntervalRef.current = null;
+      }
+      setTimeout(() => setGlobalRippleSparks([]), 500); // Clear after fade out
+    }
+  };
+
   // Reset daily points at midnight
   useEffect(() => {
     const checkMidnight = () => {
@@ -4814,6 +4934,8 @@ export default function App() {
   const [showCBTBrowser, setShowCBTBrowser] = useState(false);
   const [showRipplesModal, setShowRipplesModal] = useState(false);
   const [showPowerBoost, setShowPowerBoost] = useState(false);
+  const [isGlobalRippling, setIsGlobalRippling] = useState(false);
+  const [globalRippleSparks, setGlobalRippleSparks] = useState([]);
   const [checkInCooldownUntil, setCheckInCooldownUntil] = useState(0);
   const [cooldownRemaining, setCooldownRemaining] = useState(0);
   const [toastMessage, setToastMessage] = useState('');
@@ -5674,6 +5796,7 @@ export default function App() {
         isVisible={showToast}
         onClose={() => setShowToast(false)}
       />
+      <GlobalRippleOverlay isActive={isGlobalRippling} sparks={globalRippleSparks} />
     </div>
   );
 }
