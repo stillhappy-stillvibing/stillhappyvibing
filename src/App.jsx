@@ -2492,27 +2492,20 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
                 <BreathingGuide pattern={currentPattern.pattern} playSound={playSound} />
               </div>
 
-              {/* Spark button - share when you find it */}
+              {/* Stop/End button */}
               <div className="mt-8 pt-6 border-t border-white/10 flex flex-col items-center">
-                <p className="text-slate-500 text-xs mb-2 italic">
-                  As within, so without
-                </p>
-                <p className="text-amber-300 text-sm mb-3 italic">
-                  When you find the spark
-                </p>
                 <button
                   onClick={() => {
                     setIsActive(false);
-                    setShowCompletion(true);
                   }}
                   onContextMenu={(e) => e.preventDefault()}
-                  className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 border-2 border-amber-300/50 transition-all shadow-lg flex items-center justify-center hover:scale-105"
+                  className="w-20 h-20 rounded-full bg-gradient-to-br from-red-500/80 to-pink-500/80 border-2 border-red-300/50 transition-all shadow-lg flex items-center justify-center hover:scale-105 backdrop-blur-sm"
                   style={{ userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
                 >
-                  <span className="text-3xl">✨</span>
+                  <div className="w-8 h-8 rounded-sm bg-white"></div>
                 </button>
-                <p className="text-slate-400 text-xs mt-2 font-medium">
-                  Share
+                <p className="text-slate-400 text-xs mt-3 font-medium">
+                  End
                 </p>
               </div>
             </div>
@@ -2578,49 +2571,51 @@ function MicroMoment() {
 // Global Ripple Visualization - Earth with waves and sparks
 // Give and you shall receive: waves ripple outward, then return 10x inward
 function GlobalRippleOverlay({ isActive, sparks }) {
-  if (!isActive) return null;
-
   return (
     <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center">
-      {/* Dark overlay */}
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm animate-in fade-in duration-300" />
+      {/* Dark overlay - only show when active */}
+      {isActive && (
+        <div className="absolute inset-0 bg-black/30 backdrop-blur-sm animate-in fade-in duration-300" />
+      )}
 
-      {/* Earth in center */}
-      <div className="relative z-10">
-        <div className="text-9xl animate-pulse">🌍</div>
+      {/* Earth in center - only show when active */}
+      {isActive && (
+        <div className="relative z-10">
+          <div className="text-9xl animate-pulse">🌍</div>
 
-        {/* Outward ripple waves - giving */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          {[...Array(5)].map((_, i) => (
-            <div
-              key={`out-${i}`}
-              className="absolute rounded-full border-2 border-cyan-400/40"
-              style={{
-                width: `${(i + 1) * 120}px`,
-                height: `${(i + 1) * 120}px`,
-                animation: `rippleWave 3s ease-out infinite`,
-                animationDelay: `${i * 0.4}s`
-              }}
-            />
-          ))}
+          {/* Outward ripple waves - giving */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            {[...Array(5)].map((_, i) => (
+              <div
+                key={`out-${i}`}
+                className="absolute rounded-full border-2 border-cyan-400/40"
+                style={{
+                  width: `${(i + 1) * 120}px`,
+                  height: `${(i + 1) * 120}px`,
+                  animation: `rippleWave 3s ease-out infinite`,
+                  animationDelay: `${i * 0.4}s`
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Inward ripple waves - receiving (10x the giving) */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            {[...Array(10)].map((_, i) => (
+              <div
+                key={`in-${i}`}
+                className="absolute rounded-full border-2 border-purple-400/30"
+                style={{
+                  width: `${600 - (i * 50)}px`,
+                  height: `${600 - (i * 50)}px`,
+                  animation: `rippleWaveInward 3s ease-out infinite`,
+                  animationDelay: `${2 + (i * 0.2)}s`
+                }}
+              />
+            ))}
+          </div>
         </div>
-
-        {/* Inward ripple waves - receiving (10x the giving) */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          {[...Array(10)].map((_, i) => (
-            <div
-              key={`in-${i}`}
-              className="absolute rounded-full border-2 border-purple-400/30"
-              style={{
-                width: `${600 - (i * 50)}px`,
-                height: `${600 - (i * 50)}px`,
-                animation: `rippleWaveInward 3s ease-out infinite`,
-                animationDelay: `${2 + (i * 0.2)}s`
-              }}
-            />
-          ))}
-        </div>
-      </div>
+      )}
 
       {/* Floating sparks */}
       <div className="absolute inset-0">
@@ -5151,12 +5146,11 @@ export default function App() {
         }, 3000);
       }, 400); // Generate a spark every 400ms
     } else {
-      // Stop generating sparks and clear existing ones
+      // Stop generating rapid sparks (ambient sparks will continue)
       if (sparkIntervalRef.current) {
         clearInterval(sparkIntervalRef.current);
         sparkIntervalRef.current = null;
       }
-      setTimeout(() => setGlobalRippleSparks([]), 500); // Clear after fade out
     }
   };
 
@@ -5176,6 +5170,65 @@ export default function App() {
     checkMidnight(); // Check on mount
     const interval = setInterval(checkMidnight, 60000); // Check every minute
     return () => clearInterval(interval);
+  }, []);
+
+  // Generate ambient sparks continuously in the background
+  useEffect(() => {
+    const generateAmbientSpark = () => {
+      const fourElements = [
+        { text: 'Happy', color: 'text-yellow-400' },
+        { text: 'Healthy', color: 'text-sky-400' },
+        { text: 'Wealthy', color: 'text-green-400' },
+        { text: 'Wise', color: 'text-purple-400' }
+      ];
+
+      const showFourElement = Math.random() < 0.7;
+      let sparkMessage, sparkColor;
+
+      if (showFourElement) {
+        const currentElement = fourElements[fourElementsIndexRef.current % 4];
+        sparkMessage = currentElement.text;
+        sparkColor = currentElement.color;
+        fourElementsIndexRef.current += 1;
+      } else {
+        const thankYouMessages = ['Thank you', 'Merci', 'Gracias', 'Danke', 'Grazie', 'Obrigado'];
+        sparkMessage = thankYouMessages[Math.floor(Math.random() * thankYouMessages.length)];
+        sparkColor = 'text-cyan-300';
+      }
+
+      const newSpark = {
+        id: Date.now() + Math.random(),
+        left: Math.random() * 80 + 10,
+        top: Math.random() * 80 + 10,
+        delay: Math.random() * 0.5,
+        message: sparkMessage,
+        color: sparkColor
+      };
+
+      setGlobalRippleSparks(prev => [...prev, newSpark]);
+
+      setTimeout(() => {
+        setGlobalRippleSparks(prev => prev.filter(s => s.id !== newSpark.id));
+      }, 3000);
+    };
+
+    // Generate ambient sparks every 1.5-3 seconds
+    const scheduleNextSpark = () => {
+      const delay = 1500 + Math.random() * 1500;
+      return setTimeout(() => {
+        generateAmbientSpark();
+        timeoutRef.current = scheduleNextSpark();
+      }, delay);
+    };
+
+    const timeoutRef = { current: null };
+    timeoutRef.current = scheduleNextSpark();
+
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
   }, []);
 
   // Calculate current rank
