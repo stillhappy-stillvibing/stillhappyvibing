@@ -2588,53 +2588,8 @@ function MicroMoment() {
   );
 }
 
-// Global Ripple Visualization - Earth/Cosmos with inward then outward waves (As within, so without)
+// Global Ripple Visualization - Earth with waves and sparks
 function GlobalRippleOverlay({ isActive, sparks }) {
-  const [currentImageIndex, setCurrentImageIndex] = useState(() => Math.floor(Math.random() * 3));
-  const [rippleDirection, setRippleDirection] = useState('inward'); // 'inward' then 'outward'
-
-  // Carousel of Earth and cosmos symbols
-  const cosmosSymbols = [
-    {
-      emoji: '🌍',
-      gradient: 'from-blue-500 via-green-400 to-blue-600',
-      alt: 'Earth - our home'
-    },
-    {
-      emoji: '🌌',
-      gradient: 'from-purple-900 via-indigo-600 to-blue-900',
-      alt: 'Galaxy - infinite cosmos'
-    },
-    {
-      emoji: '✨',
-      gradient: 'from-yellow-300 via-amber-400 to-orange-500',
-      alt: 'Stars - universal light'
-    }
-  ];
-
-  const currentSymbol = cosmosSymbols[currentImageIndex];
-
-  // Rotate images and ripple direction
-  useEffect(() => {
-    if (!isActive) return;
-
-    // Switch from inward to outward after 2 seconds
-    const directionTimer = setTimeout(() => {
-      setRippleDirection('outward');
-    }, 2000);
-
-    // Rotate to next symbol every 4 seconds
-    const imageTimer = setInterval(() => {
-      setCurrentImageIndex((prev) => (prev + 1) % cosmosSymbols.length);
-      setRippleDirection('inward'); // Reset to inward on symbol change
-    }, 4000);
-
-    return () => {
-      clearTimeout(directionTimer);
-      clearInterval(imageTimer);
-    };
-  }, [isActive]);
-
   if (!isActive) return null;
 
   return (
@@ -2642,58 +2597,44 @@ function GlobalRippleOverlay({ isActive, sparks }) {
       {/* Dark overlay */}
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm animate-in fade-in duration-300" />
 
-      {/* Mind/Soul in center with light glow */}
+      {/* Earth in center */}
       <div className="relative z-10">
-        <div className={`relative w-64 h-64 rounded-full overflow-hidden border-4 border-amber-400/50 shadow-2xl shadow-amber-500/50 bg-gradient-to-br ${currentSymbol.gradient} flex items-center justify-center animate-pulse`}>
-          <div className="text-9xl filter drop-shadow-2xl">
-            {currentSymbol.emoji}
-          </div>
-          {/* Inner light glow overlay */}
-          <div className="absolute inset-0 bg-gradient-radial from-white/20 via-transparent to-transparent mix-blend-overlay" />
-        </div>
+        <div className="text-9xl animate-pulse">🌍</div>
 
-        {/* Concentric ripple waves - INWARD then OUTWARD */}
+        {/* Concentric ripple waves */}
         <div className="absolute inset-0 flex items-center justify-center">
           {[...Array(5)].map((_, i) => (
             <div
               key={i}
-              className={`absolute rounded-full border-2 ${rippleDirection === 'inward' ? 'border-amber-400/40' : 'border-cyan-400/40'}`}
+              className="absolute rounded-full border-2 border-cyan-400/40"
               style={{
-                width: rippleDirection === 'inward'
-                  ? `${300 - (i * 40)}px`
-                  : `${(i + 1) * 80}px`,
-                height: rippleDirection === 'inward'
-                  ? `${300 - (i * 40)}px`
-                  : `${(i + 1) * 80}px`,
-                animation: rippleDirection === 'inward'
-                  ? `rippleWaveInward 2s ease-in infinite`
-                  : `rippleWave 3s ease-out infinite`,
-                animationDelay: `${i * 0.3}s`
+                width: `${(i + 1) * 120}px`,
+                height: `${(i + 1) * 120}px`,
+                animation: `rippleWave 3s ease-out infinite`,
+                animationDelay: `${i * 0.4}s`
               }}
             />
           ))}
         </div>
       </div>
 
-      {/* Floating sparks inside the mind */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="relative w-64 h-64">
-          {sparks.map(spark => (
-            <div
-              key={spark.id}
-              className={`absolute animate-spark ${spark.color}`}
-              style={{
-                left: `${spark.left}%`,
-                top: `${spark.top}%`,
-                animationDelay: `${spark.delay}s`
-              }}
-            >
-              <div className="text-sm font-semibold whitespace-nowrap">
-                ✨ {spark.message}
-              </div>
+      {/* Floating sparks */}
+      <div className="absolute inset-0">
+        {sparks.map(spark => (
+          <div
+            key={spark.id}
+            className={`absolute animate-spark ${spark.color}`}
+            style={{
+              left: `${spark.left}%`,
+              top: `${spark.top}%`,
+              animationDelay: `${spark.delay}s`
+            }}
+          >
+            <div className="text-sm font-semibold whitespace-nowrap">
+              ✨ {spark.message}
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
     </div>
   );
