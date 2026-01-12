@@ -6,8 +6,8 @@ import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 
 // App Version
-const APP_VERSION = '8.11.0';
-const BUILD_DATE = '2026-01-11';
+const APP_VERSION = '8.12.0';
+const BUILD_DATE = '2026-01-12';
 
 // Gamification: Point Values
 const POINTS = {
@@ -113,6 +113,25 @@ const incrementHappinessSource = (source) => {
 const incrementTotalSparks = () => {
   const totalSparksRef = ref(database, `stats/totalSparks`);
   runTransaction(totalSparksRef, (current) => (current || 0) + 1);
+};
+
+// Track page views (every app load)
+const incrementPageViews = () => {
+  const pageViewsRef = ref(database, `stats/pageViews`);
+  runTransaction(pageViewsRef, (current) => (current || 0) + 1);
+};
+
+// Track daily unique visitors (privacy-friendly using sessionStorage)
+const trackDailyVisitor = () => {
+  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+  const sessionKey = `visitor_${today}`;
+
+  // Check if this visitor was already counted today
+  if (!sessionStorage.getItem(sessionKey)) {
+    sessionStorage.setItem(sessionKey, 'true');
+    const dailyVisitorsRef = ref(database, `stats/dailyVisitors/${today}`);
+    runTransaction(dailyVisitorsRef, (current) => (current || 0) + 1);
+  }
 };
 
 // Post a ripple to the global feed
@@ -5175,6 +5194,12 @@ export default function App() {
       setTimeout(() => showEncouragement('appOpen'), 1000);
       sessionStorage.setItem('welcomeShown', 'true');
     }
+  }, []);
+
+  // Track visitor analytics (page views and daily unique visitors)
+  useEffect(() => {
+    incrementPageViews();
+    trackDailyVisitor();
   }, []);
 
   // Track active users globally (only once per session)
