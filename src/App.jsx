@@ -5812,7 +5812,7 @@ export default function App() {
               >
                 <div className="text-4xl">🌊</div>
                 <div className="font-semibold text-sm">Waves Of Joy</div>
-                <div className="text-xs text-slate-400 text-center">Give and receive</div>
+                <div className="text-xs text-slate-400 text-center">Give and you shall receive</div>
               </button>
 
               {/* Share A Smile */}
