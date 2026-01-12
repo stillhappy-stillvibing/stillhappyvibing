@@ -2588,41 +2588,31 @@ function MicroMoment() {
   );
 }
 
-// Global Ripple Visualization - Mind/Soul with inward then outward waves (As within, so without)
+// Global Ripple Visualization - Earth/Cosmos with inward then outward waves (As within, so without)
 function GlobalRippleOverlay({ isActive, sparks }) {
-  const [currentImageIndex, setCurrentImageIndex] = useState(() => Math.floor(Math.random() * 5));
+  const [currentImageIndex, setCurrentImageIndex] = useState(() => Math.floor(Math.random() * 3));
   const [rippleDirection, setRippleDirection] = useState('inward'); // 'inward' then 'outward'
 
-  // Carousel of consciousness/mind/soul symbols
-  const mindSymbols = [
+  // Carousel of Earth and cosmos symbols
+  const cosmosSymbols = [
     {
-      emoji: '🧠',
-      gradient: 'from-purple-600 via-pink-500 to-orange-400',
-      alt: 'Brain - mind awakening'
+      emoji: '🌍',
+      gradient: 'from-blue-500 via-green-400 to-blue-600',
+      alt: 'Earth - our home'
     },
     {
-      emoji: '💡',
-      gradient: 'from-yellow-400 via-orange-400 to-red-500',
-      alt: 'Lightbulb - insight sparked'
+      emoji: '🌌',
+      gradient: 'from-purple-900 via-indigo-600 to-blue-900',
+      alt: 'Galaxy - infinite cosmos'
     },
     {
-      emoji: '🕉️',
-      gradient: 'from-indigo-500 via-purple-500 to-pink-500',
-      alt: 'Om - consciousness'
-    },
-    {
-      emoji: '👁️',
-      gradient: 'from-cyan-400 via-blue-500 to-purple-600',
-      alt: 'Third eye - inner vision'
-    },
-    {
-      emoji: '⚡',
+      emoji: '✨',
       gradient: 'from-yellow-300 via-amber-400 to-orange-500',
-      alt: 'Energy - broadcast & receiving'
+      alt: 'Stars - universal light'
     }
   ];
 
-  const currentSymbol = mindSymbols[currentImageIndex];
+  const currentSymbol = cosmosSymbols[currentImageIndex];
 
   // Rotate images and ripple direction
   useEffect(() => {
@@ -2635,7 +2625,7 @@ function GlobalRippleOverlay({ isActive, sparks }) {
 
     // Rotate to next symbol every 4 seconds
     const imageTimer = setInterval(() => {
-      setCurrentImageIndex((prev) => (prev + 1) % mindSymbols.length);
+      setCurrentImageIndex((prev) => (prev + 1) % cosmosSymbols.length);
       setRippleDirection('inward'); // Reset to inward on symbol change
     }, 4000);
 
