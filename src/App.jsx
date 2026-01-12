@@ -2492,10 +2492,10 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
                 <BreathingGuide pattern={currentPattern.pattern} playSound={playSound} />
               </div>
 
-              {/* Spark button - press when you feel the energy */}
+              {/* Spark button - share when you find it */}
               <div className="mt-8 pt-6 border-t border-white/10 flex flex-col items-center">
                 <p className="text-amber-300 text-sm mb-3 italic">
-                  Press when you feel the spark of energy
+                  When you find the spark
                 </p>
                 <button
                   onClick={() => {
@@ -2508,6 +2508,9 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
                 >
                   <span className="text-3xl">✨</span>
                 </button>
+                <p className="text-slate-400 text-xs mt-2 font-medium">
+                  Share
+                </p>
               </div>
             </div>
           )}
