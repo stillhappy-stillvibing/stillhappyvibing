@@ -2588,8 +2588,58 @@ function MicroMoment() {
   );
 }
 
-// Global Ripple Visualization - Earth with waves and sparks
+// Global Ripple Visualization - Mind/Soul with inward then outward waves (As within, so without)
 function GlobalRippleOverlay({ isActive, sparks }) {
+  const [currentImageIndex, setCurrentImageIndex] = useState(() => Math.floor(Math.random() * 5));
+  const [rippleDirection, setRippleDirection] = useState('inward'); // 'inward' then 'outward'
+
+  // Carousel of consciousness/mind/soul images
+  const mindImages = [
+    {
+      url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop',
+      alt: 'Silhouette - Receiving light'
+    },
+    {
+      url: 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=400&h=400&fit=crop',
+      alt: 'Consciousness expanding'
+    },
+    {
+      url: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=400&fit=crop',
+      alt: 'Inner wisdom awakening'
+    },
+    {
+      url: 'https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?w=400&h=400&fit=crop',
+      alt: 'Mind illuminated'
+    },
+    {
+      url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop',
+      alt: 'Soul spark ignited'
+    }
+  ];
+
+  const currentImage = mindImages[currentImageIndex];
+
+  // Rotate images and ripple direction
+  useEffect(() => {
+    if (!isActive) return;
+
+    // Switch from inward to outward after 2 seconds
+    const directionTimer = setTimeout(() => {
+      setRippleDirection('outward');
+    }, 2000);
+
+    // Rotate to next image every 4 seconds
+    const imageTimer = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % mindImages.length);
+      setRippleDirection('inward'); // Reset to inward on image change
+    }, 4000);
+
+    return () => {
+      clearTimeout(directionTimer);
+      clearInterval(imageTimer);
+    };
+  }, [isActive]);
+
   if (!isActive) return null;
 
   return (
@@ -2597,44 +2647,61 @@ function GlobalRippleOverlay({ isActive, sparks }) {
       {/* Dark overlay */}
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm animate-in fade-in duration-300" />
 
-      {/* Earth in center */}
+      {/* Mind/Soul in center with light glow */}
       <div className="relative z-10">
-        <div className="text-9xl animate-pulse">🌍</div>
+        <div className="relative w-64 h-64 rounded-full overflow-hidden border-4 border-amber-400/50 shadow-2xl shadow-amber-500/50">
+          <img
+            src={currentImage.url}
+            alt={currentImage.alt}
+            className="w-full h-full object-cover animate-pulse"
+            style={{ filter: 'brightness(1.2) contrast(1.1)' }}
+          />
+          {/* Inner light glow overlay */}
+          <div className="absolute inset-0 bg-gradient-radial from-amber-300/30 via-transparent to-transparent mix-blend-overlay" />
+        </div>
 
-        {/* Concentric ripple waves */}
+        {/* Concentric ripple waves - INWARD then OUTWARD */}
         <div className="absolute inset-0 flex items-center justify-center">
           {[...Array(5)].map((_, i) => (
             <div
               key={i}
-              className="absolute rounded-full border-2 border-cyan-400/40"
+              className={`absolute rounded-full border-2 ${rippleDirection === 'inward' ? 'border-amber-400/40' : 'border-cyan-400/40'}`}
               style={{
-                width: `${(i + 1) * 120}px`,
-                height: `${(i + 1) * 120}px`,
-                animation: `rippleWave 3s ease-out infinite`,
-                animationDelay: `${i * 0.4}s`
+                width: rippleDirection === 'inward'
+                  ? `${300 - (i * 40)}px`
+                  : `${(i + 1) * 80}px`,
+                height: rippleDirection === 'inward'
+                  ? `${300 - (i * 40)}px`
+                  : `${(i + 1) * 80}px`,
+                animation: rippleDirection === 'inward'
+                  ? `rippleWaveInward 2s ease-in infinite`
+                  : `rippleWave 3s ease-out infinite`,
+                animationDelay: `${i * 0.3}s`
               }}
             />
           ))}
         </div>
       </div>
 
-      {/* Floating sparks */}
-      <div className="absolute inset-0">
-        {sparks.map(spark => (
-          <div
-            key={spark.id}
-            className={`absolute animate-spark ${spark.color}`}
-            style={{
-              left: `${spark.left}%`,
-              top: `${spark.top}%`,
-              animationDelay: `${spark.delay}s`
-            }}
-          >
-            <div className="text-sm font-semibold whitespace-nowrap">
-              ✨ {spark.message}
+      {/* Floating sparks inside the mind */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="relative w-64 h-64">
+          {sparks.map(spark => (
+            <div
+              key={spark.id}
+              className={`absolute animate-spark ${spark.color}`}
+              style={{
+                left: `${spark.left}%`,
+                top: `${spark.top}%`,
+                animationDelay: `${spark.delay}s`
+              }}
+            >
+              <div className="text-sm font-semibold whitespace-nowrap">
+                ✨ {spark.message}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
