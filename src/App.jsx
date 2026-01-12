@@ -625,10 +625,10 @@ const breathworkPatterns = [
     name: "Triangle Breathing",
     subtitle: "Balance breath",
     description: "Simple pattern for quick centering",
-    pattern: { inhale: 4, hold1: 4, exhale: 4, hold2: 0 },
+    pattern: { inhale: 3, hold1: 3, exhale: 3, hold2: 0 },
     emoji: "🔺",
     benefits: ["Quick reset", "Improves balance", "Calms mind"],
-    duration: 12,
+    duration: 9,
   },
   {
     name: "Coherent Breathing",
@@ -1885,7 +1885,7 @@ function QuoteBrowser({ isOpen, onClose, addPoints, onBoost, onGlobalRipple }) {
             📤 Share
           </button>
 
-          <RippleButton type="quote" data={currentQuote} compact onGlobalRipple={onGlobalRipple} addPoints={addPoints} />
+          <RippleButton type="quote" data={currentQuote} circular onGlobalRipple={onGlobalRipple} addPoints={addPoints} />
         </div>
       </div>
 
@@ -2048,13 +2048,14 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare,
             </div>
 
             {/* Ripple button with personal seeds */}
-            <div className="mb-8">
+            <div className="mb-8 flex justify-center">
               <RippleButton
                 type="mentalDojo"
                 data={{
                   title: exercise.title,
                   seedThought: exercise.seedThought
                 }}
+                circular
                 colorScheme="fourElements"
                 messages={[
                   'Happy',
@@ -2232,7 +2233,7 @@ function ExerciseBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onGlo
             📤 Share
           </button>
 
-          <RippleButton type="exercise" data={currentExercise} compact onGlobalRipple={onGlobalRipple} addPoints={addPoints} />
+          <RippleButton type="exercise" data={currentExercise} circular onGlobalRipple={onGlobalRipple} addPoints={addPoints} />
         </div>
       </div>
 
@@ -2351,7 +2352,7 @@ function CBTBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onGlobalRi
             📤 Share
           </button>
 
-          <RippleButton type="cbt" data={currentExercise} compact onGlobalRipple={onGlobalRipple} addPoints={addPoints} />
+          <RippleButton type="cbt" data={currentExercise} circular onGlobalRipple={onGlobalRipple} addPoints={addPoints} />
         </div>
       </div>
 
@@ -2510,7 +2511,7 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
               </div>
 
               {/* Early completion option */}
-              <div className="mt-8 pt-6 border-t border-white/10">
+              <div className="mt-8 pt-6 border-t border-white/10 flex flex-col items-center">
                 <p className="text-amber-300 text-sm mb-3 italic">
                   Just one breath can spark joy
                 </p>
@@ -2520,9 +2521,11 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
                     setIsActive(false);
                     setShowCompletion(true);
                   }}
-                  className="px-6 py-3 bg-gradient-to-r from-orange-400 to-yellow-500 hover:from-orange-500 hover:to-yellow-600 text-slate-900 rounded-xl font-bold transition hover:scale-105"
+                  onContextMenu={(e) => e.preventDefault()}
+                  className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 border-2 border-amber-300/50 transition-all shadow-lg flex items-center justify-center hover:scale-105"
+                  style={{ userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
                 >
-                  Light it up!
+                  <span className="text-3xl">✨</span>
                 </button>
               </div>
             </div>
@@ -2551,7 +2554,7 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
                 </button>
               </div>
 
-              <RippleButton type="breathwork" data={currentPattern} onGlobalRipple={onGlobalRipple} addPoints={addPoints} />
+              <RippleButton type="breathwork" data={currentPattern} circular onGlobalRipple={onGlobalRipple} addPoints={addPoints} />
             </>
           )}
         </div>
@@ -2638,7 +2641,7 @@ function GlobalRippleOverlay({ isActive, sparks }) {
 }
 
 // Ripple Button Component - Hold to ripple content to the world
-function RippleButton({ type, data, compact = false, messages = null, colorScheme = 'cyan', onGlobalRipple, addPoints }) {
+function RippleButton({ type, data, compact = false, circular = false, messages = null, colorScheme = 'cyan', onGlobalRipple, addPoints }) {
   const [isHolding, setIsHolding] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [sparks, setSparks] = useState([]);
@@ -2825,6 +2828,46 @@ function RippleButton({ type, data, compact = false, messages = null, colorSchem
     );
   }
 
+  if (circular) {
+    return (
+      <div className="relative inline-block">
+        <button
+          onMouseDown={handleHoldStart}
+          onMouseUp={handleHoldEnd}
+          onMouseLeave={handleHoldEnd}
+          onTouchStart={handleHoldStart}
+          onTouchEnd={handleHoldEnd}
+          onContextMenu={(e) => e.preventDefault()}
+          className={`w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 border-2 border-amber-300/50 transition-all shadow-lg flex items-center justify-center select-none ${isHolding ? 'scale-95' : 'hover:scale-105'}`}
+          style={{ userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
+        >
+          <span className="text-3xl pointer-events-none">✨</span>
+        </button>
+
+        {/* Sparks overlay */}
+        {isHolding && (
+          <div className="absolute inset-0 pointer-events-none">
+            {sparks.map(spark => (
+              <div
+                key={spark.id}
+                className={`absolute animate-spark ${spark.color}`}
+                style={{
+                  left: `${spark.left}%`,
+                  top: `${spark.top}%`,
+                  animationDelay: `${spark.delay}s`
+                }}
+              >
+                <div className="text-xs font-semibold whitespace-nowrap">
+                  ✨ {spark.message}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   if (compact) {
     return (
       <div className="relative">
@@ -2935,6 +2978,30 @@ function RippleButton({ type, data, compact = false, messages = null, colorSchem
         </div>
       )}
     </div>
+  );
+}
+
+// Circular Spark Button - Simpler circular version for triggering ripples
+function CircularSparkButton({ onPress, onRelease, isPressed, className = '', size = 'medium' }) {
+  const sizeClasses = {
+    small: 'w-12 h-12 text-2xl',
+    medium: 'w-16 h-16 text-3xl',
+    large: 'w-20 h-20 text-4xl'
+  };
+
+  return (
+    <button
+      onMouseDown={onPress}
+      onMouseUp={onRelease}
+      onMouseLeave={onRelease}
+      onTouchStart={onPress}
+      onTouchEnd={onRelease}
+      onContextMenu={(e) => e.preventDefault()}
+      className={`${sizeClasses[size]} rounded-full bg-gradient-to-br from-amber-400 to-orange-500 border-2 border-amber-300/50 transition-all shadow-lg flex items-center justify-center select-none ${isPressed ? 'scale-95' : 'hover:scale-105'} ${className}`}
+      style={{ userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
+    >
+      <span className="pointer-events-none">✨</span>
+    </button>
   );
 }
 
@@ -4774,7 +4841,7 @@ function OfflineMode({ isOpen, onClose, onGlobalRipple, addPoints }) {
         </div>
 
         {/* Ripple Button */}
-        <div className="mb-4">
+        <div className="mb-4 flex flex-col items-center">
           <p className="text-center text-xs text-slate-400 italic mb-2">
             🌍 Imagine yourself at Earth's center, transmitting and receiving sparks of joy
           </p>
@@ -4785,6 +4852,7 @@ function OfflineMode({ isOpen, onClose, onGlobalRipple, addPoints }) {
               subtitle: currentPractice.subtitle,
               emoji: currentPractice.emoji
             }}
+            circular
             messages={[
               'Sending joy to the world',
               'Receiving joy from the world',
