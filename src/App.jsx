@@ -2494,6 +2494,9 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
 
               {/* Spark button - share when you find it */}
               <div className="mt-8 pt-6 border-t border-white/10 flex flex-col items-center">
+                <p className="text-slate-500 text-xs mb-2 italic">
+                  As within, so without
+                </p>
                 <p className="text-amber-300 text-sm mb-3 italic">
                   When you find the spark
                 </p>
