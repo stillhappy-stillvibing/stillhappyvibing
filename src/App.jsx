@@ -2593,31 +2593,36 @@ function GlobalRippleOverlay({ isActive, sparks }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(() => Math.floor(Math.random() * 5));
   const [rippleDirection, setRippleDirection] = useState('inward'); // 'inward' then 'outward'
 
-  // Carousel of consciousness/mind/soul images - artistic/symbolic representations
-  const mindImages = [
+  // Carousel of consciousness/mind/soul symbols
+  const mindSymbols = [
     {
-      url: 'https://images.unsplash.com/photo-1617791160505-6f00504e3519?w=400&h=400&fit=crop',
-      alt: 'Brain neurons lighting up - insight awakening'
+      emoji: '🧠',
+      gradient: 'from-purple-600 via-pink-500 to-orange-400',
+      alt: 'Brain - mind awakening'
     },
     {
-      url: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=400&h=400&fit=crop',
-      alt: 'Abstract light consciousness'
+      emoji: '💡',
+      gradient: 'from-yellow-400 via-orange-400 to-red-500',
+      alt: 'Lightbulb - insight sparked'
     },
     {
-      url: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=400&h=400&fit=crop',
-      alt: 'Mandala - sacred geometry of mind'
+      emoji: '🕉️',
+      gradient: 'from-indigo-500 via-purple-500 to-pink-500',
+      alt: 'Om - consciousness'
     },
     {
-      url: 'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=400&h=400&fit=crop',
-      alt: 'Crown chakra - 7th chakra activated'
+      emoji: '👁️',
+      gradient: 'from-cyan-400 via-blue-500 to-purple-600',
+      alt: 'Third eye - inner vision'
     },
     {
-      url: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=400&h=400&fit=crop',
-      alt: 'Neural network - broadcast & receiving'
+      emoji: '⚡',
+      gradient: 'from-yellow-300 via-amber-400 to-orange-500',
+      alt: 'Energy - broadcast & receiving'
     }
   ];
 
-  const currentImage = mindImages[currentImageIndex];
+  const currentSymbol = mindSymbols[currentImageIndex];
 
   // Rotate images and ripple direction
   useEffect(() => {
@@ -2628,10 +2633,10 @@ function GlobalRippleOverlay({ isActive, sparks }) {
       setRippleDirection('outward');
     }, 2000);
 
-    // Rotate to next image every 4 seconds
+    // Rotate to next symbol every 4 seconds
     const imageTimer = setInterval(() => {
-      setCurrentImageIndex((prev) => (prev + 1) % mindImages.length);
-      setRippleDirection('inward'); // Reset to inward on image change
+      setCurrentImageIndex((prev) => (prev + 1) % mindSymbols.length);
+      setRippleDirection('inward'); // Reset to inward on symbol change
     }, 4000);
 
     return () => {
@@ -2649,15 +2654,12 @@ function GlobalRippleOverlay({ isActive, sparks }) {
 
       {/* Mind/Soul in center with light glow */}
       <div className="relative z-10">
-        <div className="relative w-64 h-64 rounded-full overflow-hidden border-4 border-amber-400/50 shadow-2xl shadow-amber-500/50">
-          <img
-            src={currentImage.url}
-            alt={currentImage.alt}
-            className="w-full h-full object-cover animate-pulse"
-            style={{ filter: 'brightness(1.2) contrast(1.1)' }}
-          />
+        <div className={`relative w-64 h-64 rounded-full overflow-hidden border-4 border-amber-400/50 shadow-2xl shadow-amber-500/50 bg-gradient-to-br ${currentSymbol.gradient} flex items-center justify-center animate-pulse`}>
+          <div className="text-9xl filter drop-shadow-2xl">
+            {currentSymbol.emoji}
+          </div>
           {/* Inner light glow overlay */}
-          <div className="absolute inset-0 bg-gradient-radial from-amber-300/30 via-transparent to-transparent mix-blend-overlay" />
+          <div className="absolute inset-0 bg-gradient-radial from-white/20 via-transparent to-transparent mix-blend-overlay" />
         </div>
 
         {/* Concentric ripple waves - INWARD then OUTWARD */}
