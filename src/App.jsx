@@ -2160,7 +2160,7 @@ function ExerciseBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onGlo
     <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50 overflow-y-auto" onClick={onClose}>
       <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-lg w-full p-6 border border-green-400/20 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-xl font-bold flex items-center gap-2">✨ Sparks Of Joy</h2>
+          <h2 className="text-xl font-bold flex items-center gap-2">✨ Sparks of Insight</h2>
           <button onClick={onClose} className="text-slate-400 hover:text-white text-xl">✕</button>
         </div>
 
@@ -2438,7 +2438,7 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
     <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50 overflow-y-auto" onClick={onClose}>
       <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-lg w-full p-6 border border-teal-400/20 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-xl font-bold flex items-center gap-2">🌬️ Breath Of Fresh Air</h2>
+          <h2 className="text-xl font-bold flex items-center gap-2">🌬️ Sparks of Energy</h2>
           <button onClick={onClose} className="text-slate-400 hover:text-white text-xl">✕</button>
         </div>
 
@@ -2847,7 +2847,7 @@ function RippleButton({ type, data, compact = false, circular = false, messages 
 
   if (circular) {
     return (
-      <div className="relative inline-block">
+      <div className="relative flex justify-center">
         <button
           onMouseDown={handleHoldStart}
           onMouseUp={handleHoldEnd}
