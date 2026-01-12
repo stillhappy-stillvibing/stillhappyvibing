@@ -2366,16 +2366,14 @@ function CBTBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onGlobalRi
   );
 }
 
-// Breathwork Browser Component - 1-minute breathing patterns
+// Breathwork Browser Component - Breathe until you find your spark
 function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onGlobalRipple }) {
   const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * breathworkPatterns.length));
   const [isActive, setIsActive] = useState(false);
   const [cycles, setCycles] = useState(0);
   const [showCompletion, setShowCompletion] = useState(false);
-  const earlySparkRef = useRef(false); // Track if "Light it up!" was clicked
 
   const currentPattern = breathworkPatterns[currentIndex];
-  const targetCycles = Math.floor(60 / currentPattern.duration); // cycles in 1 minute
 
   const randomPattern = () => {
     let newIndex;
@@ -2386,7 +2384,6 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
     setIsActive(false);
     setCycles(0);
     setShowCompletion(false);
-    earlySparkRef.current = false; // Reset early spark flag
   };
 
   // Randomize on open for variety
@@ -2400,7 +2397,6 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
     setIsActive(true);
     setCycles(0);
     setShowCompletion(false);
-    earlySparkRef.current = false; // Reset early spark flag
   };
 
   const handleBoost = () => {
@@ -2413,24 +2409,16 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
     randomPattern();
   };
 
+  // Continuous cycle counter - loops forever until user finds their spark
   useEffect(() => {
     if (!isActive) return;
 
     const cycleTimer = setInterval(() => {
-      setCycles(prev => {
-        const newCycles = prev + 1;
-        // Only auto-complete if "Light it up!" wasn't clicked
-        if (!earlySparkRef.current && newCycles >= targetCycles) {
-          setIsActive(false);
-          setShowCompletion(true);
-          return newCycles;
-        }
-        return newCycles;
-      });
+      setCycles(prev => prev + 1);
     }, currentPattern.duration * 1000);
 
     return () => clearInterval(cycleTimer);
-  }, [isActive, currentPattern.duration, targetCycles]);
+  }, [isActive, currentPattern.duration]);
 
   if (!isOpen) return null;
 
@@ -2480,7 +2468,7 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
                 onClick={handleStart}
                 className="w-full py-5 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 rounded-xl font-bold text-lg transition hover:scale-105 mb-3"
               >
-                🧘 Start 1-Minute Zen
+                🧘 Start Breathing
               </button>
 
               <button
@@ -2503,21 +2491,14 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
               <div className="mb-6">
                 <BreathingGuide pattern={currentPattern.pattern} playSound={playSound} />
               </div>
-              <div className="text-slate-400 text-sm">
-                Cycle {cycles + 1} of {targetCycles}
-              </div>
-              <div className="mt-4 text-xs text-slate-500">
-                Keep breathing... {Math.max(0, 60 - cycles * currentPattern.duration)}s remaining
-              </div>
 
-              {/* Early completion option */}
+              {/* Spark button - press when you feel the energy */}
               <div className="mt-8 pt-6 border-t border-white/10 flex flex-col items-center">
                 <p className="text-amber-300 text-sm mb-3 italic">
-                  Just one breath can spark joy
+                  Press when you feel the spark of energy
                 </p>
                 <button
                   onClick={() => {
-                    earlySparkRef.current = true; // Mark that spark was found early
                     setIsActive(false);
                     setShowCompletion(true);
                   }}
@@ -2535,8 +2516,8 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
             <>
               <div className="text-center py-8 mb-6">
                 <div className="text-6xl mb-4">✨</div>
-                <h3 className="text-2xl font-bold mb-2">Beautiful work!</h3>
-                <p className="text-slate-400">You completed {cycles} breathing cycles</p>
+                <h3 className="text-2xl font-bold mb-2">Spark found!</h3>
+                <p className="text-slate-400">Energy flowing through you</p>
               </div>
 
               <div className="flex gap-3 mb-4">
