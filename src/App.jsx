@@ -5782,7 +5782,7 @@ export default function App() {
               >
                 <div className="text-4xl">💡</div>
                 <div className="font-semibold text-sm">Sparks of Thought</div>
-                <div className="text-xs text-slate-400 text-center">Wisdom ignited</div>
+                <div className="text-xs text-slate-400 text-center">Aha!</div>
               </button>
 
               {/* Sparks of Insight */}
@@ -5802,7 +5802,7 @@ export default function App() {
               >
                 <div className="text-4xl">🌬️</div>
                 <div className="font-semibold text-sm">Sparks of Energy</div>
-                <div className="text-xs text-slate-400 text-center">1-minute calm</div>
+                <div className="text-xs text-slate-400 text-center">Breath of fresh air</div>
               </button>
 
               {/* Waves Of Joy */}
@@ -5812,7 +5812,7 @@ export default function App() {
               >
                 <div className="text-4xl">🌊</div>
                 <div className="font-semibold text-sm">Waves Of Joy</div>
-                <div className="text-xs text-slate-400 text-center">Witness sparks</div>
+                <div className="text-xs text-slate-400 text-center">Give and receive</div>
               </button>
 
               {/* Share A Smile */}
