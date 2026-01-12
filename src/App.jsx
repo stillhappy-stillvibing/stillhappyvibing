@@ -2589,6 +2589,7 @@ function MicroMoment() {
 }
 
 // Global Ripple Visualization - Earth with waves and sparks
+// Give and you shall receive: waves ripple outward, then return 10x inward
 function GlobalRippleOverlay({ isActive, sparks }) {
   if (!isActive) return null;
 
@@ -2601,17 +2602,33 @@ function GlobalRippleOverlay({ isActive, sparks }) {
       <div className="relative z-10">
         <div className="text-9xl animate-pulse">🌍</div>
 
-        {/* Concentric ripple waves */}
+        {/* Outward ripple waves - giving */}
         <div className="absolute inset-0 flex items-center justify-center">
           {[...Array(5)].map((_, i) => (
             <div
-              key={i}
+              key={`out-${i}`}
               className="absolute rounded-full border-2 border-cyan-400/40"
               style={{
                 width: `${(i + 1) * 120}px`,
                 height: `${(i + 1) * 120}px`,
                 animation: `rippleWave 3s ease-out infinite`,
                 animationDelay: `${i * 0.4}s`
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Inward ripple waves - receiving (10x the giving) */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          {[...Array(10)].map((_, i) => (
+            <div
+              key={`in-${i}`}
+              className="absolute rounded-full border-2 border-purple-400/30"
+              style={{
+                width: `${600 - (i * 50)}px`,
+                height: `${600 - (i * 50)}px`,
+                animation: `rippleWaveInward 3s ease-out infinite`,
+                animationDelay: `${2 + (i * 0.2)}s`
               }}
             />
           ))}
