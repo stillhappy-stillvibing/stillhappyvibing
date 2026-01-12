@@ -2593,27 +2593,27 @@ function GlobalRippleOverlay({ isActive, sparks }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(() => Math.floor(Math.random() * 5));
   const [rippleDirection, setRippleDirection] = useState('inward'); // 'inward' then 'outward'
 
-  // Carousel of consciousness/mind/soul images
+  // Carousel of consciousness/mind/soul images - artistic/symbolic representations
   const mindImages = [
     {
-      url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop',
-      alt: 'Silhouette - Receiving light'
+      url: 'https://images.unsplash.com/photo-1617791160505-6f00504e3519?w=400&h=400&fit=crop',
+      alt: 'Brain neurons lighting up - insight awakening'
     },
     {
-      url: 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=400&h=400&fit=crop',
-      alt: 'Consciousness expanding'
+      url: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=400&h=400&fit=crop',
+      alt: 'Abstract light consciousness'
     },
     {
-      url: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=400&fit=crop',
-      alt: 'Inner wisdom awakening'
+      url: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=400&h=400&fit=crop',
+      alt: 'Mandala - sacred geometry of mind'
     },
     {
-      url: 'https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?w=400&h=400&fit=crop',
-      alt: 'Mind illuminated'
+      url: 'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=400&h=400&fit=crop',
+      alt: 'Crown chakra - 7th chakra activated'
     },
     {
-      url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop',
-      alt: 'Soul spark ignited'
+      url: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=400&h=400&fit=crop',
+      alt: 'Neural network - broadcast & receiving'
     }
   ];
 
