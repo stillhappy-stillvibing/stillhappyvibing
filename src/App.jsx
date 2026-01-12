@@ -1852,7 +1852,7 @@ function QuoteBrowser({ isOpen, onClose, addPoints, onBoost, onGlobalRipple }) {
     <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50" onClick={onClose}>
       <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-lg w-full p-6 border border-purple-400/20" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-xl font-bold flex items-center gap-2">🌱 Seeds Of Thought</h2>
+          <h2 className="text-xl font-bold flex items-center gap-2">💡 Sparks of Thought</h2>
           <button onClick={onClose} className="text-slate-400 hover:text-white text-xl">✕</button>
         </div>
 
@@ -3424,7 +3424,7 @@ function TheWorldTab() {
     <div className="flex flex-col items-center py-8 px-4">
       {/* Header */}
       <div className="text-center mb-8 max-w-2xl">
-        <h2 className="text-2xl font-bold mb-3">🌊 Ripples of Joy</h2>
+        <h2 className="text-2xl font-bold mb-3">🌊 Waves Of Joy</h2>
         <p className="text-slate-300 text-base leading-relaxed mb-2">
           Give and you shall receive.
         </p>
@@ -5771,43 +5771,43 @@ export default function App() {
 
             {/* Tools Grid - Main Navigation */}
             <div className="grid grid-cols-2 gap-3 mb-4">
-              {/* Seeds Of Thought */}
+              {/* Sparks of Thought */}
               <button
                 onClick={() => setShowQuoteBrowser(true)}
                 className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl p-5 hover:from-purple-500/30 hover:to-pink-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
               >
-                <div className="text-4xl">🌱</div>
-                <div className="font-semibold text-sm">Seeds Of Thought</div>
-                <div className="text-xs text-slate-400 text-center">Wisdom to plant</div>
+                <div className="text-4xl">💡</div>
+                <div className="font-semibold text-sm">Sparks of Thought</div>
+                <div className="text-xs text-slate-400 text-center">Wisdom ignited</div>
               </button>
 
-              {/* Sparks Of Joy */}
+              {/* Sparks of Insight */}
               <button
                 onClick={() => setShowExerciseBrowser(true)}
                 className="bg-gradient-to-br from-orange-500/20 to-yellow-500/20 border border-orange-500/30 rounded-xl p-5 hover:from-orange-500/30 hover:to-yellow-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
               >
                 <div className="text-4xl">✨</div>
-                <div className="font-semibold text-sm">Sparks Of Joy</div>
+                <div className="font-semibold text-sm">Sparks of Insight</div>
                 <div className="text-xs text-slate-400 text-center">Mental Dojo</div>
               </button>
 
-              {/* Breath Of Fresh Air */}
+              {/* Sparks of Energy */}
               <button
                 onClick={() => setShowBreathworkBrowser(true)}
                 className="bg-gradient-to-br from-teal-500/20 to-cyan-500/20 border border-teal-500/30 rounded-xl p-5 hover:from-teal-500/30 hover:to-cyan-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
               >
                 <div className="text-4xl">🌬️</div>
-                <div className="font-semibold text-sm">Breath Of Fresh Air</div>
+                <div className="font-semibold text-sm">Sparks of Energy</div>
                 <div className="text-xs text-slate-400 text-center">1-minute calm</div>
               </button>
 
-              {/* Ripples Of Joy - moved from bottom */}
+              {/* Waves Of Joy */}
               <button
                 onClick={() => setShowRipplesModal(true)}
                 className="bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 rounded-xl p-5 hover:from-cyan-500/30 hover:to-blue-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
               >
                 <div className="text-4xl">🌊</div>
-                <div className="font-semibold text-sm">Ripples Of Joy</div>
+                <div className="font-semibold text-sm">Waves Of Joy</div>
                 <div className="text-xs text-slate-400 text-center">Witness sparks</div>
               </button>
 
@@ -5872,7 +5872,7 @@ export default function App() {
           {/* Invite A Friend */}
           <button
             onClick={() => {
-              const inviteText = `Sparks Of Joy ✨\n\n✨ Sparks Of Joy - Mental Dojo practices\n🌱 Seeds Of Thought - Wisdom to plant\n🌬️ Breath Of Fresh Air - Calming patterns\n💛 Share A Smile - Send joy\n🌊 Ripples Of Joy - Witness sparks\n\nSmile, and the whole world smileswithyou.com!`;
+              const inviteText = `Sparks Of Joy ✨\n\n✨ Sparks of Insight - Mental Dojo practices\n💡 Sparks of Thought - Wisdom ignited\n🌬️ Sparks of Energy - Calming breath\n💛 Share A Smile - Send joy\n🌊 Waves Of Joy - Witness sparks\n\nSmile, and the whole world smileswithyou.com!`;
               if (navigator.share) {
                 navigator.share({
                   title: 'Sparks Of Joy',
