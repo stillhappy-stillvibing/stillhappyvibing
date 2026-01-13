@@ -2032,16 +2032,6 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare,
               </div>
             </div>
 
-            {/* Byron quote */}
-            <div className="mb-8 text-center">
-              <p className="text-orange-200/80 text-lg mb-1 italic">
-                "Happiness was born a twin"
-              </p>
-              <p className="text-slate-400 text-sm">
-                Share your inner spark with the world
-              </p>
-            </div>
-
             <div className="flex gap-3 flex-wrap justify-center mb-6">
               <button
                 onClick={() => {
@@ -3490,16 +3480,7 @@ function TheWorldTab() {
             <span className="text-3xl pointer-events-none">✨</span>
           </button>
           <div className="text-center max-w-md">
-            <p className="text-slate-300 text-sm mb-2">
-              Place your ring finger and hold
-            </p>
-            <p className="text-slate-400 text-xs leading-relaxed mb-2">
-              Close your eyes. Say "thank you, thank you, thank you" three times with joy.
-            </p>
-            <p className="text-slate-400 text-xs italic">
-              Radiate happiness and receive it 10-fold
-            </p>
-            <p className="text-slate-400 text-xs mt-3">
+            <p className="text-slate-300 text-base mt-4">
               <span className="text-yellow-400 font-semibold">{sparkCount}</span> sparks witnessed
             </p>
           </div>
@@ -4547,40 +4528,6 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats, ch
             </button>
           </div>
 
-          {notificationSettings.enabled && (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-slate-300">🌅 Morning Check-in</span>
-                <input
-                  type="time"
-                  value={notificationSettings.times[0]}
-                  onChange={(e) => handleTimeChange(0, e.target.value)}
-                  className="bg-white/10 border border-white/20 rounded-lg px-3 py-1 text-sm text-white"
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-slate-300">☀️ Noon Check-in</span>
-                <input
-                  type="time"
-                  value={notificationSettings.times[1]}
-                  onChange={(e) => handleTimeChange(1, e.target.value)}
-                  className="bg-white/10 border border-white/20 rounded-lg px-3 py-1 text-sm text-white"
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-slate-300">🌙 Evening Check-in</span>
-                <input
-                  type="time"
-                  value={notificationSettings.times[2]}
-                  onChange={(e) => handleTimeChange(2, e.target.value)}
-                  className="bg-white/10 border border-white/20 rounded-lg px-3 py-1 text-sm text-white"
-                />
-              </div>
-            </div>
-          )}
-
           {notificationPermission === 'denied' && (
             <p className="text-xs text-red-400 mt-2">
               ⚠️ Notifications blocked. Enable in browser settings.
@@ -4621,6 +4568,14 @@ function SettingsModal({ isOpen, onClose, onClearCheckins, onClearAll, stats, ch
             <li>• Only spark counts are shared globally</li>
             <li>• No personal info ever leaves your device</li>
           </ul>
+        </div>
+
+        {/* Ripple Buttons Info */}
+        <div className="bg-amber-400/10 border border-amber-400/30 rounded-xl p-4 mb-6">
+          <h3 className="font-semibold text-amber-400 mb-2 flex items-center gap-2">✨ Ripple Buttons</h3>
+          <p className="text-sm text-slate-300 leading-relaxed">
+            Look for small circular buttons on completion screens. Hold them to send ripples of joy through time and space, sharing your spark with the world! 🌊
+          </p>
         </div>
 
         {/* Version Info */}
