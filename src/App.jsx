@@ -1865,7 +1865,8 @@ function QuoteBrowser({ isOpen, onClose, addPoints, onBoost, onGlobalRipple }) {
           </div>
 
           {/* Ripple button moved above other buttons */}
-          <div className="mb-6 flex justify-center">
+          <div className="mb-6 flex flex-col items-center">
+            <p className="text-slate-400 text-xs mb-2 italic">Hold to send waves of joy to the world</p>
             <RippleButton type="quote" data={currentQuote} circular onGlobalRipple={onGlobalRipple} addPoints={addPoints} />
           </div>
 
@@ -2011,7 +2012,8 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare,
             </div>
 
             {/* Ripple button with personal seeds */}
-            <div className="mb-8 flex justify-center">
+            <div className="mb-8 flex flex-col items-center">
+              <p className="text-slate-400 text-xs mb-2 italic">Hold to send waves of joy to the world</p>
               <RippleButton
                 type="mentalDojo"
                 data={{
@@ -2195,8 +2197,6 @@ function ExerciseBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onGlo
           >
             📤 Share
           </button>
-
-          <RippleButton type="exercise" data={currentExercise} circular onGlobalRipple={onGlobalRipple} addPoints={addPoints} />
         </div>
       </div>
 
@@ -2492,7 +2492,8 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
               </div>
 
               {/* Ripple button moved above other buttons */}
-              <div className="mb-6 flex justify-center">
+              <div className="mb-6 flex flex-col items-center">
+                <p className="text-slate-400 text-xs mb-2 italic">Hold to send waves of joy to the world</p>
                 <RippleButton type="breathwork" data={currentPattern} circular onGlobalRipple={onGlobalRipple} addPoints={addPoints} />
               </div>
 
