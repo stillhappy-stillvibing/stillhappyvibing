@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getDatabase, ref, onValue, runTransaction, increment, set, get } from 'firebase/database';
-import html2canvas from 'html2canvas';
 import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 import packageJson from '../package.json';
@@ -1892,115 +1891,6 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
 }
 
 // Invite Modal - Screenshot the main page to invite friends
-function InviteModal({ isOpen, onClose, appRef }) {
-  const [generating, setGenerating] = useState(false);
-  const [screenshot, setScreenshot] = useState(null);
-
-  // Generate screenshot when modal opens
-  useEffect(() => {
-    if (isOpen && appRef?.current && !screenshot) {
-      generateScreenshot();
-    }
-  }, [isOpen]);
-
-  const generateScreenshot = async () => {
-    if (!appRef?.current) return;
-    setGenerating(true);
-
-    try {
-      const canvas = await html2canvas(appRef.current, {
-        backgroundColor: '#0f172a',
-        scale: 2,
-        windowWidth: appRef.current.scrollWidth,
-        windowHeight: appRef.current.scrollHeight,
-      });
-
-      const dataUrl = canvas.toDataURL('image/png');
-      setScreenshot(dataUrl);
-      setGenerating(false);
-    } catch (err) {
-      console.error('Screenshot failed:', err);
-      setGenerating(false);
-      alert('Could not generate screenshot');
-    }
-  };
-
-  const handleShare = async () => {
-    if (!screenshot) return;
-
-    try {
-      const response = await fetch(screenshot);
-      const blob = await response.blob();
-      const filename = 'sparks-of-joy-invite.png';
-
-      if (navigator.share && navigator.canShare?.({ files: [new File([blob], filename, { type: 'image/png' })] })) {
-        try {
-          await navigator.share({
-            files: [new File([blob], filename, { type: 'image/png' })],
-            title: 'Join me on Sparks Of Joy!',
-            text: 'Find your spark of joy! Smile, and the whole world smileswithyou.com ✨'
-          });
-        } catch (e) {
-          // User cancelled
-        }
-      } else {
-        // Fallback: download
-        const a = document.createElement('a');
-        a.href = screenshot;
-        a.download = filename;
-        a.click();
-      }
-    } catch (err) {
-      console.error('Share failed:', err);
-    }
-  };
-
-  const handleClose = () => {
-    setScreenshot(null);
-    onClose();
-  };
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50 overflow-y-auto" onClick={handleClose}>
-      <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-sm w-full p-6 border border-white/20" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold">💌 Invite A Friend</h2>
-          <button onClick={handleClose} className="text-slate-400 hover:text-white">✕</button>
-        </div>
-
-        {generating && (
-          <div className="text-center py-12">
-            <div className="text-4xl mb-3">📸</div>
-            <p className="text-slate-400">Creating invite...</p>
-          </div>
-        )}
-
-        {screenshot && (
-          <>
-            <div className="mb-4 rounded-xl overflow-hidden border border-white/10">
-              <img src={screenshot} alt="App preview" className="w-full" />
-            </div>
-
-            <p className="text-sm text-slate-300 text-center mb-4">
-              Share this with friends to invite them to join Sparks Of Joy!
-            </p>
-
-            <button
-              onClick={handleShare}
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold hover:scale-105 transition"
-            >
-              📤 Share Invite
-            </button>
-            <p className="text-xs text-slate-400 text-center mt-2">Smile, and the whole world smiles with you!</p>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
-
 // Quote Browser/Carousel Component
 function QuoteBrowser({ isOpen, onClose, addPoints, onBoost, onGlobalRipple }) {
   const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * wisdomQuotes.length));
