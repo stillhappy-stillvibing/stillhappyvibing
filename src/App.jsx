@@ -5378,6 +5378,7 @@ export default function App() {
   const [showCBTBrowser, setShowCBTBrowser] = useState(false);
   const [showRipplesModal, setShowRipplesModal] = useState(false);
   const [showPowerBoost, setShowPowerBoost] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(false);
   const [isGlobalRippling, setIsGlobalRippling] = useState(false);
   const [globalRippleSparks, setGlobalRippleSparks] = useState([]);
   const [checkInCooldownUntil, setCheckInCooldownUntil] = useState(0);
@@ -6136,26 +6137,56 @@ Smile, and the whole world smiles with you.`;
           <span>All data stays on your device</span>
         </div>
 
-        {/* User Analytics */}
-        {(uniqueVisitors > 0 || activeUsersToday > 0) && (
-          <div className="mt-4 p-3 bg-slate-800/30 border border-slate-700/30 rounded-xl">
-            <div className="flex items-center justify-center gap-6 text-xs text-slate-400">
-              <div className="flex items-center gap-2">
-                <span>👥</span>
-                <span>{uniqueVisitors.toLocaleString()} total visitors</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span>✨</span>
-                <span>{activeUsersToday.toLocaleString()} active today</span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <footer className="text-center mt-4 text-slate-500 text-xs">Made with 💛 for a happier world!</footer>
+        <footer
+          onClick={() => setShowAnalytics(true)}
+          className="text-center mt-4 text-slate-500 text-xs cursor-pointer hover:text-slate-400 transition"
+        >
+          Made with 💛 for a happier world!
+        </footer>
       </div>
 
       {/* Modals */}
+
+      {/* Analytics Modal */}
+      {showAnalytics && (
+        <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50" onClick={() => setShowAnalytics(false)}>
+          <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-sm w-full p-6 border border-white/20" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-bold">📊 Analytics</h2>
+              <button onClick={() => setShowAnalytics(false)} className="text-slate-400 hover:text-white text-xl">✕</button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="bg-slate-800/30 border border-slate-700/30 rounded-xl p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">👥</span>
+                    <span className="text-sm text-slate-400">Total Visitors</span>
+                  </div>
+                  <span className="text-2xl font-bold text-purple-400">{uniqueVisitors.toLocaleString()}</span>
+                </div>
+              </div>
+
+              <div className="bg-slate-800/30 border border-slate-700/30 rounded-xl p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">✨</span>
+                    <span className="text-sm text-slate-400">Active Today</span>
+                  </div>
+                  <span className="text-2xl font-bold text-pink-400">{activeUsersToday.toLocaleString()}</span>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-400/20 rounded-xl p-4 mt-6">
+                <p className="text-xs text-center text-slate-400">
+                  Anonymous tracking • No personal data collected
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <QuoteBrowser isOpen={showQuoteBrowser} onClose={() => setShowQuoteBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} onGlobalRipple={handleGlobalRipple} />
       <ExerciseBrowser isOpen={showExerciseBrowser} onClose={() => setShowExerciseBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} playSound={playSound} onGlobalRipple={handleGlobalRipple} />
       <BreathworkBrowser isOpen={showBreathworkBrowser} onClose={() => setShowBreathworkBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} playSound={playSound} onGlobalRipple={handleGlobalRipple} />
