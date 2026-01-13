@@ -2519,6 +2519,9 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
   const [cycles, setCycles] = useState(0);
   const [showCompletion, setShowCompletion] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [intention, setIntention] = useState('energy'); // New: intention state
+  const [showRitual, setShowRitual] = useState(false); // New: completion ritual state
+  const [ritualCount, setRitualCount] = useState(3); // Countdown for ritual breaths
 
   const currentPattern = breathworkPatterns[currentIndex];
 
@@ -2531,6 +2534,8 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
     setIsActive(false);
     setCycles(0);
     setShowCompletion(false);
+    setShowRitual(false);
+    setRitualCount(3);
   };
 
   // Randomize on open for variety
@@ -2611,6 +2616,34 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
                 </div>
               </div>
 
+              {/* Intention Selector */}
+              <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-400/20 rounded-xl p-4 mb-4">
+                <p className="text-sm font-semibold text-slate-300 mb-3 text-center">Set Your Intention</p>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { value: 'energy', emoji: '⚡', label: 'Energy' },
+                    { value: 'calm', emoji: '🌊', label: 'Calm' },
+                    { value: 'focus', emoji: '🎯', label: 'Focus' },
+                    { value: 'joy', emoji: '😊', label: 'Joy' },
+                    { value: 'clarity', emoji: '💎', label: 'Clarity' },
+                    { value: 'healing', emoji: '💚', label: 'Healing' }
+                  ].map(int => (
+                    <button
+                      key={int.value}
+                      onClick={() => setIntention(int.value)}
+                      className={`py-2 px-3 rounded-lg text-sm font-medium transition ${
+                        intention === int.value
+                          ? 'bg-purple-500/30 border-2 border-purple-400 text-purple-200'
+                          : 'bg-white/5 border border-white/10 text-slate-400 hover:bg-white/10'
+                      }`}
+                    >
+                      <div className="text-lg mb-1">{int.emoji}</div>
+                      <div className="text-xs">{int.label}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <button
                 onClick={handleStart}
                 className="w-full py-5 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 rounded-xl font-bold text-lg transition hover:scale-105 mb-3"
@@ -2643,7 +2676,7 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
                 </h3>
               </div>
               <div className="mb-6 min-h-[250px] relative">
-                <BreathingGuide pattern={currentPattern.pattern} playSound={playSound} />
+                <BreathingGuide pattern={currentPattern.pattern} playSound={playSound} intention={intention} />
               </div>
 
               {/* Light the Flame and Stop buttons */}
@@ -2651,7 +2684,8 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
                 <button
                   onClick={() => {
                     setIsActive(false);
-                    setShowCompletion(true);
+                    setShowRitual(true);
+                    setRitualCount(3);
                   }}
                   onContextMenu={(e) => e.preventDefault()}
                   className="px-8 py-3 bg-gradient-to-r from-teal-400 to-cyan-500 hover:from-teal-500 hover:to-cyan-600 text-slate-900 rounded-xl font-bold transition hover:scale-105"
@@ -2671,6 +2705,32 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
                   ⏹ Stop
                 </button>
               </div>
+            </div>
+          )}
+
+          {showRitual && (
+            <div className="text-center py-12">
+              <div className="text-5xl mb-4">🕊️</div>
+              <h3 className="text-xl font-bold mb-3">Completion Ritual</h3>
+              <p className="text-slate-300 text-sm mb-6">Take 3 natural breaths<br/>and notice the difference</p>
+
+              <div className="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-2 border-purple-400/30 flex items-center justify-center mb-6">
+                <span className="text-5xl font-bold text-purple-300">{ritualCount}</span>
+              </div>
+
+              <button
+                onClick={() => {
+                  if (ritualCount > 1) {
+                    setRitualCount(prev => prev - 1);
+                  } else {
+                    setShowRitual(false);
+                    setShowCompletion(true);
+                  }
+                }}
+                className="px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl font-semibold transition hover:scale-105"
+              >
+                {ritualCount > 1 ? '✓ Breathe' : '✨ Complete'}
+              </button>
             </div>
           )}
 
@@ -3844,7 +3904,7 @@ const getDayKey = (date) => {
 };
 
 // Breathing Guide Component - Heart Coherence (5 in, 5 out)
-function BreathingGuide({ pattern, playSound }) {
+function BreathingGuide({ pattern, playSound, intention = 'energy' }) {
   const [phase, setPhase] = useState('inhale');
   const [count, setCount] = useState(pattern.inhale);
   const [resetKey, setResetKey] = useState(0);
@@ -3852,6 +3912,18 @@ function BreathingGuide({ pattern, playSound }) {
   const playSoundRef = useRef(playSound);
   const patternRef = useRef(pattern);
   const fourElementsIndexRef = useRef(0);
+
+  // Affirmations based on intention
+  const affirmations = {
+    energy: { inhale: 'Receiving vitality', exhale: 'Releasing fatigue', color: 'text-amber-300' },
+    calm: { inhale: 'Receiving peace', exhale: 'Releasing tension', color: 'text-blue-300' },
+    focus: { inhale: 'Receiving clarity', exhale: 'Releasing distractions', color: 'text-purple-300' },
+    joy: { inhale: 'Receiving happiness', exhale: 'Releasing worry', color: 'text-pink-300' },
+    clarity: { inhale: 'Receiving insight', exhale: 'Releasing confusion', color: 'text-cyan-300' },
+    healing: { inhale: 'Receiving love', exhale: 'Releasing pain', color: 'text-green-300' }
+  };
+
+  const currentAffirmation = affirmations[intention] || affirmations.energy;
 
   // Update refs when props change (but don't re-run effects)
   useEffect(() => {
@@ -4015,8 +4087,15 @@ function BreathingGuide({ pattern, playSound }) {
       <div className={`w-36 h-36 mx-auto rounded-full flex flex-col items-center justify-center transition-all duration-1000 ${colors[phase]}`}>
         <span className="text-sm font-medium">{labels[phase]}</span>
         <span className="text-3xl font-bold my-1">{count}</span>
-        {(phase === 'inhale' || phase === 'exhale') && (
-          <span className="text-xs font-semibold text-teal-300 animate-pulse">Energy</span>
+        {phase === 'inhale' && (
+          <span className={`text-xs font-semibold ${currentAffirmation.color} animate-pulse`}>
+            {currentAffirmation.inhale}
+          </span>
+        )}
+        {phase === 'exhale' && (
+          <span className={`text-xs font-semibold ${currentAffirmation.color} animate-pulse`}>
+            {currentAffirmation.exhale}
+          </span>
         )}
       </div>
     </div>
