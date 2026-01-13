@@ -1863,6 +1863,11 @@ function QuoteBrowser({ isOpen, onClose, addPoints, onBoost, onGlobalRipple }) {
             <p className="text-slate-400 text-sm">{currentQuote.tradition}</p>
           </div>
 
+          {/* Ripple button moved above other buttons */}
+          <div className="mb-6 flex justify-center">
+            <RippleButton type="quote" data={currentQuote} circular onGlobalRipple={onGlobalRipple} addPoints={addPoints} />
+          </div>
+
           <div className="flex gap-3 mb-4">
             <button
               onClick={handleBoost}
@@ -1884,8 +1889,6 @@ function QuoteBrowser({ isOpen, onClose, addPoints, onBoost, onGlobalRipple }) {
           >
             📤 Share
           </button>
-
-          <RippleButton type="quote" data={currentQuote} circular onGlobalRipple={onGlobalRipple} addPoints={addPoints} />
         </div>
       </div>
 
@@ -2451,15 +2454,26 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
                 <BreathingGuide pattern={currentPattern.pattern} playSound={playSound} />
               </div>
 
-              {/* Stop button - triggers spark completion */}
-              <div className="mt-6 flex justify-center">
+              {/* Light the Flame and Stop buttons */}
+              <div className="mt-8 flex gap-4 justify-center items-center">
                 <button
                   onClick={() => {
                     setIsActive(false);
                     setShowCompletion(true);
                   }}
                   onContextMenu={(e) => e.preventDefault()}
-                  className="px-6 py-2 rounded-full bg-slate-700/50 hover:bg-slate-600/50 border border-slate-500/30 transition-all text-slate-300 hover:text-white text-sm font-medium"
+                  className="px-8 py-3 bg-gradient-to-r from-teal-400 to-cyan-500 hover:from-teal-500 hover:to-cyan-600 text-slate-900 rounded-xl font-bold transition hover:scale-105"
+                  style={{ userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
+                >
+                  🔥 Light The Flame
+                </button>
+
+                <button
+                  onClick={() => {
+                    setIsActive(false);
+                  }}
+                  onContextMenu={(e) => e.preventDefault()}
+                  className="px-6 py-3 rounded-full bg-slate-700/50 hover:bg-slate-600/50 border border-slate-500/30 transition-all text-slate-300 hover:text-white text-sm font-medium"
                   style={{ userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
                 >
                   ⏹ Stop
@@ -2476,6 +2490,11 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
                 <p className="text-slate-400">Energy flowing through you</p>
               </div>
 
+              {/* Ripple button moved above other buttons */}
+              <div className="mb-6 flex justify-center">
+                <RippleButton type="breathwork" data={currentPattern} circular onGlobalRipple={onGlobalRipple} addPoints={addPoints} />
+              </div>
+
               <div className="flex gap-3 mb-4">
                 <button
                   onClick={handleBoost}
@@ -2490,8 +2509,6 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
                   ✕ Close
                 </button>
               </div>
-
-              <RippleButton type="breathwork" data={currentPattern} circular onGlobalRipple={onGlobalRipple} addPoints={addPoints} />
             </>
           )}
         </div>
