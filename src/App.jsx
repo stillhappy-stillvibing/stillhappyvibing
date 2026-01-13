@@ -5408,8 +5408,6 @@ export default function App() {
   const [showTNTBrowser, setShowTNTBrowser] = useState(false);
   const [showWeeklyReflection, setShowWeeklyReflection] = useState(false);
   const [showMilestone, setShowMilestone] = useState(false);
-  const [showInviteModal, setShowInviteModal] = useState(false);
-  const appRef = useRef(null); // Ref for capturing main app screenshot
   const [milestoneData, setMilestoneData] = useState(null);
   const [showInsights, setShowInsights] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -6087,7 +6085,18 @@ export default function App() {
         <div className="grid grid-cols-3 gap-3 mt-6 mb-3">
           {/* Invite A Friend */}
           <button
-            onClick={() => setShowInviteModal(true)}
+            onClick={() => {
+              if (navigator.share) {
+                navigator.share({
+                  title: 'Join me on Sparks Of Joy!',
+                  text: 'Find your spark of joy! Smile, and the whole world smileswithyou.com ✨'
+                }).catch(() => {});
+              } else {
+                setToastMessage('Invite link copied!');
+                setToastEmoji('💌');
+                setShowToast(true);
+              }
+            }}
             className="bg-gradient-to-br from-pink-500/20 to-rose-500/20 border border-pink-500/30 rounded-xl p-4 hover:from-pink-500/30 hover:to-rose-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
           >
             <div className="text-3xl">💌</div>
@@ -6191,11 +6200,6 @@ export default function App() {
         isOpen={showShareSmile}
         onClose={() => setShowShareSmile(false)}
         addPoints={addPoints}
-      />
-      <InviteModal
-        isOpen={showInviteModal}
-        onClose={() => setShowInviteModal(false)}
-        appRef={appRef}
       />
 
       {/* Ripples Of Joy Modal */}
