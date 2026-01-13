@@ -1749,6 +1749,51 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
           </div>
         )}
 
+        {/* Breathwork Card - Show the specific breathing pattern that sparked energy */}
+        {type === 'breathwork' && data && (
+          <div
+            ref={cardRef}
+            className="bg-gradient-to-br from-teal-400 via-cyan-400 to-blue-400 rounded-2xl p-6 mb-4"
+          >
+            <div className="text-center text-slate-900">
+              <p className="text-5xl mb-3">{data.emoji}</p>
+              <p className="text-2xl font-bold mb-1">{data.name}</p>
+              <p className="text-sm opacity-80 mb-4">{data.subtitle}</p>
+
+              {/* Breathing Pattern */}
+              <div className="bg-white/30 rounded-xl p-4 mb-4">
+                <p className="text-xs font-semibold uppercase tracking-wider opacity-80 mb-2">Pattern</p>
+                <div className="flex gap-2 justify-center flex-wrap text-sm font-medium">
+                  <span>Inhale: {data.pattern.inhale}s</span>
+                  {data.pattern.hold1 > 0 && <span>• Hold: {data.pattern.hold1}s</span>}
+                  <span>• Exhale: {data.pattern.exhale}s</span>
+                  {data.pattern.hold2 > 0 && <span>• Hold: {data.pattern.hold2}s</span>}
+                </div>
+              </div>
+
+              {/* Key Benefits */}
+              <div className="bg-white/20 rounded-xl p-4 mb-4">
+                <p className="text-xs font-semibold uppercase tracking-wider opacity-80 mb-2">Benefits</p>
+                <div className="space-y-1">
+                  {data.benefits.slice(0, 3).map((benefit, i) => (
+                    <div key={i} className="flex items-center justify-center gap-2 text-sm">
+                      <span className="text-green-700">✓</span>
+                      <span>{benefit}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <p className="text-lg font-bold mb-3">✨ I found my spark of energy!</p>
+
+              <p className="text-xs opacity-90">
+                <span className="font-medium">Smile, and the whole world </span>
+                <span className="font-bold italic underline text-indigo-700">smileswithyou.com!</span>
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* World Stats Card */}
         {type === 'world' && data && (
           <div
@@ -2328,6 +2373,7 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
   const [isActive, setIsActive] = useState(false);
   const [cycles, setCycles] = useState(0);
   const [showCompletion, setShowCompletion] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   const currentPattern = breathworkPatterns[currentIndex];
 
@@ -2428,6 +2474,13 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
               </button>
 
               <button
+                onClick={() => setShowShareModal(true)}
+                className="w-full py-2 rounded-lg bg-teal-500/20 border border-teal-500/30 text-teal-400 text-sm hover:bg-teal-500/30 transition mb-3"
+              >
+                📤 Share This Exercise
+              </button>
+
+              <button
                 onClick={randomPattern}
                 className="w-full py-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 text-sm transition"
               >
@@ -2505,10 +2558,24 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
                   ✕ Close
                 </button>
               </div>
+
+              <button
+                onClick={() => setShowShareModal(true)}
+                className="w-full py-2 rounded-lg bg-teal-500/20 border border-teal-500/30 text-teal-400 text-sm hover:bg-teal-500/30 transition mb-3"
+              >
+                📤 Share This Spark
+              </button>
             </>
           )}
         </div>
       </div>
+
+      <ShareImageCard
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        type="breathwork"
+        data={currentPattern}
+      />
     </div>
   );
 }
