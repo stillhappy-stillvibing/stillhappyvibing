@@ -5831,16 +5831,6 @@ export default function App() {
                 <div className="text-xs text-slate-400 text-center">Aha!</div>
               </button>
 
-              {/* Sparks of Insight */}
-              <button
-                onClick={() => setShowExerciseBrowser(true)}
-                className="bg-gradient-to-br from-orange-500/20 to-yellow-500/20 border border-orange-500/30 rounded-xl p-5 hover:from-orange-500/30 hover:to-yellow-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
-              >
-                <div className="text-4xl">✨</div>
-                <div className="font-semibold text-sm">Sparks of Insight</div>
-                <div className="text-xs text-slate-400 text-center">Mental Dojo</div>
-              </button>
-
               {/* Sparks of Energy */}
               <button
                 onClick={() => setShowBreathworkBrowser(true)}
@@ -5849,6 +5839,16 @@ export default function App() {
                 <div className="text-4xl">🌬️</div>
                 <div className="font-semibold text-sm">Sparks of Energy</div>
                 <div className="text-xs text-slate-400 text-center">Breath of fresh air</div>
+              </button>
+
+              {/* Sparks of Insight */}
+              <button
+                onClick={() => setShowExerciseBrowser(true)}
+                className="bg-gradient-to-br from-orange-500/20 to-yellow-500/20 border border-orange-500/30 rounded-xl p-5 hover:from-orange-500/30 hover:to-yellow-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
+              >
+                <div className="text-4xl">✨</div>
+                <div className="font-semibold text-sm">Sparks of Insight</div>
+                <div className="text-xs text-slate-400 text-center">Mental Dojo</div>
               </button>
 
               {/* Waves Of Joy */}
@@ -5922,7 +5922,7 @@ export default function App() {
           {/* Invite A Friend */}
           <button
             onClick={() => {
-              const inviteText = `Sparks Of Joy ✨\n\n✨ Sparks of Insight - Mental Dojo practices\n💡 Sparks of Thought - Wisdom ignited\n🌬️ Sparks of Energy - Calming breath\n💛 Share A Smile - Send joy\n🌊 Waves Of Joy - Witness sparks\n\nSmile, and the whole world smileswithyou.com!`;
+              const inviteText = `Sparks Of Joy ✨\n\n💡 Sparks of Thought - Wisdom ignited\n🌬️ Sparks of Energy - Calming breath\n✨ Sparks of Insight - Mental Dojo practices\n💛 Share A Smile - Send joy\n🌊 Waves Of Joy - Witness sparks\n\nSmile, and the whole world smileswithyou.com!`;
               if (navigator.share) {
                 navigator.share({
                   title: 'Sparks Of Joy',
