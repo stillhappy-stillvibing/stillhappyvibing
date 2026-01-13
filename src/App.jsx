@@ -1431,10 +1431,6 @@ function GlobalCounter() {
           <span className={`text-white font-bold ${pulse ? 'animate-pulse' : ''}`}>{formatNumber(totalSparks)}</span> total sparks created
         </span>
       </div>
-      <div className="flex items-center justify-center gap-2 pt-3 border-t border-white/10">
-        <span className="text-xl">🌍</span>
-        <p className="text-sm text-slate-200 italic">Someone just sparked joy in the world, smile with them!</p>
-      </div>
     </div>
   );
 }
@@ -3404,9 +3400,6 @@ function TheWorldTab() {
         <p className="text-slate-400 text-sm mb-3">
           Smile, and the whole world smiles with you.
         </p>
-        <p className="text-amber-300 text-lg leading-relaxed">
-          Someone just sparked joy in the world, smile with them!
-        </p>
       </div>
 
       {/* Giving/Receiving Status - Above Image */}
@@ -3474,10 +3467,10 @@ function TheWorldTab() {
             onMouseLeave={handlePressEnd}
             onTouchStart={handlePressStart}
             onTouchEnd={handlePressEnd}
-            className={`w-4 h-4 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 border border-amber-300/50 transition-all shadow-lg flex items-center justify-center select-none ${isPressed ? 'scale-95' : 'hover:scale-105'}`}
+            className={`w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 border-2 border-amber-300/50 transition-all shadow-lg flex items-center justify-center select-none ${isPressed ? 'scale-95' : 'hover:scale-105'}`}
             style={{ userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
           >
-            <span className="text-xs pointer-events-none">✨</span>
+            <span className="text-3xl pointer-events-none">✨</span>
           </button>
           <div className="text-center max-w-md">
             <p className="text-slate-300 text-base mt-4">
