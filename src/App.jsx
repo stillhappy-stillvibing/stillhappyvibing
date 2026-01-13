@@ -3971,12 +3971,12 @@ function BreathingGuide({ pattern, playSound }) {
     hold1: 'Hold',
     hold2: 'Hold'
   };
-  const colors = {
-    prep: 'bg-slate-500/30 scale-100',
-    inhale: 'bg-green-500/30 scale-110',
-    exhale: 'bg-blue-500/30 scale-90',
-    hold1: 'bg-yellow-500/30 scale-100',
-    hold2: 'bg-purple-500/30 scale-95'
+  const scales = {
+    prep: 'scale-100',
+    inhale: 'scale-125',
+    exhale: 'scale-90',
+    hold1: 'scale-110',
+    hold2: 'scale-100'
   };
 
   return (
@@ -3997,12 +3997,15 @@ function BreathingGuide({ pattern, playSound }) {
         ))}
       </div>
 
-      {/* Breathing circle */}
-      <div className={`w-32 h-32 mx-auto rounded-full flex flex-col items-center justify-center transition-all duration-1000 ${colors[phase]}`}>
-        <span className="text-sm font-medium">{labels[phase]}</span>
-        <span className="text-3xl font-bold my-1">{count}</span>
+      {/* Breathing with the Earth */}
+      <div className="flex flex-col items-center justify-center">
+        <span className="text-sm font-medium text-slate-300 mb-2">{labels[phase]}</span>
+        <div className={`text-8xl transition-all duration-1000 ${scales[phase]}`}>
+          🌍
+        </div>
+        <span className="text-4xl font-bold text-white my-2">{count}</span>
         {(phase === 'inhale' || phase === 'exhale') && (
-          <span className="text-xs font-semibold text-teal-300 animate-pulse">Energy</span>
+          <span className="text-sm font-semibold text-teal-300 animate-pulse">Energy</span>
         )}
       </div>
     </div>
