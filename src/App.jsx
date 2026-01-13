@@ -1891,6 +1891,116 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
   );
 }
 
+// Invite Modal - Screenshot the main page to invite friends
+function InviteModal({ isOpen, onClose, appRef }) {
+  const [generating, setGenerating] = useState(false);
+  const [screenshot, setScreenshot] = useState(null);
+
+  // Generate screenshot when modal opens
+  useEffect(() => {
+    if (isOpen && appRef?.current && !screenshot) {
+      generateScreenshot();
+    }
+  }, [isOpen]);
+
+  const generateScreenshot = async () => {
+    if (!appRef?.current) return;
+    setGenerating(true);
+
+    try {
+      const canvas = await html2canvas(appRef.current, {
+        backgroundColor: '#0f172a',
+        scale: 2,
+        windowWidth: appRef.current.scrollWidth,
+        windowHeight: appRef.current.scrollHeight,
+      });
+
+      const dataUrl = canvas.toDataURL('image/png');
+      setScreenshot(dataUrl);
+      setGenerating(false);
+    } catch (err) {
+      console.error('Screenshot failed:', err);
+      setGenerating(false);
+      alert('Could not generate screenshot');
+    }
+  };
+
+  const handleShare = async () => {
+    if (!screenshot) return;
+
+    try {
+      const response = await fetch(screenshot);
+      const blob = await response.blob();
+      const filename = 'sparks-of-joy-invite.png';
+
+      if (navigator.share && navigator.canShare?.({ files: [new File([blob], filename, { type: 'image/png' })] })) {
+        try {
+          await navigator.share({
+            files: [new File([blob], filename, { type: 'image/png' })],
+            title: 'Join me on Sparks Of Joy!',
+            text: 'Find your spark of joy! Smile, and the whole world smileswithyou.com ✨'
+          });
+        } catch (e) {
+          // User cancelled
+        }
+      } else {
+        // Fallback: download
+        const a = document.createElement('a');
+        a.href = screenshot;
+        a.download = filename;
+        a.click();
+      }
+    } catch (err) {
+      console.error('Share failed:', err);
+    }
+  };
+
+  const handleClose = () => {
+    setScreenshot(null);
+    onClose();
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50 overflow-y-auto" onClick={handleClose}>
+      <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-sm w-full p-6 border border-white/20" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold">💌 Invite A Friend</h2>
+          <button onClick={handleClose} className="text-slate-400 hover:text-white">✕</button>
+        </div>
+
+        {generating && (
+          <div className="text-center py-12">
+            <div className="text-4xl mb-3">📸</div>
+            <p className="text-slate-400">Creating invite...</p>
+          </div>
+        )}
+
+        {screenshot && (
+          <>
+            <div className="mb-4 rounded-xl overflow-hidden border border-white/10">
+              <img src={screenshot} alt="App preview" className="w-full" />
+            </div>
+
+            <p className="text-sm text-slate-300 text-center mb-4">
+              Share this with friends to invite them to join Sparks Of Joy!
+            </p>
+
+            <button
+              onClick={handleShare}
+              className="w-full py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold hover:scale-105 transition"
+            >
+              📤 Share Invite
+            </button>
+            <p className="text-xs text-slate-400 text-center mt-2">Smile, and the whole world smiles with you!</p>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // Quote Browser/Carousel Component
 function QuoteBrowser({ isOpen, onClose, addPoints, onBoost, onGlobalRipple }) {
   const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * wisdomQuotes.length));
@@ -2532,7 +2642,7 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
                   {currentPattern.name}
                 </h3>
               </div>
-              <div className="mb-6">
+              <div className="mb-6 min-h-[250px] relative">
                 <BreathingGuide pattern={currentPattern.pattern} playSound={playSound} />
               </div>
 
@@ -3738,8 +3848,10 @@ function BreathingGuide({ pattern, playSound }) {
   const [phase, setPhase] = useState('inhale');
   const [count, setCount] = useState(pattern.inhale);
   const [resetKey, setResetKey] = useState(0);
+  const [sparks, setSparks] = useState([]);
   const playSoundRef = useRef(playSound);
   const patternRef = useRef(pattern);
+  const fourElementsIndexRef = useRef(0);
 
   // Update refs when props change (but don't re-run effects)
   useEffect(() => {
@@ -3755,7 +3867,70 @@ function BreathingGuide({ pattern, playSound }) {
     if (playSoundRef.current) playSoundRef.current('breathInhale');
   }, [pattern]);
 
-  // Breathing cycle with pattern support - starts immediately
+  // Generate sparks during breathing
+  useEffect(() => {
+    const sparkInterval = setInterval(() => {
+      // Mix of four elements and thank you messages
+      const showFourElement = Math.random() < 0.6;
+
+      let sparkMessage, sparkColor;
+
+      if (showFourElement) {
+        const fourElements = [
+          { text: 'Happy', color: 'text-yellow-400' },
+          { text: 'Healthy', color: 'text-sky-400' },
+          { text: 'Wealthy', color: 'text-green-400' },
+          { text: 'Wise', color: 'text-purple-400' }
+        ];
+        const currentElement = fourElements[fourElementsIndexRef.current % 4];
+        sparkMessage = currentElement.text;
+        sparkColor = currentElement.color;
+        fourElementsIndexRef.current += 1;
+      } else {
+        const thankYouMessages = ['Thank you', 'Merci', 'Gracias', 'Danke', 'ありがとう'];
+        sparkMessage = thankYouMessages[Math.floor(Math.random() * thankYouMessages.length)];
+        sparkColor = 'text-cyan-300';
+      }
+
+      // Generate sparks outside the center circle area
+      // Pick a corner/edge region: top, bottom, left, or right
+      const regions = ['top', 'bottom', 'left', 'right'];
+      const region = regions[Math.floor(Math.random() * regions.length)];
+
+      let left, top;
+
+      if (region === 'top') {
+        left = Math.random() * 80 + 10; // anywhere horizontally
+        top = Math.random() * 15; // top 15%
+      } else if (region === 'bottom') {
+        left = Math.random() * 80 + 10;
+        top = Math.random() * 15 + 85; // bottom 15%
+      } else if (region === 'left') {
+        left = Math.random() * 15; // left 15%
+        top = Math.random() * 80 + 10;
+      } else { // right
+        left = Math.random() * 15 + 85; // right 15%
+        top = Math.random() * 80 + 10;
+      }
+
+      const newSpark = {
+        id: Date.now() + Math.random(),
+        message: sparkMessage,
+        color: sparkColor,
+        left,
+        top,
+      };
+
+      setSparks(prev => [...prev, newSpark]);
+      setTimeout(() => {
+        setSparks(prev => prev.filter(s => s.id !== newSpark.id));
+      }, 2000);
+    }, 600);
+
+    return () => clearInterval(sparkInterval);
+  }, [resetKey]);
+
+  // Breathing cycle - starts immediately
   useEffect(() => {
     let currentPhase = 'inhale';
     let currentCount = patternRef.current.inhale;
@@ -3819,9 +3994,31 @@ function BreathingGuide({ pattern, playSound }) {
   };
 
   return (
-    <div className={`w-24 h-24 mx-auto rounded-full flex flex-col items-center justify-center transition-all duration-1000 ${colors[phase]}`}>
-      <span className="text-xs font-medium">{labels[phase]}</span>
-      <span className="text-2xl font-bold">{count}</span>
+    <div className="relative">
+      {/* Floating sparks */}
+      <div className="absolute inset-0 pointer-events-none">
+        {sparks.map(spark => (
+          <div
+            key={spark.id}
+            className={`absolute animate-spark ${spark.color} text-sm font-semibold whitespace-nowrap`}
+            style={{
+              left: `${spark.left}%`,
+              top: `${spark.top}%`,
+            }}
+          >
+            ✨ {spark.message}
+          </div>
+        ))}
+      </div>
+
+      {/* Breathing circle with label and count inside */}
+      <div className={`w-36 h-36 mx-auto rounded-full flex flex-col items-center justify-center transition-all duration-1000 ${colors[phase]}`}>
+        <span className="text-sm font-medium">{labels[phase]}</span>
+        <span className="text-3xl font-bold my-1">{count}</span>
+        {(phase === 'inhale' || phase === 'exhale') && (
+          <span className="text-xs font-semibold text-teal-300 animate-pulse">Energy</span>
+        )}
+      </div>
     </div>
   );
 }
@@ -5244,6 +5441,8 @@ export default function App() {
   const [showTNTBrowser, setShowTNTBrowser] = useState(false);
   const [showWeeklyReflection, setShowWeeklyReflection] = useState(false);
   const [showMilestone, setShowMilestone] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const appRef = useRef(null); // Ref for capturing main app screenshot
   const [milestoneData, setMilestoneData] = useState(null);
   const [showInsights, setShowInsights] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -5799,7 +5998,7 @@ export default function App() {
         onDismiss={() => setShowUpdateNotification(false)}
       />
 
-      <div className="max-w-xl mx-auto">
+      <div className="max-w-xl mx-auto" ref={appRef}>
         {/* Header */}
         <header className="text-center py-3">
           <div className="flex items-center justify-between mb-1">
@@ -5921,21 +6120,7 @@ export default function App() {
         <div className="grid grid-cols-3 gap-3 mt-6 mb-3">
           {/* Invite A Friend */}
           <button
-            onClick={() => {
-              const inviteText = `Sparks Of Joy ✨\n\n💡 Sparks of Thought - Wisdom ignited\n🌬️ Sparks of Energy - Calming breath\n✨ Sparks of Insight - Mental Dojo practices\n💛 Share A Smile - Send joy\n🌊 Waves Of Joy - Witness sparks\n\nSmile, and the whole world smileswithyou.com!`;
-              if (navigator.share) {
-                navigator.share({
-                  title: 'Sparks Of Joy',
-                  text: inviteText
-                }).catch(() => {});
-              } else {
-                navigator.clipboard.writeText(inviteText);
-                setToastMessage('Invite link copied!');
-                setToastEmoji('📋');
-                setShowToast(true);
-                setTimeout(() => setShowToast(false), 2000);
-              }
-            }}
+            onClick={() => setShowInviteModal(true)}
             className="bg-gradient-to-br from-pink-500/20 to-rose-500/20 border border-pink-500/30 rounded-xl p-4 hover:from-pink-500/30 hover:to-rose-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
           >
             <div className="text-3xl">💌</div>
@@ -6039,6 +6224,11 @@ export default function App() {
         isOpen={showShareSmile}
         onClose={() => setShowShareSmile(false)}
         addPoints={addPoints}
+      />
+      <InviteModal
+        isOpen={showInviteModal}
+        onClose={() => setShowInviteModal(false)}
+        appRef={appRef}
       />
 
       {/* Ripples Of Joy Modal */}
