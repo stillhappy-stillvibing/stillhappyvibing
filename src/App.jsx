@@ -2519,9 +2519,7 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
   const [cycles, setCycles] = useState(0);
   const [showCompletion, setShowCompletion] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
-  const [intention, setIntention] = useState('energy'); // New: intention state
-  const [showRitual, setShowRitual] = useState(false); // New: completion ritual state
-  const [ritualCount, setRitualCount] = useState(3); // Countdown for ritual breaths
+  const [intention, setIntention] = useState('energy');
 
   const currentPattern = breathworkPatterns[currentIndex];
 
@@ -2534,8 +2532,6 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
     setIsActive(false);
     setCycles(0);
     setShowCompletion(false);
-    setShowRitual(false);
-    setRitualCount(3);
   };
 
   // Randomize on open for variety
@@ -2684,8 +2680,7 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
                 <button
                   onClick={() => {
                     setIsActive(false);
-                    setShowRitual(true);
-                    setRitualCount(3);
+                    setShowCompletion(true);
                   }}
                   onContextMenu={(e) => e.preventDefault()}
                   className="px-8 py-3 bg-gradient-to-r from-teal-400 to-cyan-500 hover:from-teal-500 hover:to-cyan-600 text-slate-900 rounded-xl font-bold transition hover:scale-105"
@@ -2705,32 +2700,6 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
                   ⏹ Stop
                 </button>
               </div>
-            </div>
-          )}
-
-          {showRitual && (
-            <div className="text-center py-12">
-              <div className="text-5xl mb-4">🕊️</div>
-              <h3 className="text-xl font-bold mb-3">Completion Ritual</h3>
-              <p className="text-slate-300 text-sm mb-6">Take 3 natural breaths<br/>and notice the difference</p>
-
-              <div className="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-2 border-purple-400/30 flex items-center justify-center mb-6">
-                <span className="text-5xl font-bold text-purple-300">{ritualCount}</span>
-              </div>
-
-              <button
-                onClick={() => {
-                  if (ritualCount > 1) {
-                    setRitualCount(prev => prev - 1);
-                  } else {
-                    setShowRitual(false);
-                    setShowCompletion(true);
-                  }
-                }}
-                className="px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl font-semibold transition hover:scale-105"
-              >
-                {ritualCount > 1 ? '✓ Breathe' : '✨ Complete'}
-              </button>
             </div>
           )}
 
@@ -5439,8 +5408,6 @@ export default function App() {
   const [showTNTBrowser, setShowTNTBrowser] = useState(false);
   const [showWeeklyReflection, setShowWeeklyReflection] = useState(false);
   const [showMilestone, setShowMilestone] = useState(false);
-  const [showInviteModal, setShowInviteModal] = useState(false);
-  const appRef = useRef(null); // Ref for capturing main app screenshot
   const [milestoneData, setMilestoneData] = useState(null);
   const [showInsights, setShowInsights] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -6118,7 +6085,31 @@ export default function App() {
         <div className="grid grid-cols-3 gap-3 mt-6 mb-3">
           {/* Invite A Friend */}
           <button
-            onClick={() => setShowInviteModal(true)}
+            onClick={() => {
+              const inviteText = `Sparks of Joy ✨
+
+Find your spark of joy every day.
+
+💡 Sparks of Thought - Timeless wisdom
+🌬️ Sparks of Energy - Breathwork patterns
+✨ Sparks of Insight - Mental Dojo practices
+🌍 Waves of Joy - Global ripples
+
+Smile, and the whole world smiles with you.`;
+
+              if (navigator.share) {
+                navigator.share({
+                  title: 'Sparks of Joy',
+                  text: inviteText,
+                  url: 'https://smileswithyou.com'
+                }).catch(() => {});
+              } else {
+                navigator.clipboard?.writeText(inviteText + '\n\nhttps://smileswithyou.com');
+                setToastMessage('Invite copied!');
+                setToastEmoji('💌');
+                setShowToast(true);
+              }
+            }}
             className="bg-gradient-to-br from-pink-500/20 to-rose-500/20 border border-pink-500/30 rounded-xl p-4 hover:from-pink-500/30 hover:to-rose-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
           >
             <div className="text-3xl">💌</div>
@@ -6222,11 +6213,6 @@ export default function App() {
         isOpen={showShareSmile}
         onClose={() => setShowShareSmile(false)}
         addPoints={addPoints}
-      />
-      <InviteModal
-        isOpen={showInviteModal}
-        onClose={() => setShowInviteModal(false)}
-        appRef={appRef}
       />
 
       {/* Ripples Of Joy Modal */}
