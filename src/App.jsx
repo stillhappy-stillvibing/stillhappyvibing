@@ -116,6 +116,73 @@ const incrementTotalSparks = () => {
   runTransaction(totalSparksRef, (current) => (current || 0) + 1);
 };
 
+// User Tracking: Get or create unique anonymous user ID
+const getUserId = () => {
+  let userId = localStorage.getItem('sparkUserId');
+  if (!userId) {
+    // Generate unique ID: timestamp + random string
+    userId = `user_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    localStorage.setItem('sparkUserId', userId);
+  }
+  return userId;
+};
+
+// User Tracking: Track unique visitor (one-time per user)
+const trackUniqueVisitor = async () => {
+  const userId = getUserId();
+  const userRef = ref(database, `users/${userId}`);
+
+  try {
+    const snapshot = await get(userRef);
+    if (!snapshot.exists()) {
+      // First visit - record user
+      const now = new Date();
+      const localDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+      await set(userRef, {
+        firstVisit: now.toISOString(),
+        firstVisitDate: localDate
+      });
+
+      // Increment total unique visitors
+      const uniqueVisitorsRef = ref(database, 'globalStats/uniqueVisitors');
+      runTransaction(uniqueVisitorsRef, (current) => (current || 0) + 1);
+    }
+  } catch (error) {
+    console.error('Error tracking unique visitor:', error);
+  }
+};
+
+// User Tracking: Track active user today
+const trackActiveUser = async () => {
+  const userId = getUserId();
+  const now = new Date();
+  const localDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+  const activeUserRef = ref(database, `activeUsers/${localDate}/${userId}`);
+
+  try {
+    const snapshot = await get(activeUserRef);
+    if (!snapshot.exists()) {
+      // First activity today - record it
+      await set(activeUserRef, {
+        lastActive: now.toISOString()
+      });
+
+      // Increment today's active users count
+      const activeCountRef = ref(database, `globalStats/activeUsersToday/${localDate}`);
+      runTransaction(activeCountRef, (current) => (current || 0) + 1);
+    } else {
+      // Update last active timestamp
+      await set(activeUserRef, {
+        lastActive: now.toISOString()
+      });
+    }
+  } catch (error) {
+    console.error('Error tracking active user:', error);
+  }
+};
+
 // Track page views (every app load)
 const incrementPageViews = () => {
   const pageViewsRef = ref(database, `stats/pageViews`);
@@ -5311,6 +5378,7 @@ export default function App() {
   const [showCBTBrowser, setShowCBTBrowser] = useState(false);
   const [showRipplesModal, setShowRipplesModal] = useState(false);
   const [showPowerBoost, setShowPowerBoost] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(false);
   const [isGlobalRippling, setIsGlobalRippling] = useState(false);
   const [globalRippleSparks, setGlobalRippleSparks] = useState([]);
   const [checkInCooldownUntil, setCheckInCooldownUntil] = useState(0);
@@ -5318,6 +5386,10 @@ export default function App() {
   const [toastMessage, setToastMessage] = useState('');
   const [toastEmoji, setToastEmoji] = useState('');
   const [showToast, setShowToast] = useState(false);
+
+  // User analytics state
+  const [uniqueVisitors, setUniqueVisitors] = useState(0);
+  const [activeUsersToday, setActiveUsersToday] = useState(0);
 
   // Streak recovery state
   const [recoveryActive, setRecoveryActive] = useState(false);
@@ -5825,6 +5897,10 @@ export default function App() {
 
   // Auto-check-in on site visit
   useEffect(() => {
+    // Track user analytics on app load
+    trackUniqueVisitor();
+    trackActiveUser();
+
     const today = getDayKey(new Date());
     const hasCheckedInToday = checkins.some(c => getDayKey(c.timestamp) === today);
 
@@ -5844,6 +5920,29 @@ export default function App() {
       incrementHappinessSource('peace');
     }
   }, []); // Run once on mount
+
+  // Listen to analytics data in real-time
+  useEffect(() => {
+    const now = new Date();
+    const localDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+    // Listen to unique visitors
+    const uniqueVisitorsRef = ref(database, 'globalStats/uniqueVisitors');
+    const unsubscribeVisitors = onValue(uniqueVisitorsRef, (snapshot) => {
+      setUniqueVisitors(snapshot.val() || 0);
+    });
+
+    // Listen to active users today
+    const activeUsersTodayRef = ref(database, `globalStats/activeUsersToday/${localDate}`);
+    const unsubscribeActiveUsers = onValue(activeUsersTodayRef, (snapshot) => {
+      setActiveUsersToday(snapshot.val() || 0);
+    });
+
+    return () => {
+      unsubscribeVisitors();
+      unsubscribeActiveUsers();
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white p-4">
@@ -6038,10 +6137,56 @@ Smile, and the whole world smiles with you.`;
           <span>All data stays on your device</span>
         </div>
 
-        <footer className="text-center mt-4 text-slate-500 text-xs">Made with 💛 for a happier world!</footer>
+        <footer
+          onClick={() => setShowAnalytics(true)}
+          className="text-center mt-4 text-slate-500 text-xs cursor-pointer hover:text-slate-400 transition"
+        >
+          Made with 💛 for a happier world!
+        </footer>
       </div>
 
       {/* Modals */}
+
+      {/* Analytics Modal */}
+      {showAnalytics && (
+        <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50" onClick={() => setShowAnalytics(false)}>
+          <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-sm w-full p-6 border border-white/20" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-bold">📊 Analytics</h2>
+              <button onClick={() => setShowAnalytics(false)} className="text-slate-400 hover:text-white text-xl">✕</button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="bg-slate-800/30 border border-slate-700/30 rounded-xl p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">👥</span>
+                    <span className="text-sm text-slate-400">Total Visitors</span>
+                  </div>
+                  <span className="text-2xl font-bold text-purple-400">{uniqueVisitors.toLocaleString()}</span>
+                </div>
+              </div>
+
+              <div className="bg-slate-800/30 border border-slate-700/30 rounded-xl p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">✨</span>
+                    <span className="text-sm text-slate-400">Active Today</span>
+                  </div>
+                  <span className="text-2xl font-bold text-pink-400">{activeUsersToday.toLocaleString()}</span>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-400/20 rounded-xl p-4 mt-6">
+                <p className="text-xs text-center text-slate-400">
+                  Anonymous tracking • No personal data collected
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <QuoteBrowser isOpen={showQuoteBrowser} onClose={() => setShowQuoteBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} onGlobalRipple={handleGlobalRipple} />
       <ExerciseBrowser isOpen={showExerciseBrowser} onClose={() => setShowExerciseBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} playSound={playSound} onGlobalRipple={handleGlobalRipple} />
       <BreathworkBrowser isOpen={showBreathworkBrowser} onClose={() => setShowBreathworkBrowser(false)} addPoints={addPoints} onBoost={handleToolBoost} playSound={playSound} onGlobalRipple={handleGlobalRipple} />
