@@ -1891,6 +1891,116 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
   );
 }
 
+// Invite Modal - Screenshot the main page to invite friends
+function InviteModal({ isOpen, onClose, appRef }) {
+  const [generating, setGenerating] = useState(false);
+  const [screenshot, setScreenshot] = useState(null);
+
+  // Generate screenshot when modal opens
+  useEffect(() => {
+    if (isOpen && appRef?.current && !screenshot) {
+      generateScreenshot();
+    }
+  }, [isOpen]);
+
+  const generateScreenshot = async () => {
+    if (!appRef?.current) return;
+    setGenerating(true);
+
+    try {
+      const canvas = await html2canvas(appRef.current, {
+        backgroundColor: '#0f172a',
+        scale: 2,
+        windowWidth: appRef.current.scrollWidth,
+        windowHeight: appRef.current.scrollHeight,
+      });
+
+      const dataUrl = canvas.toDataURL('image/png');
+      setScreenshot(dataUrl);
+      setGenerating(false);
+    } catch (err) {
+      console.error('Screenshot failed:', err);
+      setGenerating(false);
+      alert('Could not generate screenshot');
+    }
+  };
+
+  const handleShare = async () => {
+    if (!screenshot) return;
+
+    try {
+      const response = await fetch(screenshot);
+      const blob = await response.blob();
+      const filename = 'sparks-of-joy-invite.png';
+
+      if (navigator.share && navigator.canShare?.({ files: [new File([blob], filename, { type: 'image/png' })] })) {
+        try {
+          await navigator.share({
+            files: [new File([blob], filename, { type: 'image/png' })],
+            title: 'Join me on Sparks Of Joy!',
+            text: 'Find your spark of joy! Smile, and the whole world smileswithyou.com ✨'
+          });
+        } catch (e) {
+          // User cancelled
+        }
+      } else {
+        // Fallback: download
+        const a = document.createElement('a');
+        a.href = screenshot;
+        a.download = filename;
+        a.click();
+      }
+    } catch (err) {
+      console.error('Share failed:', err);
+    }
+  };
+
+  const handleClose = () => {
+    setScreenshot(null);
+    onClose();
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50 overflow-y-auto" onClick={handleClose}>
+      <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-sm w-full p-6 border border-white/20" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold">💌 Invite A Friend</h2>
+          <button onClick={handleClose} className="text-slate-400 hover:text-white">✕</button>
+        </div>
+
+        {generating && (
+          <div className="text-center py-12">
+            <div className="text-4xl mb-3">📸</div>
+            <p className="text-slate-400">Creating invite...</p>
+          </div>
+        )}
+
+        {screenshot && (
+          <>
+            <div className="mb-4 rounded-xl overflow-hidden border border-white/10">
+              <img src={screenshot} alt="App preview" className="w-full" />
+            </div>
+
+            <p className="text-sm text-slate-300 text-center mb-4">
+              Share this with friends to invite them to join Sparks Of Joy!
+            </p>
+
+            <button
+              onClick={handleShare}
+              className="w-full py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold hover:scale-105 transition"
+            >
+              📤 Share Invite
+            </button>
+            <p className="text-xs text-slate-400 text-center mt-2">Smile, and the whole world smiles with you!</p>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // Quote Browser/Carousel Component
 function QuoteBrowser({ isOpen, onClose, addPoints, onBoost, onGlobalRipple }) {
   const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * wisdomQuotes.length));
@@ -5244,6 +5354,8 @@ export default function App() {
   const [showTNTBrowser, setShowTNTBrowser] = useState(false);
   const [showWeeklyReflection, setShowWeeklyReflection] = useState(false);
   const [showMilestone, setShowMilestone] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const appRef = useRef(null); // Ref for capturing main app screenshot
   const [milestoneData, setMilestoneData] = useState(null);
   const [showInsights, setShowInsights] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -5799,7 +5911,7 @@ export default function App() {
         onDismiss={() => setShowUpdateNotification(false)}
       />
 
-      <div className="max-w-xl mx-auto">
+      <div className="max-w-xl mx-auto" ref={appRef}>
         {/* Header */}
         <header className="text-center py-3">
           <div className="flex items-center justify-between mb-1">
@@ -5921,21 +6033,7 @@ export default function App() {
         <div className="grid grid-cols-3 gap-3 mt-6 mb-3">
           {/* Invite A Friend */}
           <button
-            onClick={() => {
-              const inviteText = `Sparks Of Joy ✨\n\n💡 Sparks of Thought - Wisdom ignited\n🌬️ Sparks of Energy - Calming breath\n✨ Sparks of Insight - Mental Dojo practices\n💛 Share A Smile - Send joy\n🌊 Waves Of Joy - Witness sparks\n\nSmile, and the whole world smileswithyou.com!`;
-              if (navigator.share) {
-                navigator.share({
-                  title: 'Sparks Of Joy',
-                  text: inviteText
-                }).catch(() => {});
-              } else {
-                navigator.clipboard.writeText(inviteText);
-                setToastMessage('Invite link copied!');
-                setToastEmoji('📋');
-                setShowToast(true);
-                setTimeout(() => setShowToast(false), 2000);
-              }
-            }}
+            onClick={() => setShowInviteModal(true)}
             className="bg-gradient-to-br from-pink-500/20 to-rose-500/20 border border-pink-500/30 rounded-xl p-4 hover:from-pink-500/30 hover:to-rose-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
           >
             <div className="text-3xl">💌</div>
@@ -6039,6 +6137,11 @@ export default function App() {
         isOpen={showShareSmile}
         onClose={() => setShowShareSmile(false)}
         addPoints={addPoints}
+      />
+      <InviteModal
+        isOpen={showInviteModal}
+        onClose={() => setShowInviteModal(false)}
+        appRef={appRef}
       />
 
       {/* Ripples Of Joy Modal */}
