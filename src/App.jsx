@@ -4766,7 +4766,7 @@ function OfflineMode({ isOpen, onClose, onGlobalRipple, addPoints }) {
         </div>
 
         {/* Practice Card */}
-        <div className="bg-gradient-to-br from-orange-500/20 to-amber-500/20 border-2 border-orange-400/40 rounded-2xl p-6 mb-6 min-h-[400px] flex flex-col">
+        <div className="relative bg-gradient-to-br from-orange-500/20 to-amber-500/20 border-2 border-orange-400/40 rounded-2xl p-6 mb-6 min-h-[400px] flex flex-col">
           {/* Emoji & Title */}
           <div className="text-center mb-4">
             <div className="text-6xl mb-3">{currentPractice.emoji}</div>
@@ -4801,6 +4801,37 @@ function OfflineMode({ isOpen, onClose, onGlobalRipple, addPoints }) {
               </p>
             )}
           </div>
+
+          {/* Small floating ripple button - bottom right */}
+          <div className="absolute bottom-4 right-4 group">
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-full right-0 mb-2 bg-slate-800 text-slate-300 text-xs py-1 px-3 rounded-lg whitespace-nowrap pointer-events-none">
+              Hold to send waves of joy to the world
+            </div>
+            <div className="w-12 h-12 animate-pulse hover:animate-none">
+              <RippleButton
+                type="offlinePractice"
+                data={{
+                  title: currentPractice.title,
+                  subtitle: currentPractice.subtitle,
+                  emoji: currentPractice.emoji
+                }}
+                circular
+                messages={[
+                  'Sending joy to the world',
+                  'Receiving joy from the world',
+                  'Broadcasting from Earth\'s center',
+                  'Tuning into infinite joy',
+                  'Transmitting happiness',
+                  'Receiving gratitude',
+                  'Joy anywhere, anytime',
+                  'Offline wisdom spreading',
+                  'Thank you', 'Merci', 'Gracias', 'Danke'
+                ]}
+                onGlobalRipple={onGlobalRipple}
+                addPoints={addPoints}
+              />
+            </div>
+          </div>
         </div>
 
         {/* Navigation Controls */}
@@ -4825,35 +4856,6 @@ function OfflineMode({ isOpen, onClose, onGlobalRipple, addPoints }) {
           >
             →
           </button>
-        </div>
-
-        {/* Ripple Button */}
-        <div className="mb-4 flex flex-col items-center">
-          <p className="text-center text-xs text-slate-400 italic mb-2">
-            🌍 Imagine yourself at Earth's center, transmitting and receiving sparks of joy
-          </p>
-          <RippleButton
-            type="offlinePractice"
-            data={{
-              title: currentPractice.title,
-              subtitle: currentPractice.subtitle,
-              emoji: currentPractice.emoji
-            }}
-            circular
-            messages={[
-              'Sending joy to the world',
-              'Receiving joy from the world',
-              'Broadcasting from Earth\'s center',
-              'Tuning into infinite joy',
-              'Transmitting happiness',
-              'Receiving gratitude',
-              'Joy anywhere, anytime',
-              'Offline wisdom spreading',
-              'Thank you', 'Merci', 'Gracias', 'Danke'
-            ]}
-            onGlobalRipple={onGlobalRipple}
-            addPoints={addPoints}
-          />
         </div>
 
         {/* Footer */}
