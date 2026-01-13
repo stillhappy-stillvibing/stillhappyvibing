@@ -5853,7 +5853,7 @@ export default function App() {
         onDismiss={() => setShowUpdateNotification(false)}
       />
 
-      <div className="max-w-xl mx-auto" ref={appRef}>
+      <div className="max-w-xl mx-auto">
         {/* Header */}
         <header className="text-center py-3">
           <div className="flex items-center justify-between mb-1">
