@@ -6095,17 +6095,16 @@ Find your spark of joy every day.
 ✨ Sparks of Insight - Mental Dojo practices
 🌍 Waves of Joy - Global ripples
 
-Smile, and the whole world smiles with you.
-
-smileswithyou.com`;
+Smile, and the whole world smiles with you.`;
 
               if (navigator.share) {
                 navigator.share({
                   title: 'Sparks of Joy',
-                  text: inviteText
+                  text: inviteText,
+                  url: 'https://smileswithyou.com'
                 }).catch(() => {});
               } else {
-                navigator.clipboard?.writeText(inviteText);
+                navigator.clipboard?.writeText(inviteText + '\n\nhttps://smileswithyou.com');
                 setToastMessage('Invite copied!');
                 setToastEmoji('💌');
                 setShowToast(true);
