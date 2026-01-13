@@ -2642,7 +2642,7 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
                   {currentPattern.name}
                 </h3>
               </div>
-              <div className="mb-6">
+              <div className="mb-6 min-h-[250px] relative">
                 <BreathingGuide pattern={currentPattern.pattern} playSound={playSound} />
               </div>
 
@@ -3845,11 +3845,13 @@ const getDayKey = (date) => {
 
 // Breathing Guide Component - Heart Coherence (5 in, 5 out)
 function BreathingGuide({ pattern, playSound }) {
-  const [phase, setPhase] = useState('inhale');
-  const [count, setCount] = useState(pattern.inhale);
+  const [phase, setPhase] = useState('prep');
+  const [count, setCount] = useState(2);
   const [resetKey, setResetKey] = useState(0);
+  const [sparks, setSparks] = useState([]);
   const playSoundRef = useRef(playSound);
   const patternRef = useRef(pattern);
+  const fourElementsIndexRef = useRef(0);
 
   // Update refs when props change (but don't re-run effects)
   useEffect(() => {
@@ -3859,16 +3861,59 @@ function BreathingGuide({ pattern, playSound }) {
   // When pattern changes, reset the breathing cycle
   useEffect(() => {
     patternRef.current = pattern;
-    setPhase('inhale');
-    setCount(pattern.inhale);
+    setPhase('prep');
+    setCount(2);
     setResetKey(prev => prev + 1); // Force interval recreation
-    if (playSoundRef.current) playSoundRef.current('breathInhale');
   }, [pattern]);
 
-  // Breathing cycle with pattern support - starts immediately
+  // Generate sparks during breathing
   useEffect(() => {
-    let currentPhase = 'inhale';
-    let currentCount = patternRef.current.inhale;
+    if (phase === 'prep') return;
+
+    const sparkInterval = setInterval(() => {
+      // Mix of four elements and thank you messages
+      const showFourElement = Math.random() < 0.6;
+
+      let sparkMessage, sparkColor;
+
+      if (showFourElement) {
+        const fourElements = [
+          { text: 'Happy', color: 'text-yellow-400' },
+          { text: 'Healthy', color: 'text-sky-400' },
+          { text: 'Wealthy', color: 'text-green-400' },
+          { text: 'Wise', color: 'text-purple-400' }
+        ];
+        const currentElement = fourElements[fourElementsIndexRef.current % 4];
+        sparkMessage = currentElement.text;
+        sparkColor = currentElement.color;
+        fourElementsIndexRef.current += 1;
+      } else {
+        const thankYouMessages = ['Thank you', 'Merci', 'Gracias', 'Danke', 'ありがとう'];
+        sparkMessage = thankYouMessages[Math.floor(Math.random() * thankYouMessages.length)];
+        sparkColor = 'text-cyan-300';
+      }
+
+      const newSpark = {
+        id: Date.now() + Math.random(),
+        message: sparkMessage,
+        color: sparkColor,
+        left: Math.random() * 80 + 10,
+        top: Math.random() * 80 + 10,
+      };
+
+      setSparks(prev => [...prev, newSpark]);
+      setTimeout(() => {
+        setSparks(prev => prev.filter(s => s.id !== newSpark.id));
+      }, 2000);
+    }, 600);
+
+    return () => clearInterval(sparkInterval);
+  }, [phase]);
+
+  // Breathing cycle with 2-second prep phase
+  useEffect(() => {
+    let currentPhase = 'prep';
+    let currentCount = 2;
 
     const interval = setInterval(() => {
       currentCount--;
@@ -3878,7 +3923,11 @@ function BreathingGuide({ pattern, playSound }) {
         const p = patternRef.current;
 
         // Determine next phase based on pattern
-        if (currentPhase === 'inhale') {
+        if (currentPhase === 'prep') {
+          currentPhase = 'inhale';
+          currentCount = p.inhale;
+          if (playSoundRef.current) playSoundRef.current('breathInhale');
+        } else if (currentPhase === 'inhale') {
           if (p.hold1 && p.hold1 > 0) {
             currentPhase = 'hold1';
             currentCount = p.hold1;
@@ -3916,12 +3965,14 @@ function BreathingGuide({ pattern, playSound }) {
   }, [resetKey]); // Recreate interval when pattern changes
 
   const labels = {
+    prep: 'Get Ready',
     inhale: 'Breathe In',
     exhale: 'Breathe Out',
     hold1: 'Hold',
     hold2: 'Hold'
   };
   const colors = {
+    prep: 'bg-slate-500/30 scale-100',
     inhale: 'bg-green-500/30 scale-110',
     exhale: 'bg-blue-500/30 scale-90',
     hold1: 'bg-yellow-500/30 scale-100',
@@ -3929,9 +3980,31 @@ function BreathingGuide({ pattern, playSound }) {
   };
 
   return (
-    <div className={`w-24 h-24 mx-auto rounded-full flex flex-col items-center justify-center transition-all duration-1000 ${colors[phase]}`}>
-      <span className="text-xs font-medium">{labels[phase]}</span>
-      <span className="text-2xl font-bold">{count}</span>
+    <div className="relative">
+      {/* Floating sparks */}
+      <div className="absolute inset-0 pointer-events-none">
+        {sparks.map(spark => (
+          <div
+            key={spark.id}
+            className={`absolute animate-spark ${spark.color} text-sm font-semibold whitespace-nowrap`}
+            style={{
+              left: `${spark.left}%`,
+              top: `${spark.top}%`,
+            }}
+          >
+            ✨ {spark.message}
+          </div>
+        ))}
+      </div>
+
+      {/* Breathing circle */}
+      <div className={`w-32 h-32 mx-auto rounded-full flex flex-col items-center justify-center transition-all duration-1000 ${colors[phase]}`}>
+        <span className="text-sm font-medium">{labels[phase]}</span>
+        <span className="text-3xl font-bold my-1">{count}</span>
+        {(phase === 'inhale' || phase === 'exhale') && (
+          <span className="text-xs font-semibold text-teal-300 animate-pulse">Energy</span>
+        )}
+      </div>
     </div>
   );
 }
