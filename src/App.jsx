@@ -1857,11 +1857,18 @@ function QuoteBrowser({ isOpen, onClose, addPoints, onBoost, onGlobalRipple }) {
           <button onClick={onClose} className="text-slate-400 hover:text-white text-xl">✕</button>
         </div>
 
-        <div className="mb-4 text-center relative">
-          <div className="border-l-4 border-purple-400 bg-white/5 p-5 rounded-r-xl mb-6 min-h-[200px] flex flex-col justify-center">
+        <div className="mb-4 text-center">
+          <div className="relative border-l-4 border-purple-400 bg-white/5 p-5 rounded-r-xl mb-6 min-h-[200px] flex flex-col justify-center">
             <p className="text-lg italic mb-3 leading-relaxed">"{currentQuote.text}"</p>
             <p className="text-purple-400 font-medium">— {currentQuote.author}</p>
             <p className="text-slate-400 text-sm">{currentQuote.tradition}</p>
+
+            {/* Small spark ripple button - right aligned, vertically centered */}
+            <div className="absolute top-1/2 -translate-y-1/2 right-4">
+              <div className="w-10 h-10 animate-pulse hover:animate-none">
+                <RippleButton type="quote" data={currentQuote} circular onGlobalRipple={onGlobalRipple} addPoints={addPoints} />
+              </div>
+            </div>
           </div>
 
           <div className="flex gap-3 mb-4">
@@ -1885,16 +1892,6 @@ function QuoteBrowser({ isOpen, onClose, addPoints, onBoost, onGlobalRipple }) {
           >
             📤 Share
           </button>
-
-          {/* Small floating ripple button - bottom right */}
-          <div className="absolute bottom-4 right-4 group">
-            <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-full right-0 mb-2 bg-slate-800 text-slate-300 text-xs py-1 px-3 rounded-lg whitespace-nowrap pointer-events-none">
-              Hold to send waves of joy to the world
-            </div>
-            <div className="w-12 h-12 animate-pulse hover:animate-none">
-              <RippleButton type="quote" data={currentQuote} circular onGlobalRipple={onGlobalRipple} addPoints={addPoints} />
-            </div>
-          </div>
         </div>
       </div>
 
@@ -2002,6 +1999,36 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare,
                 <p className="text-3xl font-medium leading-relaxed italic text-orange-100">
                   "{exercise.seedThought}"
                 </p>
+
+                {/* Small spark ripple button - right aligned, vertically centered */}
+                <div className="absolute top-1/2 -translate-y-1/2 right-4">
+                  <div className="w-10 h-10 animate-pulse hover:animate-none">
+                    <RippleButton
+                      type="mentalDojo"
+                      data={{
+                        title: exercise.title,
+                        seedThought: exercise.seedThought
+                      }}
+                      circular
+                      colorScheme="fourElements"
+                      messages={[
+                        'Happy',
+                        'Healthy',
+                        'Wealthy',
+                        'Wise',
+                        'I am a force for good!',
+                        'I am already blessed!',
+                        'every action is a mirror, let it reflect my best!',
+                        'thank you! thank you! thank you!',
+                        'Happiness was born a twin',
+                        'Thank you', 'Merci', 'Gracias', 'Danke', 'Grazie',
+                        'Obrigado', 'Спасибо', 'ありがとう', '谢谢', 'شكرا'
+                      ]}
+                      onGlobalRipple={onGlobalRipple}
+                      addPoints={addPoints}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -2038,39 +2065,6 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare,
               >
                 ✕ Close
               </button>
-            </div>
-
-            {/* Small floating ripple button - bottom right */}
-            <div className="absolute bottom-4 right-4 group">
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-full right-0 mb-2 bg-slate-800 text-slate-300 text-xs py-1 px-3 rounded-lg whitespace-nowrap pointer-events-none">
-                Hold to send waves of joy to the world
-              </div>
-              <div className="w-12 h-12 animate-pulse hover:animate-none">
-                <RippleButton
-                  type="mentalDojo"
-                  data={{
-                    title: exercise.title,
-                    seedThought: exercise.seedThought
-                  }}
-                  circular
-                  colorScheme="fourElements"
-                  messages={[
-                    'Happy',
-                    'Healthy',
-                    'Wealthy',
-                    'Wise',
-                    'I am a force for good!',
-                    'I am already blessed!',
-                    'every action is a mirror, let it reflect my best!',
-                    'thank you! thank you! thank you!',
-                    'Happiness was born a twin',
-                    'Thank you', 'Merci', 'Gracias', 'Danke', 'Grazie',
-                    'Obrigado', 'Спасибо', 'ありがとう', '谢谢', 'شكرا'
-                  ]}
-                  onGlobalRipple={onGlobalRipple}
-                  addPoints={addPoints}
-                />
-              </div>
             </div>
           </div>
         )}
@@ -2492,11 +2486,18 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
           )}
 
           {showCompletion && (
-            <div className="relative">
-              <div className="text-center py-8 mb-6">
+            <>
+              <div className="text-center py-8 mb-6 relative">
                 <div className="text-6xl mb-4">✨</div>
                 <h3 className="text-2xl font-bold mb-2">Spark found!</h3>
                 <p className="text-slate-400">Energy flowing through you</p>
+
+                {/* Small spark ripple button - right aligned, vertically centered with text */}
+                <div className="absolute top-1/2 -translate-y-1/2 right-0">
+                  <div className="w-10 h-10 animate-pulse hover:animate-none">
+                    <RippleButton type="breathwork" data={currentPattern} circular onGlobalRipple={onGlobalRipple} addPoints={addPoints} />
+                  </div>
+                </div>
               </div>
 
               <div className="flex gap-3 mb-4">
@@ -2513,17 +2514,7 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
                   ✕ Close
                 </button>
               </div>
-
-              {/* Small floating ripple button - bottom right */}
-              <div className="absolute bottom-4 right-4 group">
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-full right-0 mb-2 bg-slate-800 text-slate-300 text-xs py-1 px-3 rounded-lg whitespace-nowrap pointer-events-none">
-                  Hold to send waves of joy to the world
-                </div>
-                <div className="w-12 h-12 animate-pulse hover:animate-none">
-                  <RippleButton type="breathwork" data={currentPattern} circular onGlobalRipple={onGlobalRipple} addPoints={addPoints} />
-                </div>
-              </div>
-            </div>
+            </>
           )}
         </div>
       </div>
@@ -4775,7 +4766,7 @@ function OfflineMode({ isOpen, onClose, onGlobalRipple, addPoints }) {
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto relative">
             <p className="text-sm text-orange-200 mb-4 italic">{currentPractice.description}</p>
 
             {currentPractice.id === 'finger' && (
@@ -4800,36 +4791,33 @@ function OfflineMode({ isOpen, onClose, onGlobalRipple, addPoints }) {
                 {currentPractice.content}
               </p>
             )}
-          </div>
 
-          {/* Small floating ripple button - bottom right */}
-          <div className="absolute bottom-4 right-4 group">
-            <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-full right-0 mb-2 bg-slate-800 text-slate-300 text-xs py-1 px-3 rounded-lg whitespace-nowrap pointer-events-none">
-              Hold to send waves of joy to the world
-            </div>
-            <div className="w-12 h-12 animate-pulse hover:animate-none">
-              <RippleButton
-                type="offlinePractice"
-                data={{
-                  title: currentPractice.title,
-                  subtitle: currentPractice.subtitle,
-                  emoji: currentPractice.emoji
-                }}
-                circular
-                messages={[
-                  'Sending joy to the world',
-                  'Receiving joy from the world',
-                  'Broadcasting from Earth\'s center',
-                  'Tuning into infinite joy',
-                  'Transmitting happiness',
-                  'Receiving gratitude',
-                  'Joy anywhere, anytime',
-                  'Offline wisdom spreading',
-                  'Thank you', 'Merci', 'Gracias', 'Danke'
-                ]}
-                onGlobalRipple={onGlobalRipple}
-                addPoints={addPoints}
-              />
+            {/* Small spark ripple button - right aligned, vertically centered */}
+            <div className="absolute top-1/2 -translate-y-1/2 -right-2">
+              <div className="w-10 h-10 animate-pulse hover:animate-none">
+                <RippleButton
+                  type="offlinePractice"
+                  data={{
+                    title: currentPractice.title,
+                    subtitle: currentPractice.subtitle,
+                    emoji: currentPractice.emoji
+                  }}
+                  circular
+                  messages={[
+                    'Sending joy to the world',
+                    'Receiving joy from the world',
+                    'Broadcasting from Earth\'s center',
+                    'Tuning into infinite joy',
+                    'Transmitting happiness',
+                    'Receiving gratitude',
+                    'Joy anywhere, anytime',
+                    'Offline wisdom spreading',
+                    'Thank you', 'Merci', 'Gracias', 'Danke'
+                  ]}
+                  onGlobalRipple={onGlobalRipple}
+                  addPoints={addPoints}
+                />
+              </div>
             </div>
           </div>
         </div>
