@@ -2492,21 +2492,18 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
                 <BreathingGuide pattern={currentPattern.pattern} playSound={playSound} />
               </div>
 
-              {/* Stop/End button */}
-              <div className="mt-8 pt-6 border-t border-white/10 flex flex-col items-center">
+              {/* Stop button */}
+              <div className="mt-6 flex justify-center">
                 <button
                   onClick={() => {
                     setIsActive(false);
                   }}
                   onContextMenu={(e) => e.preventDefault()}
-                  className="w-20 h-20 rounded-full bg-gradient-to-br from-red-500/80 to-pink-500/80 border-2 border-red-300/50 transition-all shadow-lg flex items-center justify-center hover:scale-105 backdrop-blur-sm"
+                  className="px-6 py-2 rounded-full bg-slate-700/50 hover:bg-slate-600/50 border border-slate-500/30 transition-all text-slate-300 hover:text-white text-sm font-medium"
                   style={{ userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
                 >
-                  <div className="w-8 h-8 rounded-sm bg-white"></div>
+                  ⏹ Stop
                 </button>
-                <p className="text-slate-400 text-xs mt-3 font-medium">
-                  End
-                </p>
               </div>
             </div>
           )}
@@ -5170,65 +5167,6 @@ export default function App() {
     checkMidnight(); // Check on mount
     const interval = setInterval(checkMidnight, 60000); // Check every minute
     return () => clearInterval(interval);
-  }, []);
-
-  // Generate ambient sparks continuously in the background
-  useEffect(() => {
-    const generateAmbientSpark = () => {
-      const fourElements = [
-        { text: 'Happy', color: 'text-yellow-400' },
-        { text: 'Healthy', color: 'text-sky-400' },
-        { text: 'Wealthy', color: 'text-green-400' },
-        { text: 'Wise', color: 'text-purple-400' }
-      ];
-
-      const showFourElement = Math.random() < 0.7;
-      let sparkMessage, sparkColor;
-
-      if (showFourElement) {
-        const currentElement = fourElements[fourElementsIndexRef.current % 4];
-        sparkMessage = currentElement.text;
-        sparkColor = currentElement.color;
-        fourElementsIndexRef.current += 1;
-      } else {
-        const thankYouMessages = ['Thank you', 'Merci', 'Gracias', 'Danke', 'Grazie', 'Obrigado'];
-        sparkMessage = thankYouMessages[Math.floor(Math.random() * thankYouMessages.length)];
-        sparkColor = 'text-cyan-300';
-      }
-
-      const newSpark = {
-        id: Date.now() + Math.random(),
-        left: Math.random() * 80 + 10,
-        top: Math.random() * 80 + 10,
-        delay: Math.random() * 0.5,
-        message: sparkMessage,
-        color: sparkColor
-      };
-
-      setGlobalRippleSparks(prev => [...prev, newSpark]);
-
-      setTimeout(() => {
-        setGlobalRippleSparks(prev => prev.filter(s => s.id !== newSpark.id));
-      }, 3000);
-    };
-
-    // Generate ambient sparks every 1.5-3 seconds
-    const scheduleNextSpark = () => {
-      const delay = 1500 + Math.random() * 1500;
-      return setTimeout(() => {
-        generateAmbientSpark();
-        timeoutRef.current = scheduleNextSpark();
-      }, delay);
-    };
-
-    const timeoutRef = { current: null };
-    timeoutRef.current = scheduleNextSpark();
-
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
   }, []);
 
   // Calculate current rank
