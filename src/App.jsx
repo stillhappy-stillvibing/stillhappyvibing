@@ -3971,12 +3971,12 @@ function BreathingGuide({ pattern, playSound }) {
     hold1: 'Hold',
     hold2: 'Hold'
   };
-  const scales = {
-    prep: 'scale-100',
-    inhale: 'scale-125',
-    exhale: 'scale-90',
-    hold1: 'scale-110',
-    hold2: 'scale-100'
+  const circleStyles = {
+    prep: { size: 'w-32 h-32', color: 'border-slate-400/50' },
+    inhale: { size: 'w-40 h-40', color: 'border-green-400/70' },
+    exhale: { size: 'w-24 h-24', color: 'border-blue-400/70' },
+    hold1: { size: 'w-36 h-36', color: 'border-yellow-400/70' },
+    hold2: { size: 'w-32 h-32', color: 'border-purple-400/70' }
   };
 
   return (
@@ -3999,11 +3999,20 @@ function BreathingGuide({ pattern, playSound }) {
 
       {/* Breathing with the Earth */}
       <div className="flex flex-col items-center justify-center">
-        <span className="text-sm font-medium text-slate-300 mb-2">{labels[phase]}</span>
-        <div className={`text-8xl transition-all duration-1000 ${scales[phase]}`}>
-          🌍
+        <span className="text-sm font-medium text-slate-300 mb-3">{labels[phase]}</span>
+
+        {/* Earth with animated circle */}
+        <div className="relative flex items-center justify-center mb-3">
+          {/* Fixed Earth background */}
+          <div className="absolute text-6xl z-0">
+            🌍
+          </div>
+
+          {/* Animated breathing circle */}
+          <div className={`rounded-full border-4 ${circleStyles[phase].color} ${circleStyles[phase].size} transition-all duration-1000 z-10`} />
         </div>
-        <span className="text-4xl font-bold text-white my-2">{count}</span>
+
+        <span className="text-4xl font-bold text-white mb-2">{count}</span>
         {(phase === 'inhale' || phase === 'exhale') && (
           <span className="text-sm font-semibold text-teal-300 animate-pulse">Energy</span>
         )}
