@@ -2811,10 +2811,10 @@ function RippleButton({ type, data, compact = false, circular = false, messages 
           onTouchStart={handleHoldStart}
           onTouchEnd={handleHoldEnd}
           onContextMenu={(e) => e.preventDefault()}
-          className={`w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 border-2 border-amber-300/50 transition-all shadow-lg flex items-center justify-center select-none ${isHolding ? 'scale-95' : 'hover:scale-105'}`}
+          className={`w-4 h-4 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 border border-amber-300/50 transition-all shadow-lg flex items-center justify-center select-none ${isHolding ? 'scale-95' : 'hover:scale-105'}`}
           style={{ userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
         >
-          <span className="text-lg pointer-events-none">✨</span>
+          <span className="text-xs pointer-events-none">✨</span>
         </button>
 
         {/* Sparks overlay */}
@@ -3474,10 +3474,10 @@ function TheWorldTab() {
             onMouseLeave={handlePressEnd}
             onTouchStart={handlePressStart}
             onTouchEnd={handlePressEnd}
-            className={`w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 border-2 border-amber-300/50 transition-all shadow-lg flex items-center justify-center select-none ${isPressed ? 'scale-95' : 'hover:scale-105'}`}
+            className={`w-4 h-4 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 border border-amber-300/50 transition-all shadow-lg flex items-center justify-center select-none ${isPressed ? 'scale-95' : 'hover:scale-105'}`}
             style={{ userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
           >
-            <span className="text-lg pointer-events-none">✨</span>
+            <span className="text-xs pointer-events-none">✨</span>
           </button>
           <div className="text-center max-w-md">
             <p className="text-slate-300 text-base mt-4">
