@@ -1617,7 +1617,7 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
           try {
             await navigator.share({
               files: [new File([blob], filename, { type: 'image/png' })],
-              title: type === 'quote' ? 'Wisdom to Share' : type === 'spark' ? 'Spark Of Joy' : type === 'exercise' ? 'Mental Dojo Practice' : 'Gratitude',
+              title: type === 'quote' ? 'Wisdom to Share' : type === 'spark' ? 'Spark Of Joy' : type === 'exercise' ? 'Mental Dojo Practice' : type === 'breathwork' ? 'Spark of Energy' : type === 'waves' ? 'Waves of Joy' : 'Gratitude',
               text: `Smile, and the whole world smileswithyou.com. ✨`
             });
             shareSuccessful = true;
@@ -1789,6 +1789,41 @@ function ShareImageCard({ isOpen, onClose, type, data }) {
               <p className="text-xs opacity-90">
                 <span className="font-medium">Smile, and the whole world </span>
                 <span className="font-bold italic underline text-indigo-700">smileswithyou.com!</span>
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Waves of Joy Card - Share the global wave */}
+        {type === 'waves' && data && (
+          <div
+            ref={cardRef}
+            className="bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 rounded-2xl p-6 mb-4"
+          >
+            <div className="text-center text-white">
+              <p className="text-5xl mb-4">🌍</p>
+              <p className="text-2xl font-bold mb-2">Waves Of Joy</p>
+              <p className="text-sm opacity-90 mb-4">Give and you shall receive</p>
+
+              {/* Spark Count - The key viral metric */}
+              <div className="bg-white/20 rounded-xl p-4 mb-4">
+                <p className="text-4xl font-bold text-amber-300 mb-1">{data.sparkCount}</p>
+                <p className="text-xs uppercase tracking-wider opacity-80">sparks witnessed</p>
+              </div>
+
+              {/* Carl Sagan Quote Snippet */}
+              <div className="bg-white/10 rounded-xl p-4 mb-4">
+                <p className="text-sm italic leading-relaxed mb-2">
+                  "Look again at that dot. That's here. That's home. That's us..."
+                </p>
+                <p className="text-xs opacity-80">— Carl Sagan</p>
+              </div>
+
+              <p className="text-lg font-bold mb-3">✨ Join the global wave of joy!</p>
+
+              <p className="text-xs opacity-90">
+                <span className="font-medium">Smile, and the whole world </span>
+                <span className="font-bold italic underline text-amber-300">smileswithyou.com!</span>
               </p>
             </div>
           </div>
@@ -3350,6 +3385,7 @@ function TheWorldTab() {
   const [sparkCount, setSparkCount] = useState(0);
   const [isPressed, setIsPressed] = useState(false);
   const [ripplePhase, setRipplePhase] = useState('outward'); // 'outward' or 'inward'
+  const [showShareModal, setShowShareModal] = useState(false);
   const imageRef = useRef(null);
   const phaseInterval = useRef(null);
   const fourElementsIndexRef = useRef(0); // Track position in Happy, Healthy, Wealthy, Wise sequence
@@ -3556,6 +3592,17 @@ function TheWorldTab() {
         <p className="text-slate-400 text-xs text-right">— Carl Sagan</p>
       </div>
 
+      {/* Share This Wave Button */}
+      <div className="max-w-2xl w-full mb-8">
+        <button
+          onClick={() => setShowShareModal(true)}
+          className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30 text-amber-300 text-sm hover:bg-amber-500/30 transition font-medium"
+        >
+          📤 Share This Wave of Joy
+        </button>
+        <p className="text-xs text-slate-400 text-center mt-2">Invite others to join the global wave!</p>
+      </div>
+
       {/* Ripples Feed - What's being shared globally */}
       <div className="w-full max-w-2xl mb-8">
         <div className="text-center mb-6">
@@ -3663,6 +3710,13 @@ function TheWorldTab() {
           animation-delay: 0.9s;
         }
       `}</style>
+
+      <ShareImageCard
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        type="waves"
+        data={{ sparkCount }}
+      />
     </div>
   );
 }
