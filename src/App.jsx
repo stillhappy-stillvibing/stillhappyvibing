@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getDatabase, ref, onValue, runTransaction, increment, set, get } from 'firebase/database';
+import html2canvas from 'html2canvas';
 import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
 import packageJson from '../package.json';
