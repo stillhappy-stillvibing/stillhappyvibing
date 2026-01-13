@@ -116,6 +116,73 @@ const incrementTotalSparks = () => {
   runTransaction(totalSparksRef, (current) => (current || 0) + 1);
 };
 
+// User Tracking: Get or create unique anonymous user ID
+const getUserId = () => {
+  let userId = localStorage.getItem('sparkUserId');
+  if (!userId) {
+    // Generate unique ID: timestamp + random string
+    userId = `user_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    localStorage.setItem('sparkUserId', userId);
+  }
+  return userId;
+};
+
+// User Tracking: Track unique visitor (one-time per user)
+const trackUniqueVisitor = async () => {
+  const userId = getUserId();
+  const userRef = ref(database, `users/${userId}`);
+
+  try {
+    const snapshot = await get(userRef);
+    if (!snapshot.exists()) {
+      // First visit - record user
+      const now = new Date();
+      const localDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+      await set(userRef, {
+        firstVisit: now.toISOString(),
+        firstVisitDate: localDate
+      });
+
+      // Increment total unique visitors
+      const uniqueVisitorsRef = ref(database, 'globalStats/uniqueVisitors');
+      runTransaction(uniqueVisitorsRef, (current) => (current || 0) + 1);
+    }
+  } catch (error) {
+    console.error('Error tracking unique visitor:', error);
+  }
+};
+
+// User Tracking: Track active user today
+const trackActiveUser = async () => {
+  const userId = getUserId();
+  const now = new Date();
+  const localDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+  const activeUserRef = ref(database, `activeUsers/${localDate}/${userId}`);
+
+  try {
+    const snapshot = await get(activeUserRef);
+    if (!snapshot.exists()) {
+      // First activity today - record it
+      await set(activeUserRef, {
+        lastActive: now.toISOString()
+      });
+
+      // Increment today's active users count
+      const activeCountRef = ref(database, `globalStats/activeUsersToday/${localDate}`);
+      runTransaction(activeCountRef, (current) => (current || 0) + 1);
+    } else {
+      // Update last active timestamp
+      await set(activeUserRef, {
+        lastActive: now.toISOString()
+      });
+    }
+  } catch (error) {
+    console.error('Error tracking active user:', error);
+  }
+};
+
 // Track page views (every app load)
 const incrementPageViews = () => {
   const pageViewsRef = ref(database, `stats/pageViews`);
@@ -5319,6 +5386,10 @@ export default function App() {
   const [toastEmoji, setToastEmoji] = useState('');
   const [showToast, setShowToast] = useState(false);
 
+  // User analytics state
+  const [uniqueVisitors, setUniqueVisitors] = useState(0);
+  const [activeUsersToday, setActiveUsersToday] = useState(0);
+
   // Streak recovery state
   const [recoveryActive, setRecoveryActive] = useState(false);
   const [recoveryQuest, setRecoveryQuest] = useState(null); // 'triple', 'tools', 'bookend'
@@ -5825,6 +5896,10 @@ export default function App() {
 
   // Auto-check-in on site visit
   useEffect(() => {
+    // Track user analytics on app load
+    trackUniqueVisitor();
+    trackActiveUser();
+
     const today = getDayKey(new Date());
     const hasCheckedInToday = checkins.some(c => getDayKey(c.timestamp) === today);
 
@@ -5844,6 +5919,29 @@ export default function App() {
       incrementHappinessSource('peace');
     }
   }, []); // Run once on mount
+
+  // Listen to analytics data in real-time
+  useEffect(() => {
+    const now = new Date();
+    const localDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+    // Listen to unique visitors
+    const uniqueVisitorsRef = ref(database, 'globalStats/uniqueVisitors');
+    const unsubscribeVisitors = onValue(uniqueVisitorsRef, (snapshot) => {
+      setUniqueVisitors(snapshot.val() || 0);
+    });
+
+    // Listen to active users today
+    const activeUsersTodayRef = ref(database, `globalStats/activeUsersToday/${localDate}`);
+    const unsubscribeActiveUsers = onValue(activeUsersTodayRef, (snapshot) => {
+      setActiveUsersToday(snapshot.val() || 0);
+    });
+
+    return () => {
+      unsubscribeVisitors();
+      unsubscribeActiveUsers();
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white p-4">
@@ -6037,6 +6135,22 @@ Smile, and the whole world smiles with you.`;
           <span>🔒</span>
           <span>All data stays on your device</span>
         </div>
+
+        {/* User Analytics */}
+        {(uniqueVisitors > 0 || activeUsersToday > 0) && (
+          <div className="mt-4 p-3 bg-slate-800/30 border border-slate-700/30 rounded-xl">
+            <div className="flex items-center justify-center gap-6 text-xs text-slate-400">
+              <div className="flex items-center gap-2">
+                <span>👥</span>
+                <span>{uniqueVisitors.toLocaleString()} total visitors</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span>✨</span>
+                <span>{activeUsersToday.toLocaleString()} active today</span>
+              </div>
+            </div>
+          </div>
+        )}
 
         <footer className="text-center mt-4 text-slate-500 text-xs">Made with 💛 for a happier world!</footer>
       </div>
