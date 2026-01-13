@@ -625,10 +625,10 @@ const breathworkPatterns = [
     name: "Triangle Breathing",
     subtitle: "Balance breath",
     description: "Simple pattern for quick centering",
-    pattern: { inhale: 4, hold1: 4, exhale: 4, hold2: 0 },
+    pattern: { inhale: 3, hold1: 3, exhale: 3, hold2: 0 },
     emoji: "🔺",
     benefits: ["Quick reset", "Improves balance", "Calms mind"],
-    duration: 12,
+    duration: 9,
   },
   {
     name: "Coherent Breathing",
@@ -1852,7 +1852,7 @@ function QuoteBrowser({ isOpen, onClose, addPoints, onBoost, onGlobalRipple }) {
     <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50" onClick={onClose}>
       <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-lg w-full p-6 border border-purple-400/20" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-xl font-bold flex items-center gap-2">🌱 Seeds Of Thought</h2>
+          <h2 className="text-xl font-bold flex items-center gap-2">💡 Sparks of Thought</h2>
           <button onClick={onClose} className="text-slate-400 hover:text-white text-xl">✕</button>
         </div>
 
@@ -1861,6 +1861,11 @@ function QuoteBrowser({ isOpen, onClose, addPoints, onBoost, onGlobalRipple }) {
             <p className="text-lg italic mb-3 leading-relaxed">"{currentQuote.text}"</p>
             <p className="text-purple-400 font-medium">— {currentQuote.author}</p>
             <p className="text-slate-400 text-sm">{currentQuote.tradition}</p>
+          </div>
+
+          {/* Ripple button moved above other buttons */}
+          <div className="mb-6 flex justify-center">
+            <RippleButton type="quote" data={currentQuote} circular onGlobalRipple={onGlobalRipple} addPoints={addPoints} />
           </div>
 
           <div className="flex gap-3 mb-4">
@@ -1884,8 +1889,6 @@ function QuoteBrowser({ isOpen, onClose, addPoints, onBoost, onGlobalRipple }) {
           >
             📤 Share
           </button>
-
-          <RippleButton type="quote" data={currentQuote} compact onGlobalRipple={onGlobalRipple} addPoints={addPoints} />
         </div>
       </div>
 
@@ -1902,45 +1905,15 @@ function QuoteBrowser({ isOpen, onClose, addPoints, onBoost, onGlobalRipple }) {
 // Mindfulness Visual Meditation Component - 30 second Tratak (circle gazing)
 // Mental Dojo - 30-second practice space
 function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare, onGlobalRipple }) {
-  const [timeLeft, setTimeLeft] = useState(30);
   const [isComplete, setIsComplete] = useState(false);
   const [showSparks, setShowSparks] = useState(false);
-  const [foundSpark, setFoundSpark] = useState(false); // Track if user clicked button vs timeout
-  const earlyFlameRef = useRef(false); // Track if "Light The Flame" was clicked early
-
-  // Calculate progress percentage for glow effect (0% to 100%)
-  const progress = ((30 - timeLeft) / 30) * 100;
-  const glowIntensity = progress / 100; // 0 to 1
 
   useEffect(() => {
     if (!isOpen) {
-      setTimeLeft(30);
       setIsComplete(false);
       setShowSparks(false);
-      setFoundSpark(false);
-      earlyFlameRef.current = false; // Reset ref when modal closes
       return;
     }
-
-    const timer = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          // Only auto-complete if "Light The Flame" wasn't clicked
-          if (!earlyFlameRef.current) {
-            setIsComplete(true);
-            setShowSparks(true);
-            setFoundSpark(false); // Time ran out, they planted the seed
-            // Hide sparks after 2 seconds
-            setTimeout(() => setShowSparks(false), 2000);
-          }
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -1949,54 +1922,43 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare,
     <div className="fixed inset-0 bg-black flex items-center justify-center p-4 z-50">
       <div className="max-w-2xl w-full" onClick={e => e.stopPropagation()}>
         {!isComplete ? (
-          // During practice - 30 seconds with growing glow and progress bar
+          // During practice - no timer, practice at your own pace
           <div className="text-center animate-in fade-in duration-1000 relative">
             <div className="text-6xl mb-8">🥋</div>
 
-            {/* Practice instruction - the kaizen one-liner with intensifying glow */}
+            {/* Practice instruction */}
             <div className="relative mb-12">
-              {/* Outer glow that intensifies */}
-              <div
-                className="absolute inset-0 bg-gradient-to-br from-orange-500 via-yellow-500 to-amber-500 blur-3xl rounded-2xl transition-opacity duration-1000"
-                style={{ opacity: 0.1 + (glowIntensity * 0.4) }}
-              ></div>
-              {/* Inner card with border that gets brighter */}
-              <div
-                className="relative bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-2xl p-10 transition-all duration-1000"
-                style={{
-                  borderWidth: '2px',
-                  borderStyle: 'solid',
-                  borderColor: `rgba(251, 146, 60, ${0.3 + (glowIntensity * 0.5)})`
-                }}
-              >
+              {/* Outer glow */}
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-500 via-yellow-500 to-amber-500 blur-3xl rounded-2xl opacity-30"></div>
+              {/* Inner card */}
+              <div className="relative bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-2xl p-10 border-2 border-orange-400/50">
                 <p className="text-2xl leading-relaxed text-orange-100">
                   {exercise.practiceInstruction}
                 </p>
               </div>
             </div>
 
-            <p className="text-slate-400 text-sm mb-4">Once you find the spark</p>
+            <p className="text-slate-400 text-sm mb-8">Practice at your own pace. When you find the spark, light the flame.</p>
 
-            {/* Progress bar at bottom */}
-            <div className="w-full bg-slate-800/50 rounded-full h-2 overflow-hidden mb-6">
-              <div
-                className="h-full bg-gradient-to-r from-orange-400 via-yellow-400 to-amber-400 transition-all duration-1000 ease-linear"
-                style={{ width: `${progress}%` }}
-              ></div>
+            <div className="flex gap-4 justify-center items-center">
+              <button
+                onClick={() => {
+                  setIsComplete(true);
+                  setShowSparks(true);
+                  setTimeout(() => setShowSparks(false), 2000);
+                }}
+                className="px-8 py-3 bg-gradient-to-r from-orange-400 to-yellow-500 hover:from-orange-500 hover:to-yellow-600 text-slate-900 rounded-xl font-bold transition hover:scale-105"
+              >
+                🔥 Light The Flame
+              </button>
+
+              <button
+                onClick={onClose}
+                className="px-6 py-3 rounded-full bg-slate-700/50 hover:bg-slate-600/50 border border-slate-500/30 transition-all text-slate-300 hover:text-white text-sm font-medium"
+              >
+                ⏹ Stop
+              </button>
             </div>
-
-            <button
-              onClick={() => {
-                earlyFlameRef.current = true; // Mark that flame was lit early
-                setIsComplete(true);
-                setShowSparks(true);
-                setFoundSpark(true); // User clicked the button!
-                setTimeout(() => setShowSparks(false), 2000);
-              }}
-              className="px-8 py-3 bg-gradient-to-r from-orange-400 to-yellow-500 hover:from-orange-500 hover:to-yellow-600 text-slate-900 rounded-xl font-bold transition hover:scale-105"
-            >
-              Light The Flame
-            </button>
           </div>
         ) : (
           // After 30 seconds - completion with seed thought and sparks
@@ -2024,7 +1986,7 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare,
             )}
 
             <h3 className="text-3xl font-bold mb-8 text-orange-300">
-              {foundSpark ? "You found the spark within!" : "You've planted a seed of joy, it will spark within"}
+              You found the spark within!
             </h3>
 
             {/* The seed thought */}
@@ -2048,13 +2010,14 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare,
             </div>
 
             {/* Ripple button with personal seeds */}
-            <div className="mb-8">
+            <div className="mb-8 flex justify-center">
               <RippleButton
                 type="mentalDojo"
                 data={{
                   title: exercise.title,
                   seedThought: exercise.seedThought
                 }}
+                circular
                 colorScheme="fourElements"
                 messages={[
                   'Happy',
@@ -2159,7 +2122,7 @@ function ExerciseBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onGlo
     <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50 overflow-y-auto" onClick={onClose}>
       <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-lg w-full p-6 border border-green-400/20 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-xl font-bold flex items-center gap-2">✨ Sparks Of Joy</h2>
+          <h2 className="text-xl font-bold flex items-center gap-2">✨ Sparks of Insight</h2>
           <button onClick={onClose} className="text-slate-400 hover:text-white text-xl">✕</button>
         </div>
 
@@ -2232,7 +2195,7 @@ function ExerciseBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onGlo
             📤 Share
           </button>
 
-          <RippleButton type="exercise" data={currentExercise} compact onGlobalRipple={onGlobalRipple} addPoints={addPoints} />
+          <RippleButton type="exercise" data={currentExercise} circular onGlobalRipple={onGlobalRipple} addPoints={addPoints} />
         </div>
       </div>
 
@@ -2351,7 +2314,7 @@ function CBTBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onGlobalRi
             📤 Share
           </button>
 
-          <RippleButton type="cbt" data={currentExercise} compact onGlobalRipple={onGlobalRipple} addPoints={addPoints} />
+          <RippleButton type="cbt" data={currentExercise} circular onGlobalRipple={onGlobalRipple} addPoints={addPoints} />
         </div>
       </div>
 
@@ -2365,16 +2328,14 @@ function CBTBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onGlobalRi
   );
 }
 
-// Breathwork Browser Component - 1-minute breathing patterns
+// Breathwork Browser Component - Breathe until you find your spark
 function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onGlobalRipple }) {
   const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * breathworkPatterns.length));
   const [isActive, setIsActive] = useState(false);
   const [cycles, setCycles] = useState(0);
   const [showCompletion, setShowCompletion] = useState(false);
-  const earlySparkRef = useRef(false); // Track if "Light it up!" was clicked
 
   const currentPattern = breathworkPatterns[currentIndex];
-  const targetCycles = Math.floor(60 / currentPattern.duration); // cycles in 1 minute
 
   const randomPattern = () => {
     let newIndex;
@@ -2385,7 +2346,6 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
     setIsActive(false);
     setCycles(0);
     setShowCompletion(false);
-    earlySparkRef.current = false; // Reset early spark flag
   };
 
   // Randomize on open for variety
@@ -2399,7 +2359,6 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
     setIsActive(true);
     setCycles(0);
     setShowCompletion(false);
-    earlySparkRef.current = false; // Reset early spark flag
   };
 
   const handleBoost = () => {
@@ -2412,24 +2371,16 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
     randomPattern();
   };
 
+  // Continuous cycle counter - loops forever until user finds their spark
   useEffect(() => {
     if (!isActive) return;
 
     const cycleTimer = setInterval(() => {
-      setCycles(prev => {
-        const newCycles = prev + 1;
-        // Only auto-complete if "Light it up!" wasn't clicked
-        if (!earlySparkRef.current && newCycles >= targetCycles) {
-          setIsActive(false);
-          setShowCompletion(true);
-          return newCycles;
-        }
-        return newCycles;
-      });
+      setCycles(prev => prev + 1);
     }, currentPattern.duration * 1000);
 
     return () => clearInterval(cycleTimer);
-  }, [isActive, currentPattern.duration, targetCycles]);
+  }, [isActive, currentPattern.duration]);
 
   if (!isOpen) return null;
 
@@ -2437,7 +2388,7 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
     <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50 overflow-y-auto" onClick={onClose}>
       <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl max-w-lg w-full p-6 border border-teal-400/20 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-xl font-bold flex items-center gap-2">🌬️ Breath Of Fresh Air</h2>
+          <h2 className="text-xl font-bold flex items-center gap-2">🌬️ Sparks of Energy</h2>
           <button onClick={onClose} className="text-slate-400 hover:text-white text-xl">✕</button>
         </div>
 
@@ -2479,7 +2430,7 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
                 onClick={handleStart}
                 className="w-full py-5 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 rounded-xl font-bold text-lg transition hover:scale-105 mb-3"
               >
-                🧘 Start 1-Minute Zen
+                🧘 Start Breathing
               </button>
 
               <button
@@ -2502,27 +2453,30 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
               <div className="mb-6">
                 <BreathingGuide pattern={currentPattern.pattern} playSound={playSound} />
               </div>
-              <div className="text-slate-400 text-sm">
-                Cycle {cycles + 1} of {targetCycles}
-              </div>
-              <div className="mt-4 text-xs text-slate-500">
-                Keep breathing... {Math.max(0, 60 - cycles * currentPattern.duration)}s remaining
-              </div>
 
-              {/* Early completion option */}
-              <div className="mt-8 pt-6 border-t border-white/10">
-                <p className="text-amber-300 text-sm mb-3 italic">
-                  Just one breath can spark joy
-                </p>
+              {/* Light the Flame and Stop buttons */}
+              <div className="mt-8 flex gap-4 justify-center items-center">
                 <button
                   onClick={() => {
-                    earlySparkRef.current = true; // Mark that spark was found early
                     setIsActive(false);
                     setShowCompletion(true);
                   }}
-                  className="px-6 py-3 bg-gradient-to-r from-orange-400 to-yellow-500 hover:from-orange-500 hover:to-yellow-600 text-slate-900 rounded-xl font-bold transition hover:scale-105"
+                  onContextMenu={(e) => e.preventDefault()}
+                  className="px-8 py-3 bg-gradient-to-r from-teal-400 to-cyan-500 hover:from-teal-500 hover:to-cyan-600 text-slate-900 rounded-xl font-bold transition hover:scale-105"
+                  style={{ userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
                 >
-                  Light it up!
+                  🔥 Light The Flame
+                </button>
+
+                <button
+                  onClick={() => {
+                    setIsActive(false);
+                  }}
+                  onContextMenu={(e) => e.preventDefault()}
+                  className="px-6 py-3 rounded-full bg-slate-700/50 hover:bg-slate-600/50 border border-slate-500/30 transition-all text-slate-300 hover:text-white text-sm font-medium"
+                  style={{ userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
+                >
+                  ⏹ Stop
                 </button>
               </div>
             </div>
@@ -2532,8 +2486,13 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
             <>
               <div className="text-center py-8 mb-6">
                 <div className="text-6xl mb-4">✨</div>
-                <h3 className="text-2xl font-bold mb-2">Beautiful work!</h3>
-                <p className="text-slate-400">You completed {cycles} breathing cycles</p>
+                <h3 className="text-2xl font-bold mb-2">Spark found!</h3>
+                <p className="text-slate-400">Energy flowing through you</p>
+              </div>
+
+              {/* Ripple button moved above other buttons */}
+              <div className="mb-6 flex justify-center">
+                <RippleButton type="breathwork" data={currentPattern} circular onGlobalRipple={onGlobalRipple} addPoints={addPoints} />
               </div>
 
               <div className="flex gap-3 mb-4">
@@ -2550,8 +2509,6 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
                   ✕ Close
                 </button>
               </div>
-
-              <RippleButton type="breathwork" data={currentPattern} onGlobalRipple={onGlobalRipple} addPoints={addPoints} />
             </>
           )}
         </div>
@@ -2586,34 +2543,53 @@ function MicroMoment() {
 }
 
 // Global Ripple Visualization - Earth with waves and sparks
+// Give and you shall receive: waves ripple outward, then return 10x inward
 function GlobalRippleOverlay({ isActive, sparks }) {
-  if (!isActive) return null;
-
   return (
     <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center">
-      {/* Dark overlay */}
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm animate-in fade-in duration-300" />
+      {/* Dark overlay - only show when active */}
+      {isActive && (
+        <div className="absolute inset-0 bg-black/30 backdrop-blur-sm animate-in fade-in duration-300" />
+      )}
 
-      {/* Earth in center */}
-      <div className="relative z-10">
-        <div className="text-9xl animate-pulse">🌍</div>
+      {/* Earth in center - only show when active */}
+      {isActive && (
+        <div className="relative z-10">
+          <div className="text-9xl animate-pulse">🌍</div>
 
-        {/* Concentric ripple waves */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          {[...Array(5)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute rounded-full border-2 border-cyan-400/40"
-              style={{
-                width: `${(i + 1) * 120}px`,
-                height: `${(i + 1) * 120}px`,
-                animation: `rippleWave 3s ease-out infinite`,
-                animationDelay: `${i * 0.4}s`
-              }}
-            />
-          ))}
+          {/* Outward ripple waves - giving */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            {[...Array(5)].map((_, i) => (
+              <div
+                key={`out-${i}`}
+                className="absolute rounded-full border-2 border-cyan-400/40"
+                style={{
+                  width: `${(i + 1) * 120}px`,
+                  height: `${(i + 1) * 120}px`,
+                  animation: `rippleWave 3s ease-out infinite`,
+                  animationDelay: `${i * 0.4}s`
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Inward ripple waves - receiving (10x the giving) */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            {[...Array(10)].map((_, i) => (
+              <div
+                key={`in-${i}`}
+                className="absolute rounded-full border-2 border-purple-400/30"
+                style={{
+                  width: `${600 - (i * 50)}px`,
+                  height: `${600 - (i * 50)}px`,
+                  animation: `rippleWaveInward 3s ease-out infinite`,
+                  animationDelay: `${2 + (i * 0.2)}s`
+                }}
+              />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Floating sparks */}
       <div className="absolute inset-0">
@@ -2638,7 +2614,7 @@ function GlobalRippleOverlay({ isActive, sparks }) {
 }
 
 // Ripple Button Component - Hold to ripple content to the world
-function RippleButton({ type, data, compact = false, messages = null, colorScheme = 'cyan', onGlobalRipple, addPoints }) {
+function RippleButton({ type, data, compact = false, circular = false, messages = null, colorScheme = 'cyan', onGlobalRipple, addPoints }) {
   const [isHolding, setIsHolding] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [sparks, setSparks] = useState([]);
@@ -2825,6 +2801,46 @@ function RippleButton({ type, data, compact = false, messages = null, colorSchem
     );
   }
 
+  if (circular) {
+    return (
+      <div className="relative flex justify-center">
+        <button
+          onMouseDown={handleHoldStart}
+          onMouseUp={handleHoldEnd}
+          onMouseLeave={handleHoldEnd}
+          onTouchStart={handleHoldStart}
+          onTouchEnd={handleHoldEnd}
+          onContextMenu={(e) => e.preventDefault()}
+          className={`w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 border-2 border-amber-300/50 transition-all shadow-lg flex items-center justify-center select-none ${isHolding ? 'scale-95' : 'hover:scale-105'}`}
+          style={{ userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
+        >
+          <span className="text-3xl pointer-events-none">✨</span>
+        </button>
+
+        {/* Sparks overlay */}
+        {isHolding && (
+          <div className="absolute inset-0 pointer-events-none">
+            {sparks.map(spark => (
+              <div
+                key={spark.id}
+                className={`absolute animate-spark ${spark.color}`}
+                style={{
+                  left: `${spark.left}%`,
+                  top: `${spark.top}%`,
+                  animationDelay: `${spark.delay}s`
+                }}
+              >
+                <div className="text-xs font-semibold whitespace-nowrap">
+                  ✨ {spark.message}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   if (compact) {
     return (
       <div className="relative">
@@ -2935,6 +2951,30 @@ function RippleButton({ type, data, compact = false, messages = null, colorSchem
         </div>
       )}
     </div>
+  );
+}
+
+// Circular Spark Button - Simpler circular version for triggering ripples
+function CircularSparkButton({ onPress, onRelease, isPressed, className = '', size = 'medium' }) {
+  const sizeClasses = {
+    small: 'w-12 h-12 text-2xl',
+    medium: 'w-16 h-16 text-3xl',
+    large: 'w-20 h-20 text-4xl'
+  };
+
+  return (
+    <button
+      onMouseDown={onPress}
+      onMouseUp={onRelease}
+      onMouseLeave={onRelease}
+      onTouchStart={onPress}
+      onTouchEnd={onRelease}
+      onContextMenu={(e) => e.preventDefault()}
+      className={`${sizeClasses[size]} rounded-full bg-gradient-to-br from-amber-400 to-orange-500 border-2 border-amber-300/50 transition-all shadow-lg flex items-center justify-center select-none ${isPressed ? 'scale-95' : 'hover:scale-105'} ${className}`}
+      style={{ userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
+    >
+      <span className="pointer-events-none">✨</span>
+    </button>
   );
 }
 
@@ -3344,11 +3384,11 @@ function TheWorldTab() {
     }
   };
 
-  // Generate background sparks at random intervals
+  // Generate background sparks at random intervals - celebrating abundance of joy!
   useEffect(() => {
     const interval = setInterval(() => {
       addSpark();
-    }, 2000 + Math.random() * 3000);
+    }, 500 + Math.random() * 1000); // 0.5-1.5 seconds - billions of people, billions of sparks!
 
     return () => clearInterval(interval);
   }, []);
@@ -3357,7 +3397,7 @@ function TheWorldTab() {
     <div className="flex flex-col items-center py-8 px-4">
       {/* Header */}
       <div className="text-center mb-8 max-w-2xl">
-        <h2 className="text-2xl font-bold mb-3">🌊 Ripples of Joy</h2>
+        <h2 className="text-2xl font-bold mb-3">🌊 Waves Of Joy</h2>
         <p className="text-slate-300 text-base leading-relaxed mb-2">
           Give and you shall receive.
         </p>
@@ -4774,7 +4814,7 @@ function OfflineMode({ isOpen, onClose, onGlobalRipple, addPoints }) {
         </div>
 
         {/* Ripple Button */}
-        <div className="mb-4">
+        <div className="mb-4 flex flex-col items-center">
           <p className="text-center text-xs text-slate-400 italic mb-2">
             🌍 Imagine yourself at Earth's center, transmitting and receiving sparks of joy
           </p>
@@ -4785,6 +4825,7 @@ function OfflineMode({ isOpen, onClose, onGlobalRipple, addPoints }) {
               subtitle: currentPractice.subtitle,
               emoji: currentPractice.emoji
             }}
+            circular
             messages={[
               'Sending joy to the world',
               'Receiving joy from the world',
@@ -5079,12 +5120,11 @@ export default function App() {
         }, 3000);
       }, 400); // Generate a spark every 400ms
     } else {
-      // Stop generating sparks and clear existing ones
+      // Stop generating rapid sparks (ambient sparks will continue)
       if (sparkIntervalRef.current) {
         clearInterval(sparkIntervalRef.current);
         sparkIntervalRef.current = null;
       }
-      setTimeout(() => setGlobalRippleSparks([]), 500); // Clear after fade out
     }
   };
 
@@ -5689,7 +5729,7 @@ export default function App() {
             <h1 className="text-xl font-bold bg-gradient-to-r from-orange-400 via-yellow-400 to-amber-400 bg-clip-text text-transparent">✨ Sparks Of Joy ✨</h1>
             <button onClick={() => setShowSettingsModal(true)} className="text-slate-400 hover:text-white text-xl">⚙️</button>
           </div>
-          <p className="text-slate-400 text-xs mb-2">Smile, and the whole world smiles with you</p>
+          <p className="text-slate-400 text-xs mb-2">Smile, and the whole world smiles with you!</p>
         </header>
 
         {/* No tab navigation - single page interface */}
@@ -5703,44 +5743,44 @@ export default function App() {
 
             {/* Tools Grid - Main Navigation */}
             <div className="grid grid-cols-2 gap-3 mb-4">
-              {/* Seeds Of Thought */}
+              {/* Sparks of Thought */}
               <button
                 onClick={() => setShowQuoteBrowser(true)}
                 className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl p-5 hover:from-purple-500/30 hover:to-pink-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
               >
-                <div className="text-4xl">🌱</div>
-                <div className="font-semibold text-sm">Seeds Of Thought</div>
-                <div className="text-xs text-slate-400 text-center">Wisdom to plant</div>
+                <div className="text-4xl">💡</div>
+                <div className="font-semibold text-sm">Sparks of Thought</div>
+                <div className="text-xs text-slate-400 text-center">Aha!</div>
               </button>
 
-              {/* Sparks Of Joy */}
+              {/* Sparks of Insight */}
               <button
                 onClick={() => setShowExerciseBrowser(true)}
                 className="bg-gradient-to-br from-orange-500/20 to-yellow-500/20 border border-orange-500/30 rounded-xl p-5 hover:from-orange-500/30 hover:to-yellow-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
               >
                 <div className="text-4xl">✨</div>
-                <div className="font-semibold text-sm">Sparks Of Joy</div>
+                <div className="font-semibold text-sm">Sparks of Insight</div>
                 <div className="text-xs text-slate-400 text-center">Mental Dojo</div>
               </button>
 
-              {/* Breath Of Fresh Air */}
+              {/* Sparks of Energy */}
               <button
                 onClick={() => setShowBreathworkBrowser(true)}
                 className="bg-gradient-to-br from-teal-500/20 to-cyan-500/20 border border-teal-500/30 rounded-xl p-5 hover:from-teal-500/30 hover:to-cyan-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
               >
                 <div className="text-4xl">🌬️</div>
-                <div className="font-semibold text-sm">Breath Of Fresh Air</div>
-                <div className="text-xs text-slate-400 text-center">1-minute calm</div>
+                <div className="font-semibold text-sm">Sparks of Energy</div>
+                <div className="text-xs text-slate-400 text-center">Breath of fresh air</div>
               </button>
 
-              {/* Ripples Of Joy - moved from bottom */}
+              {/* Waves Of Joy */}
               <button
                 onClick={() => setShowRipplesModal(true)}
                 className="bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 rounded-xl p-5 hover:from-cyan-500/30 hover:to-blue-500/30 transition hover:scale-105 flex flex-col items-center gap-2"
               >
                 <div className="text-4xl">🌊</div>
-                <div className="font-semibold text-sm">Ripples Of Joy</div>
-                <div className="text-xs text-slate-400 text-center">Witness sparks</div>
+                <div className="font-semibold text-sm">Waves Of Joy</div>
+                <div className="text-xs text-slate-400 text-center">Give and you shall receive</div>
               </button>
 
               {/* Share A Smile */}
@@ -5804,7 +5844,7 @@ export default function App() {
           {/* Invite A Friend */}
           <button
             onClick={() => {
-              const inviteText = `Sparks Of Joy ✨\n\n✨ Sparks Of Joy - Mental Dojo practices\n🌱 Seeds Of Thought - Wisdom to plant\n🌬️ Breath Of Fresh Air - Calming patterns\n💛 Share A Smile - Send joy\n🌊 Ripples Of Joy - Witness sparks\n\nSmile, and the whole world smileswithyou.com!`;
+              const inviteText = `Sparks Of Joy ✨\n\n✨ Sparks of Insight - Mental Dojo practices\n💡 Sparks of Thought - Wisdom ignited\n🌬️ Sparks of Energy - Calming breath\n💛 Share A Smile - Send joy\n🌊 Waves Of Joy - Witness sparks\n\nSmile, and the whole world smileswithyou.com!`;
               if (navigator.share) {
                 navigator.share({
                   title: 'Sparks Of Joy',
