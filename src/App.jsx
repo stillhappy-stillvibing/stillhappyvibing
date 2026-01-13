@@ -3971,12 +3971,12 @@ function BreathingGuide({ pattern, playSound }) {
     hold1: 'Hold',
     hold2: 'Hold'
   };
-  const circleStyles = {
-    prep: { size: 'w-32 h-32', color: 'border-slate-400/50' },
-    inhale: { size: 'w-40 h-40', color: 'border-green-400/70' },
-    exhale: { size: 'w-24 h-24', color: 'border-blue-400/70' },
-    hold1: { size: 'w-36 h-36', color: 'border-yellow-400/70' },
-    hold2: { size: 'w-32 h-32', color: 'border-purple-400/70' }
+  const colors = {
+    prep: 'bg-slate-500/30 scale-100',
+    inhale: 'bg-green-500/30 scale-110',
+    exhale: 'bg-blue-500/30 scale-90',
+    hold1: 'bg-yellow-500/30 scale-100',
+    hold2: 'bg-purple-500/30 scale-95'
   };
 
   return (
@@ -3997,24 +3997,12 @@ function BreathingGuide({ pattern, playSound }) {
         ))}
       </div>
 
-      {/* Breathing with the Earth */}
-      <div className="flex flex-col items-center justify-center">
-        <span className="text-sm font-medium text-slate-300 mb-3">{labels[phase]}</span>
-
-        {/* Earth with animated circle */}
-        <div className="relative flex items-center justify-center mb-3">
-          {/* Fixed Earth background */}
-          <div className="absolute text-6xl z-0">
-            🌍
-          </div>
-
-          {/* Animated breathing circle */}
-          <div className={`rounded-full border-4 ${circleStyles[phase].color} ${circleStyles[phase].size} transition-all duration-1000 z-10`} />
-        </div>
-
-        <span className="text-4xl font-bold text-white mb-2">{count}</span>
+      {/* Breathing circle with label and count inside */}
+      <div className={`w-36 h-36 mx-auto rounded-full flex flex-col items-center justify-center transition-all duration-1000 ${colors[phase]}`}>
+        <span className="text-sm font-medium">{labels[phase]}</span>
+        <span className="text-3xl font-bold my-1">{count}</span>
         {(phase === 'inhale' || phase === 'exhale') && (
-          <span className="text-sm font-semibold text-teal-300 animate-pulse">Energy</span>
+          <span className="text-xs font-semibold text-teal-300 animate-pulse">Energy</span>
         )}
       </div>
     </div>
