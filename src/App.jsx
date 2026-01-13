@@ -6086,13 +6086,27 @@ export default function App() {
           {/* Invite A Friend */}
           <button
             onClick={() => {
+              const inviteText = `Sparks of Joy ✨
+
+Find your spark of joy every day.
+
+💡 Sparks of Thought - Timeless wisdom
+🌬️ Sparks of Energy - Breathwork patterns
+✨ Sparks of Insight - Mental Dojo practices
+🌍 Waves of Joy - Global ripples
+
+Smile, and the whole world smiles with you.
+
+smileswithyou.com`;
+
               if (navigator.share) {
                 navigator.share({
-                  title: 'Join me on Sparks Of Joy!',
-                  text: 'Find your spark of joy! Smile, and the whole world smileswithyou.com ✨'
+                  title: 'Sparks of Joy',
+                  text: inviteText
                 }).catch(() => {});
               } else {
-                setToastMessage('Invite link copied!');
+                navigator.clipboard?.writeText(inviteText);
+                setToastMessage('Invite copied!');
                 setToastEmoji('💌');
                 setShowToast(true);
               }
