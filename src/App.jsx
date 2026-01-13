@@ -2675,7 +2675,7 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
                   {currentPattern.name}
                 </h3>
               </div>
-              <div className="mb-6 min-h-[250px] relative">
+              <div className="mb-6">
                 <BreathingGuide pattern={currentPattern.pattern} playSound={playSound} intention={intention} />
               </div>
 
@@ -3908,10 +3908,8 @@ function BreathingGuide({ pattern, playSound, intention = 'energy' }) {
   const [phase, setPhase] = useState('inhale');
   const [count, setCount] = useState(pattern.inhale);
   const [resetKey, setResetKey] = useState(0);
-  const [sparks, setSparks] = useState([]);
   const playSoundRef = useRef(playSound);
   const patternRef = useRef(pattern);
-  const fourElementsIndexRef = useRef(0);
 
   // Affirmations based on intention
   const affirmations = {
@@ -3938,69 +3936,6 @@ function BreathingGuide({ pattern, playSound, intention = 'energy' }) {
     setResetKey(prev => prev + 1); // Force interval recreation
     if (playSoundRef.current) playSoundRef.current('breathInhale');
   }, [pattern]);
-
-  // Generate sparks during breathing
-  useEffect(() => {
-    const sparkInterval = setInterval(() => {
-      // Mix of four elements and thank you messages
-      const showFourElement = Math.random() < 0.6;
-
-      let sparkMessage, sparkColor;
-
-      if (showFourElement) {
-        const fourElements = [
-          { text: 'Happy', color: 'text-yellow-400' },
-          { text: 'Healthy', color: 'text-sky-400' },
-          { text: 'Wealthy', color: 'text-green-400' },
-          { text: 'Wise', color: 'text-purple-400' }
-        ];
-        const currentElement = fourElements[fourElementsIndexRef.current % 4];
-        sparkMessage = currentElement.text;
-        sparkColor = currentElement.color;
-        fourElementsIndexRef.current += 1;
-      } else {
-        const thankYouMessages = ['Thank you', 'Merci', 'Gracias', 'Danke', 'ありがとう'];
-        sparkMessage = thankYouMessages[Math.floor(Math.random() * thankYouMessages.length)];
-        sparkColor = 'text-cyan-300';
-      }
-
-      // Generate sparks outside the center circle area
-      // Pick a corner/edge region: top, bottom, left, or right
-      const regions = ['top', 'bottom', 'left', 'right'];
-      const region = regions[Math.floor(Math.random() * regions.length)];
-
-      let left, top;
-
-      if (region === 'top') {
-        left = Math.random() * 80 + 10; // anywhere horizontally
-        top = Math.random() * 15; // top 15%
-      } else if (region === 'bottom') {
-        left = Math.random() * 80 + 10;
-        top = Math.random() * 15 + 85; // bottom 15%
-      } else if (region === 'left') {
-        left = Math.random() * 15; // left 15%
-        top = Math.random() * 80 + 10;
-      } else { // right
-        left = Math.random() * 15 + 85; // right 15%
-        top = Math.random() * 80 + 10;
-      }
-
-      const newSpark = {
-        id: Date.now() + Math.random(),
-        message: sparkMessage,
-        color: sparkColor,
-        left,
-        top,
-      };
-
-      setSparks(prev => [...prev, newSpark]);
-      setTimeout(() => {
-        setSparks(prev => prev.filter(s => s.id !== newSpark.id));
-      }, 2000);
-    }, 600);
-
-    return () => clearInterval(sparkInterval);
-  }, [resetKey]);
 
   // Breathing cycle - starts immediately
   useEffect(() => {
@@ -4066,23 +4001,7 @@ function BreathingGuide({ pattern, playSound, intention = 'energy' }) {
   };
 
   return (
-    <div className="relative">
-      {/* Floating sparks */}
-      <div className="absolute inset-0 pointer-events-none">
-        {sparks.map(spark => (
-          <div
-            key={spark.id}
-            className={`absolute animate-spark ${spark.color} text-sm font-semibold whitespace-nowrap`}
-            style={{
-              left: `${spark.left}%`,
-              top: `${spark.top}%`,
-            }}
-          >
-            ✨ {spark.message}
-          </div>
-        ))}
-      </div>
-
+    <div>
       {/* Breathing circle with label and count inside */}
       <div className={`w-36 h-36 mx-auto rounded-full flex flex-col items-center justify-center transition-all duration-1000 ${colors[phase]}`}>
         <span className="text-sm font-medium">{labels[phase]}</span>
