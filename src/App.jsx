@@ -3892,12 +3892,33 @@ function BreathingGuide({ pattern, playSound }) {
         sparkColor = 'text-cyan-300';
       }
 
+      // Generate sparks outside the center circle area
+      // Pick a corner/edge region: top, bottom, left, or right
+      const regions = ['top', 'bottom', 'left', 'right'];
+      const region = regions[Math.floor(Math.random() * regions.length)];
+
+      let left, top;
+
+      if (region === 'top') {
+        left = Math.random() * 80 + 10; // anywhere horizontally
+        top = Math.random() * 15; // top 15%
+      } else if (region === 'bottom') {
+        left = Math.random() * 80 + 10;
+        top = Math.random() * 15 + 85; // bottom 15%
+      } else if (region === 'left') {
+        left = Math.random() * 15; // left 15%
+        top = Math.random() * 80 + 10;
+      } else { // right
+        left = Math.random() * 15 + 85; // right 15%
+        top = Math.random() * 80 + 10;
+      }
+
       const newSpark = {
         id: Date.now() + Math.random(),
         message: sparkMessage,
         color: sparkColor,
-        left: Math.random() * 80 + 10,
-        top: Math.random() * 80 + 10,
+        left,
+        top,
       };
 
       setSparks(prev => [...prev, newSpark]);
