@@ -2519,9 +2519,7 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
   const [cycles, setCycles] = useState(0);
   const [showCompletion, setShowCompletion] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
-  const [intention, setIntention] = useState('energy'); // New: intention state
-  const [showRitual, setShowRitual] = useState(false); // New: completion ritual state
-  const [ritualCount, setRitualCount] = useState(3); // Countdown for ritual breaths
+  const [intention, setIntention] = useState('energy');
 
   const currentPattern = breathworkPatterns[currentIndex];
 
@@ -2534,8 +2532,6 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
     setIsActive(false);
     setCycles(0);
     setShowCompletion(false);
-    setShowRitual(false);
-    setRitualCount(3);
   };
 
   // Randomize on open for variety
@@ -2684,8 +2680,7 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
                 <button
                   onClick={() => {
                     setIsActive(false);
-                    setShowRitual(true);
-                    setRitualCount(3);
+                    setShowCompletion(true);
                   }}
                   onContextMenu={(e) => e.preventDefault()}
                   className="px-8 py-3 bg-gradient-to-r from-teal-400 to-cyan-500 hover:from-teal-500 hover:to-cyan-600 text-slate-900 rounded-xl font-bold transition hover:scale-105"
@@ -2705,32 +2700,6 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
                   ⏹ Stop
                 </button>
               </div>
-            </div>
-          )}
-
-          {showRitual && (
-            <div className="text-center py-12">
-              <div className="text-5xl mb-4">🕊️</div>
-              <h3 className="text-xl font-bold mb-3">Completion Ritual</h3>
-              <p className="text-slate-300 text-sm mb-6">Take 3 natural breaths<br/>and notice the difference</p>
-
-              <div className="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-2 border-purple-400/30 flex items-center justify-center mb-6">
-                <span className="text-5xl font-bold text-purple-300">{ritualCount}</span>
-              </div>
-
-              <button
-                onClick={() => {
-                  if (ritualCount > 1) {
-                    setRitualCount(prev => prev - 1);
-                  } else {
-                    setShowRitual(false);
-                    setShowCompletion(true);
-                  }
-                }}
-                className="px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl font-semibold transition hover:scale-105"
-              >
-                {ritualCount > 1 ? '✓ Breathe' : '✨ Complete'}
-              </button>
             </div>
           )}
 
