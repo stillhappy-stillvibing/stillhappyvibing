@@ -1902,45 +1902,15 @@ function QuoteBrowser({ isOpen, onClose, addPoints, onBoost, onGlobalRipple }) {
 // Mindfulness Visual Meditation Component - 30 second Tratak (circle gazing)
 // Mental Dojo - 30-second practice space
 function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare, onGlobalRipple }) {
-  const [timeLeft, setTimeLeft] = useState(30);
   const [isComplete, setIsComplete] = useState(false);
   const [showSparks, setShowSparks] = useState(false);
-  const [foundSpark, setFoundSpark] = useState(false); // Track if user clicked button vs timeout
-  const earlyFlameRef = useRef(false); // Track if "Light The Flame" was clicked early
-
-  // Calculate progress percentage for glow effect (0% to 100%)
-  const progress = ((30 - timeLeft) / 30) * 100;
-  const glowIntensity = progress / 100; // 0 to 1
 
   useEffect(() => {
     if (!isOpen) {
-      setTimeLeft(30);
       setIsComplete(false);
       setShowSparks(false);
-      setFoundSpark(false);
-      earlyFlameRef.current = false; // Reset ref when modal closes
       return;
     }
-
-    const timer = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          // Only auto-complete if "Light The Flame" wasn't clicked
-          if (!earlyFlameRef.current) {
-            setIsComplete(true);
-            setShowSparks(true);
-            setFoundSpark(false); // Time ran out, they planted the seed
-            // Hide sparks after 2 seconds
-            setTimeout(() => setShowSparks(false), 2000);
-          }
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -1949,54 +1919,43 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare,
     <div className="fixed inset-0 bg-black flex items-center justify-center p-4 z-50">
       <div className="max-w-2xl w-full" onClick={e => e.stopPropagation()}>
         {!isComplete ? (
-          // During practice - 30 seconds with growing glow and progress bar
+          // During practice - no timer, practice at your own pace
           <div className="text-center animate-in fade-in duration-1000 relative">
             <div className="text-6xl mb-8">🥋</div>
 
-            {/* Practice instruction - the kaizen one-liner with intensifying glow */}
+            {/* Practice instruction */}
             <div className="relative mb-12">
-              {/* Outer glow that intensifies */}
-              <div
-                className="absolute inset-0 bg-gradient-to-br from-orange-500 via-yellow-500 to-amber-500 blur-3xl rounded-2xl transition-opacity duration-1000"
-                style={{ opacity: 0.1 + (glowIntensity * 0.4) }}
-              ></div>
-              {/* Inner card with border that gets brighter */}
-              <div
-                className="relative bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-2xl p-10 transition-all duration-1000"
-                style={{
-                  borderWidth: '2px',
-                  borderStyle: 'solid',
-                  borderColor: `rgba(251, 146, 60, ${0.3 + (glowIntensity * 0.5)})`
-                }}
-              >
+              {/* Outer glow */}
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-500 via-yellow-500 to-amber-500 blur-3xl rounded-2xl opacity-30"></div>
+              {/* Inner card */}
+              <div className="relative bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-2xl p-10 border-2 border-orange-400/50">
                 <p className="text-2xl leading-relaxed text-orange-100">
                   {exercise.practiceInstruction}
                 </p>
               </div>
             </div>
 
-            <p className="text-slate-400 text-sm mb-4">Once you find the spark</p>
+            <p className="text-slate-400 text-sm mb-8">Practice at your own pace. When you find the spark, light the flame.</p>
 
-            {/* Progress bar at bottom */}
-            <div className="w-full bg-slate-800/50 rounded-full h-2 overflow-hidden mb-6">
-              <div
-                className="h-full bg-gradient-to-r from-orange-400 via-yellow-400 to-amber-400 transition-all duration-1000 ease-linear"
-                style={{ width: `${progress}%` }}
-              ></div>
+            <div className="flex gap-4 justify-center items-center">
+              <button
+                onClick={() => {
+                  setIsComplete(true);
+                  setShowSparks(true);
+                  setTimeout(() => setShowSparks(false), 2000);
+                }}
+                className="px-8 py-3 bg-gradient-to-r from-orange-400 to-yellow-500 hover:from-orange-500 hover:to-yellow-600 text-slate-900 rounded-xl font-bold transition hover:scale-105"
+              >
+                🔥 Light The Flame
+              </button>
+
+              <button
+                onClick={onClose}
+                className="px-6 py-3 rounded-full bg-slate-700/50 hover:bg-slate-600/50 border border-slate-500/30 transition-all text-slate-300 hover:text-white text-sm font-medium"
+              >
+                ⏹ Stop
+              </button>
             </div>
-
-            <button
-              onClick={() => {
-                earlyFlameRef.current = true; // Mark that flame was lit early
-                setIsComplete(true);
-                setShowSparks(true);
-                setFoundSpark(true); // User clicked the button!
-                setTimeout(() => setShowSparks(false), 2000);
-              }}
-              className="px-8 py-3 bg-gradient-to-r from-orange-400 to-yellow-500 hover:from-orange-500 hover:to-yellow-600 text-slate-900 rounded-xl font-bold transition hover:scale-105"
-            >
-              Light The Flame
-            </button>
           </div>
         ) : (
           // After 30 seconds - completion with seed thought and sparks
@@ -2024,7 +1983,7 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare,
             )}
 
             <h3 className="text-3xl font-bold mb-8 text-orange-300">
-              {foundSpark ? "You found the spark within!" : "You've planted a seed of joy, it will spark within"}
+              You found the spark within!
             </h3>
 
             {/* The seed thought */}
@@ -3408,11 +3367,11 @@ function TheWorldTab() {
     }
   };
 
-  // Generate background sparks at random intervals
+  // Generate background sparks at random intervals - celebrating abundance of joy!
   useEffect(() => {
     const interval = setInterval(() => {
       addSpark();
-    }, 2000 + Math.random() * 3000);
+    }, 500 + Math.random() * 1000); // 0.5-1.5 seconds - billions of people, billions of sparks!
 
     return () => clearInterval(interval);
   }, []);
