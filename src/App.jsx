@@ -2472,7 +2472,15 @@ function CBTBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onGlobalRi
 
 // Breathwork Browser Component - Breathe until you find your spark
 function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onGlobalRipple }) {
-  const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * breathworkPatterns.length));
+  // Load user's preferred exercise from localStorage, default to Box Breathing (index 0)
+  const [currentIndex, setCurrentIndex] = useState(() => {
+    try {
+      const saved = localStorage.getItem('preferredBreathworkIndex');
+      return saved !== null ? parseInt(saved) : 0;
+    } catch {
+      return 0;
+    }
+  });
   const [isActive, setIsActive] = useState(false);
   const [cycles, setCycles] = useState(0);
   const [showCompletion, setShowCompletion] = useState(false);
@@ -2481,23 +2489,14 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
 
   const currentPattern = breathworkPatterns[currentIndex];
 
-  const randomPattern = () => {
-    let newIndex;
-    do {
-      newIndex = Math.floor(Math.random() * breathworkPatterns.length);
-    } while (newIndex === currentIndex && breathworkPatterns.length > 1);
-    setCurrentIndex(newIndex);
+  // Save user's exercise selection
+  const selectExercise = (index) => {
+    setCurrentIndex(index);
+    localStorage.setItem('preferredBreathworkIndex', index.toString());
     setIsActive(false);
     setCycles(0);
     setShowCompletion(false);
   };
-
-  // Randomize on open for variety
-  useEffect(() => {
-    if (isOpen) {
-      randomPattern();
-    }
-  }, [isOpen]);
 
   const handleStart = () => {
     setIsActive(true);
@@ -2508,11 +2507,6 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
   const handleBoost = () => {
     addPoints(POINTS.BREATHWORK_BOOST);
     onBoost?.();
-    randomPattern();
-  };
-
-  const handleSkip = () => {
-    randomPattern();
   };
 
   // Continuous cycle counter - loops forever until user finds their spark
@@ -2570,6 +2564,24 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
                 </div>
               </div>
 
+              {/* Exercise Selector */}
+              <div className="flex items-center justify-center gap-3 mb-4 flex-wrap">
+                {breathworkPatterns.map((pattern, index) => (
+                  <button
+                    key={index}
+                    onClick={() => selectExercise(index)}
+                    className={`text-3xl transition-all hover:scale-110 ${
+                      currentIndex === index
+                        ? 'scale-125 drop-shadow-lg'
+                        : 'opacity-40 hover:opacity-70'
+                    }`}
+                    title={pattern.name}
+                  >
+                    {pattern.emoji}
+                  </button>
+                ))}
+              </div>
+
               {/* Intention Selector */}
               <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-400/20 rounded-xl p-4 mb-4">
                 <p className="text-sm font-semibold text-slate-300 mb-3 text-center">Set Your Intention</p>
@@ -2607,16 +2619,9 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
 
               <button
                 onClick={() => setShowShareModal(true)}
-                className="w-full py-2 rounded-lg bg-teal-500/20 border border-teal-500/30 text-teal-400 text-sm hover:bg-teal-500/30 transition mb-3"
+                className="w-full py-2 rounded-lg bg-teal-500/20 border border-teal-500/30 text-teal-400 text-sm hover:bg-teal-500/30 transition"
               >
                 📤 Share This Exercise
-              </button>
-
-              <button
-                onClick={randomPattern}
-                className="w-full py-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 text-sm transition"
-              >
-                → Try Different Pattern
               </button>
             </>
           )}
