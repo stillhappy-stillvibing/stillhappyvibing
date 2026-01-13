@@ -5729,7 +5729,7 @@ export default function App() {
             <h1 className="text-xl font-bold bg-gradient-to-r from-orange-400 via-yellow-400 to-amber-400 bg-clip-text text-transparent">✨ Sparks Of Joy ✨</h1>
             <button onClick={() => setShowSettingsModal(true)} className="text-slate-400 hover:text-white text-xl">⚙️</button>
           </div>
-          <p className="text-slate-400 text-xs mb-2">Smile, and the whole world smiles with you</p>
+          <p className="text-slate-400 text-xs mb-2">Smile, and the whole world smiles with you!</p>
         </header>
 
         {/* No tab navigation - single page interface */}
