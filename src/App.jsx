@@ -1863,9 +1863,9 @@ function QuoteBrowser({ isOpen, onClose, addPoints, onBoost, onGlobalRipple }) {
             <p className="text-purple-400 font-medium">— {currentQuote.author}</p>
             <p className="text-slate-400 text-sm">{currentQuote.tradition}</p>
 
-            {/* Small spark ripple button - right aligned, vertically centered */}
-            <div className="absolute top-1/2 -translate-y-1/2 right-4">
-              <div className="w-10 h-10 animate-pulse hover:animate-none">
+            {/* Small spark ripple button - bottom-right corner */}
+            <div className="absolute bottom-4 right-4">
+              <div className="animate-pulse hover:animate-none">
                 <RippleButton type="quote" data={currentQuote} circular onGlobalRipple={onGlobalRipple} addPoints={addPoints} />
               </div>
             </div>
@@ -2000,9 +2000,9 @@ function MentalDojo({ exercise, isOpen, onComplete, onClose, addPoints, onShare,
                   "{exercise.seedThought}"
                 </p>
 
-                {/* Small spark ripple button - right aligned, vertically centered */}
-                <div className="absolute top-1/2 -translate-y-1/2 right-4">
-                  <div className="w-10 h-10 animate-pulse hover:animate-none">
+                {/* Small spark ripple button - bottom-right corner */}
+                <div className="absolute bottom-4 right-4">
+                  <div className="animate-pulse hover:animate-none">
                     <RippleButton
                       type="mentalDojo"
                       data={{
@@ -2276,7 +2276,7 @@ function CBTBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onGlobalRi
         </div>
 
         <div className="mb-4">
-          <div className="bg-blue-400/10 border-blue-400/30 border rounded-xl p-4 mb-6">
+          <div className="bg-blue-400/10 border-blue-400/30 border rounded-xl p-4 mb-6 relative">
             <h3 className="text-blue-400 font-semibold text-lg mb-1">
               🧠 {currentExercise.title}
             </h3>
@@ -2293,6 +2293,13 @@ function CBTBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onGlobalRi
                 </li>
               ))}
             </ul>
+
+            {/* Small spark ripple button - bottom-right corner */}
+            <div className="absolute bottom-4 right-4">
+              <div className="animate-pulse hover:animate-none">
+                <RippleButton type="cbt" data={currentExercise} circular onGlobalRipple={onGlobalRipple} addPoints={addPoints} />
+              </div>
+            </div>
           </div>
 
           <div className="flex gap-3 mb-4">
@@ -2316,8 +2323,6 @@ function CBTBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onGlobalRi
           >
             📤 Share
           </button>
-
-          <RippleButton type="cbt" data={currentExercise} circular onGlobalRipple={onGlobalRipple} addPoints={addPoints} />
         </div>
       </div>
 
@@ -2492,9 +2497,9 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
                 <h3 className="text-2xl font-bold mb-2">Spark found!</h3>
                 <p className="text-slate-400">Energy flowing through you</p>
 
-                {/* Small spark ripple button - right aligned, vertically centered with text */}
-                <div className="absolute top-1/2 -translate-y-1/2 right-0">
-                  <div className="w-10 h-10 animate-pulse hover:animate-none">
+                {/* Small spark ripple button - bottom-right corner */}
+                <div className="absolute bottom-4 right-4">
+                  <div className="animate-pulse hover:animate-none">
                     <RippleButton type="breathwork" data={currentPattern} circular onGlobalRipple={onGlobalRipple} addPoints={addPoints} />
                   </div>
                 </div>
