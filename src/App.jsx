@@ -4,10 +4,11 @@ import { getDatabase, ref, onValue, runTransaction, increment, set, get } from '
 import html2canvas from 'html2canvas';
 import { useVersionCheck } from './useVersionCheck';
 import UpdateNotification from './UpdateNotification';
+import packageJson from '../package.json';
 
-// App Version
-const APP_VERSION = '8.12.0';
-const BUILD_DATE = '2026-01-12';
+// App Version - imported from package.json (single source of truth)
+const APP_VERSION = packageJson.version;
+const BUILD_DATE = new Date().toISOString().split('T')[0];
 
 // Gamification: Point Values
 const POINTS = {
