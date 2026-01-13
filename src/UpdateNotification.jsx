@@ -15,24 +15,46 @@ const UpdateNotification = ({ isVisible, newVersion, onUpdate, onDismiss }) => {
     }
   }, [isVisible]);
 
-  const handleUpdate = () => {
-    // Clear all caches and reload
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(registrations => {
-        registrations.forEach(registration => {
-          registration.unregister();
-        });
-      });
-    }
+  const handleUpdate = async () => {
+    try {
+      console.log('Starting update process...');
 
-    // Clear browser cache and reload
-    caches.keys().then(names => {
-      names.forEach(name => {
-        caches.delete(name);
-      });
-    }).finally(() => {
-      window.location.reload(true);
-    });
+      // Wait for all cleanup to complete before reloading
+      const cleanupPromises = [];
+
+      // Unregister service workers
+      if ('serviceWorker' in navigator) {
+        const swPromise = navigator.serviceWorker.getRegistrations().then(registrations => {
+          console.log(`Unregistering ${registrations.length} service workers...`);
+          return Promise.all(registrations.map(registration => registration.unregister()));
+        });
+        cleanupPromises.push(swPromise);
+      }
+
+      // Clear all caches
+      if ('caches' in window) {
+        const cachePromise = caches.keys().then(names => {
+          console.log(`Deleting ${names.length} caches...`);
+          return Promise.all(names.map(name => caches.delete(name)));
+        });
+        cleanupPromises.push(cachePromise);
+      }
+
+      // Wait for all cleanup to complete
+      await Promise.all(cleanupPromises);
+      console.log('Cleanup complete, reloading...');
+
+      // Give service worker unregistration time to take effect, then reload
+      setTimeout(() => {
+        window.location.href = window.location.href;
+      }, 100);
+    } catch (error) {
+      console.error('Update failed:', error);
+      // Force reload anyway to try to recover
+      setTimeout(() => {
+        window.location.href = window.location.href;
+      }, 100);
+    }
   };
 
   const handleDismiss = () => {
