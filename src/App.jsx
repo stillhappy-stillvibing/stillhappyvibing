@@ -3845,8 +3845,8 @@ const getDayKey = (date) => {
 
 // Breathing Guide Component - Heart Coherence (5 in, 5 out)
 function BreathingGuide({ pattern, playSound }) {
-  const [phase, setPhase] = useState('prep');
-  const [count, setCount] = useState(2);
+  const [phase, setPhase] = useState('inhale');
+  const [count, setCount] = useState(pattern.inhale);
   const [resetKey, setResetKey] = useState(0);
   const [sparks, setSparks] = useState([]);
   const playSoundRef = useRef(playSound);
@@ -3861,15 +3861,14 @@ function BreathingGuide({ pattern, playSound }) {
   // When pattern changes, reset the breathing cycle
   useEffect(() => {
     patternRef.current = pattern;
-    setPhase('prep');
-    setCount(2);
+    setPhase('inhale');
+    setCount(pattern.inhale);
     setResetKey(prev => prev + 1); // Force interval recreation
+    if (playSoundRef.current) playSoundRef.current('breathInhale');
   }, [pattern]);
 
   // Generate sparks during breathing
   useEffect(() => {
-    if (phase === 'prep') return;
-
     const sparkInterval = setInterval(() => {
       // Mix of four elements and thank you messages
       const showFourElement = Math.random() < 0.6;
@@ -3908,12 +3907,12 @@ function BreathingGuide({ pattern, playSound }) {
     }, 600);
 
     return () => clearInterval(sparkInterval);
-  }, [phase]);
+  }, [resetKey]);
 
-  // Breathing cycle with 2-second prep phase
+  // Breathing cycle - starts immediately
   useEffect(() => {
-    let currentPhase = 'prep';
-    let currentCount = 2;
+    let currentPhase = 'inhale';
+    let currentCount = patternRef.current.inhale;
 
     const interval = setInterval(() => {
       currentCount--;
@@ -3923,11 +3922,7 @@ function BreathingGuide({ pattern, playSound }) {
         const p = patternRef.current;
 
         // Determine next phase based on pattern
-        if (currentPhase === 'prep') {
-          currentPhase = 'inhale';
-          currentCount = p.inhale;
-          if (playSoundRef.current) playSoundRef.current('breathInhale');
-        } else if (currentPhase === 'inhale') {
+        if (currentPhase === 'inhale') {
           if (p.hold1 && p.hold1 > 0) {
             currentPhase = 'hold1';
             currentCount = p.hold1;
@@ -3965,14 +3960,12 @@ function BreathingGuide({ pattern, playSound }) {
   }, [resetKey]); // Recreate interval when pattern changes
 
   const labels = {
-    prep: 'Get Ready',
     inhale: 'Breathe In',
     exhale: 'Breathe Out',
     hold1: 'Hold',
     hold2: 'Hold'
   };
   const colors = {
-    prep: 'bg-slate-500/30 scale-100',
     inhale: 'bg-green-500/30 scale-110',
     exhale: 'bg-blue-500/30 scale-90',
     hold1: 'bg-yellow-500/30 scale-100',
