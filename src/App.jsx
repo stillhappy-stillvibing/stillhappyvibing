@@ -2492,11 +2492,12 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
                 <BreathingGuide pattern={currentPattern.pattern} playSound={playSound} />
               </div>
 
-              {/* Stop button */}
+              {/* Stop button - triggers spark completion */}
               <div className="mt-6 flex justify-center">
                 <button
                   onClick={() => {
                     setIsActive(false);
+                    setShowCompletion(true);
                   }}
                   onContextMenu={(e) => e.preventDefault()}
                   className="px-6 py-2 rounded-full bg-slate-700/50 hover:bg-slate-600/50 border border-slate-500/30 transition-all text-slate-300 hover:text-white text-sm font-medium"
