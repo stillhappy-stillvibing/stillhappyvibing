@@ -3627,11 +3627,15 @@ function TheWorldTab() {
         </p>
       </div>
 
-      {/* Giving/Receiving Status - Above Image */}
+      {/* Giving/Receiving Status or "In Tune" - Above Image */}
       <div className="mb-4 text-center min-h-[28px]">
-        {isPressed && (
+        {isPressed ? (
           <p className="text-amber-300 text-lg font-medium animate-pulse">
             {ripplePhase === 'outward' ? '🙏 Giving gratitude...' : '💛 Receiving joy...'}
+          </p>
+        ) : (
+          <p className="text-purple-300 text-lg font-medium italic">
+            In Tune With The Infinite
           </p>
         )}
       </div>
@@ -3648,13 +3652,6 @@ function TheWorldTab() {
             className="w-full h-auto"
             style={{ minHeight: '300px', maxHeight: '500px', objectFit: 'contain' }}
           />
-
-          {/* "In Tune With The Infinite" text overlay */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <p className="text-purple-300 text-lg font-medium italic text-center px-4">
-              In Tune With The Infinite
-            </p>
-          </div>
 
           {/* Concentric Ripple Circles - Outward and Inward */}
           {isPressed && (
