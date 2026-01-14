@@ -2765,26 +2765,17 @@ function GlobalRippleOverlay({ isActive, sparks }) {
         <div className="absolute inset-0 bg-black/30 backdrop-blur-sm animate-in fade-in duration-300" />
       )}
 
-      {/* Earth in center - always visible */}
-      <div className="relative z-10">
-        {/* Text Above Earth */}
-        <div className="absolute -top-16 left-1/2 -translate-x-1/2 whitespace-nowrap">
-          {isActive ? (
+      {/* Earth in center - only show when active */}
+      {isActive && (
+        <div className="relative z-10">
+          {/* Text Above Earth */}
+          <div className="absolute -top-16 left-1/2 -translate-x-1/2 whitespace-nowrap">
             <p className="text-amber-300 text-xl font-medium animate-pulse">
               {ripplePhase === 'outward' ? '🙏 Giving...' : '💛 Receiving...'}
             </p>
-          ) : (
-            <p className="text-purple-300 text-lg font-medium italic">
-              In Tune With The Infinite
-            </p>
-          )}
-        </div>
+          </div>
 
-        <div className="text-9xl animate-pulse">🌍</div>
-
-        {/* Ripple waves - only show when active */}
-        {isActive && (
-          <>
+          <div className="text-9xl animate-pulse">🌍</div>
 
           {/* Outward ripple waves - giving */}
           <div className="absolute inset-0 flex items-center justify-center">
@@ -2817,9 +2808,8 @@ function GlobalRippleOverlay({ isActive, sparks }) {
               />
             ))}
           </div>
-          </>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Floating sparks */}
       <div className="absolute inset-0">
@@ -3637,11 +3627,15 @@ function TheWorldTab() {
         </p>
       </div>
 
-      {/* Giving/Receiving Status - Above Image */}
+      {/* Giving/Receiving Status or "In Tune" - Above Image */}
       <div className="mb-4 text-center min-h-[28px]">
-        {isPressed && (
+        {isPressed ? (
           <p className="text-amber-300 text-lg font-medium animate-pulse">
             {ripplePhase === 'outward' ? '🙏 Giving gratitude...' : '💛 Receiving joy...'}
+          </p>
+        ) : (
+          <p className="text-purple-300 text-lg font-medium italic">
+            In Tune With The Infinite
           </p>
         )}
       </div>
