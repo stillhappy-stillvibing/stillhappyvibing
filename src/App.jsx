@@ -2489,6 +2489,15 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
 
   const currentPattern = breathworkPatterns[currentIndex];
 
+  // Reset state when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setIsActive(false);
+      setShowCompletion(false);
+      setCycles(0);
+    }
+  }, [isOpen]);
+
   // Save user's exercise selection
   const selectExercise = (index) => {
     setCurrentIndex(index);
@@ -2668,25 +2677,22 @@ function BreathworkBrowser({ isOpen, onClose, addPoints, onBoost, playSound, onG
 
           {showCompletion && (
             <>
-              <div className="text-center py-8 mb-6 relative">
+              <div className="text-center py-8 mb-6">
                 <div className="text-6xl mb-4">✨</div>
                 <h3 className="text-2xl font-bold mb-2">Spark found!</h3>
                 <p className="text-slate-400">Energy flowing through you</p>
-
-                {/* Small spark ripple button - bottom-right corner */}
-                <div className="absolute bottom-4 right-4">
-                  <div className="animate-pulse hover:animate-none">
-                    <RippleButton type="breathwork" data={currentPattern} circular onGlobalRipple={onGlobalRipple} addPoints={addPoints} />
-                  </div>
-                </div>
               </div>
 
               <div className="flex gap-3 mb-4">
                 <button
-                  onClick={handleBoost}
+                  onClick={() => {
+                    setShowCompletion(false);
+                    setIsActive(true);
+                    setCycles(0);
+                  }}
                   className="flex-1 py-4 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 rounded-xl font-bold text-lg transition hover:scale-105"
                 >
-                  💫 +{POINTS.BREATHWORK_BOOST} Boost & Next
+                  🔄 Replay
                 </button>
                 <button
                   onClick={onClose}
