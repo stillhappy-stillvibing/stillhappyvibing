@@ -2846,6 +2846,7 @@ function RippleButton({ type, data, compact = false, circular = false, messages 
   const [sparks, setSparks] = useState([]);
   const [ripplePhase, setRipplePhase] = useState('outward');
   const phaseIntervalRef = useRef(null);
+  const sparkIntervalRef = useRef(null); // Track spark animation interval
   const fourElementsIndexRef = useRef(0); // Track position in Happy, Healthy, Wealthy, Wise sequence
   const hapticWaveRef = useRef({ count: 0, interval: null }); // Track haptic wave progression
 
@@ -2972,13 +2973,11 @@ function RippleButton({ type, data, compact = false, circular = false, messages 
     }, 800);
 
     // Add sparks while holding
-    const sparkInterval = setInterval(() => {
+    sparkIntervalRef.current = setInterval(() => {
       if (Math.random() > 0.7) {
         addSpark();
       }
     }, 200);
-
-    phaseIntervalRef.sparkInterval = sparkInterval;
   };
 
   const handleHoldEnd = () => {
@@ -2992,10 +2991,12 @@ function RippleButton({ type, data, compact = false, circular = false, messages 
     // Clear all intervals
     if (phaseIntervalRef.current) {
       clearInterval(phaseIntervalRef.current);
-      if (phaseIntervalRef.sparkInterval) {
-        clearInterval(phaseIntervalRef.sparkInterval);
-      }
       phaseIntervalRef.current = null;
+    }
+
+    if (sparkIntervalRef.current) {
+      clearInterval(sparkIntervalRef.current);
+      sparkIntervalRef.current = null;
     }
 
     if (hapticWaveRef.current.interval) {
