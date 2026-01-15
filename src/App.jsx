@@ -3037,6 +3037,7 @@ function RippleButton({ type, data, compact = false, circular = false, messages 
           onMouseLeave={handleHoldEnd}
           onTouchStart={handleHoldStart}
           onTouchEnd={handleHoldEnd}
+          onTouchCancel={handleHoldEnd}
           onContextMenu={(e) => e.preventDefault()}
           className={`w-4 h-4 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 border border-amber-300/50 transition-all shadow-lg flex items-center justify-center select-none ${isHolding ? 'scale-95' : 'hover:scale-105'}`}
           style={{ userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
@@ -3077,6 +3078,7 @@ function RippleButton({ type, data, compact = false, circular = false, messages 
           onMouseLeave={handleHoldEnd}
           onTouchStart={handleHoldStart}
           onTouchEnd={handleHoldEnd}
+          onTouchCancel={handleHoldEnd}
           onContextMenu={(e) => e.preventDefault()}
           className={`w-full py-2 rounded-lg border text-sm font-semibold transition ${
             isHolding
@@ -3120,6 +3122,7 @@ function RippleButton({ type, data, compact = false, circular = false, messages 
         onMouseLeave={handleHoldEnd}
         onTouchStart={handleHoldStart}
         onTouchEnd={handleHoldEnd}
+        onTouchCancel={handleHoldEnd}
         onContextMenu={(e) => e.preventDefault()}
         className={`w-full py-3 rounded-xl border font-bold transition-all duration-300 ${
           isHolding
@@ -3196,6 +3199,7 @@ function CircularSparkButton({ onPress, onRelease, isPressed, className = '', si
       onMouseLeave={onRelease}
       onTouchStart={onPress}
       onTouchEnd={onRelease}
+      onTouchCancel={onRelease}
       onContextMenu={(e) => e.preventDefault()}
       className={`${sizeClasses[size]} rounded-full bg-gradient-to-br from-amber-400 to-orange-500 border-2 border-amber-300/50 transition-all shadow-lg flex items-center justify-center select-none ${isPressed ? 'scale-95' : 'hover:scale-105'} ${className}`}
       style={{ userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
@@ -3703,6 +3707,7 @@ function TheWorldTab() {
             onMouseLeave={handlePressEnd}
             onTouchStart={handlePressStart}
             onTouchEnd={handlePressEnd}
+            onTouchCancel={handlePressEnd}
             className={`w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 border-2 border-amber-300/50 transition-all shadow-lg flex items-center justify-center select-none ${isPressed ? 'scale-95' : 'hover:scale-105'}`}
             style={{ userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
           >
