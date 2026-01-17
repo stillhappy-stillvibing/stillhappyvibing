@@ -1,8 +1,8 @@
-# ✨ Happiness Tracker 2026 ✨
+# ✨ Sparks Of Joy ✨
 
-A Progressive Web App (PWA) to track your happiness, practice gratitude, and build mindfulness habits in 2026.
+Smile, and the whole world smiles with you. A Progressive Web App (PWA) to find your spark of joy through daily practices, wisdom, and mindfulness.
 
-![Happiness Tracker](https://img.shields.io/badge/2026-Happiness%20Tracker-yellow)
+![Sparks Of Joy](https://img.shields.io/badge/2026-Sparks%20Of%20Joy-yellow)
 ![PWA](https://img.shields.io/badge/PWA-Ready-green)
 ![React](https://img.shields.io/badge/React-18-blue)
 

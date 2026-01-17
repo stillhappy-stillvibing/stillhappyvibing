@@ -9,9 +9,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'pwa-512x512.svg'],
       manifest: {
-        name: 'Happiness Tracker',
-        short_name: 'Happiness Tracker',
-        description: 'Track what makes you smile with gratitude journaling and mindfulness',
+        name: 'Sparks Of Joy',
+        short_name: 'Sparks Of Joy',
+        description: 'Smile, and the whole world smiles with you. Find your spark of joy through daily practices, wisdom, and mindfulness.',
         theme_color: '#0f172a',
         background_color: '#0f172a',
         display: 'standalone',
