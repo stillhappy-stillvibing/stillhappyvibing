@@ -6146,7 +6146,7 @@ Smile, and the whole world smiles with you.`;
           onClick={() => setShowAnalytics(true)}
           className="text-center mt-4 text-slate-500 text-xs cursor-pointer hover:text-slate-400 transition"
         >
-          Made with 💛 for a happier world!
+          happy happy joy joy
         </footer>
       </div>
 
